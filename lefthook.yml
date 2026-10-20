@@ -1,0 +1,13 @@
+# Git hooks, installed with: pnpm exec lefthook install
+
+pre-commit:
+  commands:
+    gitleaks:
+      # Scan staged changes for secrets before they ever reach a commit
+      run: gitleaks git --pre-commit --redact --staged --verbose
+
+commit-msg:
+  commands:
+    commitlint:
+      # Enforce Conventional Commit messages
+      run: pnpm exec commitlint --edit {1}

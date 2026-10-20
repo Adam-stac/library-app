@@ -1,0 +1,47 @@
+# --- Secrets: never commit these ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editors ---
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- Java / Spring Boot ---
+target/
+build/
+out/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+hs_err_pid*
+
+# --- Node / front end ---
+node_modules/
+dist/
+coverage/
+.vite/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# --- Logs and local data ---
+logs/
+*.log
+data/
+pgdata/

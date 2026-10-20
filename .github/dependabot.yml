@@ -1,0 +1,23 @@
+# Dependabot opens pull requests when dependencies need updating.
+# Maven (apps/api) and Docker entries are added in Phase 2.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      tooling:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"
