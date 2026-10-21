@@ -2,7 +2,7 @@
 # Build from the repo root:  docker build -f apps/web/Dockerfile .
 
 # ---- Stage 1: build the static files ----
-FROM node:24-alpine AS build
+FROM node:25-alpine AS build
 # Keep in step with your local pnpm version (pnpm -v)
 ARG PNPM_VERSION=12.14.0
 RUN npm install -g pnpm@${PNPM_VERSION}
