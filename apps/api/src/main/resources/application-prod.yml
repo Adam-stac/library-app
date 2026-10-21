@@ -1,0 +1,8 @@
+# Production only (SPRING_PROFILES_ACTIVE=prod)
+logging:
+  structured:
+    format:
+      console: ecs # JSON logs
+
+server:
+  forward-headers-strategy: framework # behind Cloudflare/Coolify, which handle HTTPS
