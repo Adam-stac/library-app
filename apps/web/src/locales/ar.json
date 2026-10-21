@@ -4,8 +4,7 @@
     "tagline": "اعرف مكتبتك: كتبك، ومؤلفيها، وتراجمهم."
   },
   "language": {
-    "switchTo": "English",
-    "switchLabel": "التبديل إلى اللغة الإنجليزية"
+    "switchTo": "English"
   },
   "home": {
     "title": "مرحبًا بك",
