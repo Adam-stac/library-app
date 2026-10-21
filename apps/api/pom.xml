@@ -26,10 +26,15 @@
 		<tag/>
 		<url/>
 	</scm>
-	<properties>
-		<java.version>25</java.version>
-		<spring-modulith.version>2.1.1</spring-modulith.version>
-	</properties>
+  <properties>
+    <java.version>25</java.version>
+    <spring-modulith.version>2.1.1</spring-modulith.version>
+    <!-- Security overrides: remove each once Spring Boot ships this version or newer. -->
+    <!-- Jackson 3.1.7 fixes CVE-2026-89407, -89425, -68497, -91776, -91777 (denial of service). -->
+    <jackson-bom.version>3.1.7</jackson-bom.version>
+    <!-- Tomcat 11.0.25 fixes CVE-2026-65182, -65905, -68525 (access control and authentication bypass). -->
+    <tomcat.version>11.0.25</tomcat.version>
+  </properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

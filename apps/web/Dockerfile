@@ -17,6 +17,10 @@ RUN pnpm --filter @library-app/web build
 
 # ---- Stage 2: serve with nginx, running as a non-root user ----
 FROM nginxinc/nginx-unprivileged:stable-alpine
+# Install the latest Alpine security patches (needs root briefly), then drop back to the nginx user
+USER root
+RUN apk upgrade --no-cache
+USER 101
 COPY apps/web/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY apps/web/nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /repo/apps/web/dist/ /usr/share/nginx/html/
