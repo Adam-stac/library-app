@@ -99,9 +99,9 @@ jobs:
         run: pnpm --filter @library-app/web e2e
       - name: OWASP ZAP baseline scan of the running app
         run: |
-          mkdir -p zap && chmod 777 zap
+          mkdir -p zap && chmod 777 zap && cp .zap/rules.tsv zap/
           docker run --rm --network host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.17.0 \
-            zap-baseline.py -t http://localhost:3000 -r zap-report.html -J zap-report.json
+            zap-baseline.py -t http://localhost:3000 -c rules.tsv -r zap-report.html -J zap-report.json
       - name: Show container logs if something failed
         if: failure()
         run: docker compose logs --no-color
