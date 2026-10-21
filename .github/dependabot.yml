@@ -1,5 +1,4 @@
 # Dependabot opens pull requests when dependencies need updating.
-# Maven (apps/api) and Docker entries are added in Phase 2.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -39,6 +38,13 @@ updates:
       - "/apps/web"
     schedule:
       interval: "weekly"
+    ignore:
+      # We stay on long-term-support versions and move between them deliberately:
+      # Node LTS = even numbers (24, 26); Java LTS = 25, then 29.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore"
       include: "scope"
