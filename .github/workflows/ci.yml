@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege: jobs can only read the code
+permissions:
+  contents: read
+
+# On a pull request, a new push cancels the previous run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  api:
+    name: api
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+          cache-dependency-path: apps/api/pom.xml
+      - name: Build and test (real Postgres via Testcontainers)
+        run: ./mvnw -B -ntp verify
+
+  web:
+    name: web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: Install pnpm
+        run: npm install -g pnpm@12.14.0
+      - name: Install dependencies (exactly as locked)
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter @library-app/web lint
+      - name: Typecheck
+        run: pnpm --filter @library-app/web typecheck
+      - name: Test
+        run: pnpm --filter @library-app/web test
+      - name: Build
+        run: pnpm --filter @library-app/web build
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build API image
+        run: docker build -t library-api:ci apps/api
+      - name: Build web image
+        run: docker build -t library-web:ci -f apps/web/Dockerfile .

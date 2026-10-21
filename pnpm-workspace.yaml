@@ -1,7 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Packages may only run install scripts if explicitly allowed here (supply-chain protection).
 allowBuilds:
-  lefthook: set this to true or false
+  # Not needed: our own "prepare" script installs the git hooks.
+  lefthook: false
+
+# pnpm holds back very newly published versions (supply-chain protection).
+# i18next 26.5.4 was too new at install time; remove this once it's older than the threshold.
 minimumReleaseAgeExclude:
   - i18next@26.5.4
