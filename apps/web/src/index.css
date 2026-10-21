@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+
+@theme {
+  /* IBM Plex Sans Arabic covers Arabic and Latin text, bundled with the app (no external font requests) */
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
