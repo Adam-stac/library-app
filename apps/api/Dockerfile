@@ -14,6 +14,8 @@ RUN cp target/*.jar application.jar \
 
 # ---- Stage 2: runtime (small JRE only, no compiler, no build tools) ----
 FROM eclipse-temurin:25-jre-alpine
+# Install the latest Alpine security patches on top of the base image
+RUN apk upgrade --no-cache
 RUN addgroup -S app && adduser -S -G app app
 WORKDIR /application
 COPY --from=build /build/extracted/dependencies/ ./
