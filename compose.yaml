@@ -1,0 +1,57 @@
+# Runs the whole app locally: docker compose up -d --build
+# Then open http://localhost:3000
+name: library-app
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-library}
+      POSTGRES_USER: ${POSTGRES_USER:-library_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql # data survives restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    # No ports published: the database is reachable only by the API, on the internal network
+
+  api:
+    build: apps/api
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-library}
+      DB_USERNAME: ${POSTGRES_USER:-library_app}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true # the container can't modify its own files
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    # No ports published: the browser reaches the API only through the web container's /api proxy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "127.0.0.1:3000:8080" # only reachable from this computer
+    depends_on:
+      - api
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  pgdata:

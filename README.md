@@ -42,3 +42,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md): short-lived branches, Conventional Commi
 ## Decisions
 
 Significant decisions are recorded in [docs/adr](docs/adr).
+
+## Run the whole app locally
+
+```bash
+cp .env.example .env    # then set POSTGRES_PASSWORD (openssl rand -base64 24)
+docker compose up -d --build
+```
+
+Open http://localhost:3000. Stop with `docker compose down` (add `-v` to delete the local database).
