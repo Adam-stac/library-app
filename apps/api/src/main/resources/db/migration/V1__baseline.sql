@@ -1,0 +1,2 @@
+-- V1: baseline. Starts Flyway's migration history. No tables yet:
+-- each feature adds its own numbered migration. Never edit a merged migration.
