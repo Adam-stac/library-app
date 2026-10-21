@@ -3,3 +3,5 @@ packages:
   - "packages/*"
 allowBuilds:
   lefthook: set this to true or false
+minimumReleaseAgeExclude:
+  - i18next@26.5.4
