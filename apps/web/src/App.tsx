@@ -12,7 +12,6 @@ export default function App() {
           <button
             type="button"
             onClick={() => void i18n.changeLanguage(nextLanguage)}
-            aria-label={t('language.switchLabel')}
             lang={nextLanguage}
             className="min-h-11 rounded-full border border-stone-300 px-4 text-sm hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
           >

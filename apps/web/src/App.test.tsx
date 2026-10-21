@@ -22,7 +22,7 @@ describe('App', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: 'التبديل إلى اللغة الإنجليزية' }))
+    await user.click(screen.getByRole('button', { name: 'English' }))
 
     expect(await screen.findByRole('heading', { name: 'Welcome' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('lang', 'en')
@@ -35,7 +35,7 @@ describe('App', () => {
     await i18n.changeLanguage('en')
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: 'Switch to Arabic' }))
+    await user.click(screen.getByRole('button', { name: 'العربية' }))
 
     expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
