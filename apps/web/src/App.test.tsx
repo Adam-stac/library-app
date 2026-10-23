@@ -1,8 +1,17 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 import i18n from './i18n'
+
+function renderApp(path = '/') {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <App />
+    </MemoryRouter>,
+  )
+}
 
 describe('App', () => {
   beforeEach(async () => {
@@ -11,7 +20,7 @@ describe('App', () => {
   })
 
   it('shows Arabic, right-to-left, by default', () => {
-    render(<App />)
+    renderApp()
 
     expect(screen.getByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('lang', 'ar')
@@ -20,7 +29,7 @@ describe('App', () => {
 
   it('switches to English, left-to-right, and remembers the choice', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderApp()
 
     await user.click(screen.getByRole('button', { name: 'English' }))
 
@@ -33,11 +42,20 @@ describe('App', () => {
   it('switches back to Arabic', async () => {
     const user = userEvent.setup()
     await i18n.changeLanguage('en')
-    render(<App />)
+    renderApp()
 
     await user.click(screen.getByRole('button', { name: 'العربية' }))
 
     expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
+  })
+
+  it('links from the home page to registration', async () => {
+    const user = userEvent.setup()
+    renderApp()
+
+    await user.click(screen.getByRole('link', { name: 'إنشاء حساب' }))
+
+    expect(await screen.findByRole('heading', { name: 'إنشاء حساب' })).toBeInTheDocument()
   })
 })

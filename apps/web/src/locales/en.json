@@ -8,6 +8,43 @@
   },
   "home": {
     "title": "Welcome",
-    "comingSoon": "Coming soon: authors, places and books."
+    "comingSoon": "Coming soon: authors, places and books.",
+    "createAccount": "Create an account"
+  },
+  "register": {
+    "title": "Create an account",
+    "intro": "We'll email you a link to confirm your account.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 15 characters. Try a phrase of a few words you'll remember.",
+    "passwordCount": "{{count}} of 15 characters",
+    "showPassword": "Show password",
+    "submit": "Create account",
+    "submitting": "Sending…",
+    "checkInboxTitle": "Check your inbox",
+    "checkInboxBody": "If {{email}} can be used to register, we've sent it a link to confirm your account. The link expires in 24 hours."
+  },
+  "verify": {
+    "checking": "Confirming your email…",
+    "successTitle": "Your email is confirmed",
+    "successBody": "Your account is ready.",
+    "invalidTitle": "This link is invalid or has expired",
+    "invalidBody": "It may have been used already, or it's more than 24 hours old. You can register again to get a new link.",
+    "registerAgain": "Register again",
+    "errorTitle": "We couldn't confirm your email just now",
+    "goHome": "Back to the home page"
+  },
+  "errors": {
+    "required": "This field is required.",
+    "invalid_email": "Enter a valid email address.",
+    "too_long": "This is too long.",
+    "too_short": "Your password must be at least 15 characters.",
+    "compromised": "This password has appeared in known data breaches. Please choose another.",
+    "invalid": "This value isn't valid.",
+    "rate_limited": "Too many attempts in a short time. Wait a minute and try again.",
+    "busy": "We're busy right now. Please try again in a moment.",
+    "request_too_large": "What you sent is too large.",
+    "network_error": "We couldn't connect. Check your internet connection and try again.",
+    "unexpected": "Something went wrong. Please try again."
   }
 }
