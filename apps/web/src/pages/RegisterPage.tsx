@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { postJson } from '../api'
 
 const MIN_PASSWORD_LENGTH = 15
@@ -172,6 +173,13 @@ export default function RegisterPage() {
           {submitting ? t('register.submitting') : t('register.submit')}
         </button>
       </form>
+
+      <p className="mt-8 text-stone-700">
+        {t('register.haveAccount')}{' '}
+        <Link to="/sign-in" className="font-semibold text-stone-900 underline underline-offset-4">
+          {t('register.signIn')}
+        </Link>
+      </p>
     </section>
   )
 }

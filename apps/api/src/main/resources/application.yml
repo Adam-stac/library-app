@@ -18,12 +18,18 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  session:
+    jdbc:
+      initialize-schema: never # Flyway creates the session tables
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
     default-encoding: UTF-8
 
 server:
+  servlet:
+    session:
+      timeout: 12h # signed-in sessions end after 12 hours without activity
   error:
     include-stacktrace: never
     include-message: never

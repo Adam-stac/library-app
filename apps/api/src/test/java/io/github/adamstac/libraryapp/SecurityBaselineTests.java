@@ -37,9 +37,9 @@ class SecurityBaselineTests {
 
     @Test
     void everythingElseIsDeniedByDefault() throws Exception {
-        assertThat(get("/").statusCode()).isEqualTo(403);
-        assertThat(get("/api/v1/authors").statusCode()).isEqualTo(403);
-        assertThat(get("/actuator/env").statusCode()).isEqualTo(403);
+        assertThat(get("/").statusCode()).isEqualTo(401);
+        assertThat(get("/api/v1/authors").statusCode()).isEqualTo(401);
+        assertThat(get("/actuator/env").statusCode()).isEqualTo(401);
     }
 
     @Test

@@ -1,2 +1,3 @@
 10049	IGNORE	(Storable and Cacheable Content) Public static files are meant to be cached; API responses send Cache-Control: no-store.
 10109	IGNORE	(Modern Web Application) Informational: identifies a single-page app, not a vulnerability.
+10010	IGNORE	(XSRF-TOKEN must be readable by our scripts: double-submit CSRF. The session cookie is HttpOnly.)

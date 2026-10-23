@@ -34,7 +34,7 @@ export default function VerifyEmailPage() {
   }
 
   const content = {
-    success: { title: t('verify.successTitle'), body: t('verify.successBody'), link: '/', linkText: t('verify.goHome') },
+    success: { title: t('verify.successTitle'), body: t('verify.successBody'), link: '/sign-in', linkText: t('verify.signIn') },
     invalid: {
       title: t('verify.invalidTitle'),
       body: t('verify.invalidBody'),

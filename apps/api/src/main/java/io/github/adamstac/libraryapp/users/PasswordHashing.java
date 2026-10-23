@@ -3,14 +3,15 @@ package io.github.adamstac.libraryapp.users;
 import io.github.adamstac.libraryapp.ServiceBusyException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Argon2 deliberately uses a lot of memory per hash. Capping concurrent hashes stops a flood of
- * requests from exhausting the server; callers that can't get a slot in time get "busy" (503).
+ * Argon2 deliberately uses a lot of memory per hash. Capping concurrent hashes and checks stops a flood
+ * of requests from exhausting the server; callers that can't get a slot in time get "busy" (503).
  */
 @Component
 class PasswordHashing {
@@ -31,6 +32,14 @@ class PasswordHashing {
     }
 
     String hash(String password) {
+        return withSlot(() -> encoder.encode(password));
+    }
+
+    boolean matches(String password, String hash) {
+        return withSlot(() -> encoder.matches(password, hash));
+    }
+
+    private <T> T withSlot(Supplier<T> work) {
         boolean acquired;
         try {
             acquired = slots.tryAcquire(waitMillis, TimeUnit.MILLISECONDS);
@@ -42,7 +51,7 @@ class PasswordHashing {
             throw new ServiceBusyException();
         }
         try {
-            return encoder.encode(password);
+            return work.get();
         } finally {
             slots.release();
         }
