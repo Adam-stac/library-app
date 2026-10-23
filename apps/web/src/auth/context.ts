@@ -13,6 +13,8 @@ export type Auth = {
   signIn: (email: string, password: string) => Promise<ApiResult<Account>>
   /** True once the session has ended on the server. */
   signOut: () => Promise<boolean>
+  /** Asks the API again, e.g. after a password reset has ended every session. */
+  refresh: () => Promise<void>
 }
 
 export const AuthContext = createContext<Auth | null>(null)

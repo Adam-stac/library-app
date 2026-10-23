@@ -11,12 +11,19 @@ export default function HomePage() {
       <h1 className="text-3xl font-semibold">{t('home.title')}</h1>
       <p className="mt-3 text-lg text-stone-700">{t('app.tagline')}</p>
       {state.status === 'signedIn' && (
-        <p className="mt-8 text-lg">
-          {t('home.signedIn')}{' '}
-          <bdi dir="ltr" className="font-semibold">
-            {state.account.email}
-          </bdi>
-        </p>
+        <>
+          <p className="mt-8 text-lg">
+            {t('home.signedIn')}{' '}
+            <bdi dir="ltr" className="font-semibold">
+              {state.account.email}
+            </bdi>
+          </p>
+          <p className="mt-4">
+            <Link to="/change-password" className="font-semibold underline underline-offset-4">
+              {t('home.changePassword')}
+            </Link>
+          </p>
+        </>
       )}
       {state.status === 'signedOut' && (
         <p className="mt-8 flex flex-wrap gap-3">

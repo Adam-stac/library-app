@@ -17,7 +17,8 @@
     "comingSoon": "Coming soon: authors, places and books.",
     "createAccount": "Create an account",
     "signIn": "Sign in",
-    "signedIn": "You're signed in as"
+    "signedIn": "You're signed in as",
+    "changePassword": "Change password"
   },
   "signIn": {
     "title": "Sign in",
@@ -28,7 +29,8 @@
     "submitting": "Signing in…",
     "lockoutHint": "After several wrong attempts in a row, sign-in is paused for 15 minutes to protect your account.",
     "noAccount": "Don't have an account?",
-    "createAccount": "Create one"
+    "createAccount": "Create one",
+    "forgotPassword": "Forgot your password?"
   },
   "register": {
     "title": "Create an account",
@@ -44,6 +46,39 @@
     "checkInboxBody": "If {{email}} can be used to register, we've sent it a link to confirm your account. The link expires in 24 hours.",
     "haveAccount": "Already have an account?",
     "signIn": "Sign in"
+  },
+  "forgot": {
+    "title": "Forgot your password?",
+    "intro": "Enter your account's email and we'll send you a link to choose a new password.",
+    "email": "Email",
+    "submit": "Send reset link",
+    "submitting": "Sending…",
+    "checkInboxTitle": "Check your inbox",
+    "checkInboxBody": "If {{email}} has an account, we've sent it a link to reset the password. The link expires in 1 hour.",
+    "backToSignIn": "Back to sign in"
+  },
+  "reset": {
+    "title": "Choose a new password",
+    "newPassword": "New password",
+    "submit": "Save new password",
+    "submitting": "Saving…",
+    "doneTitle": "Your password has been changed",
+    "doneBody": "For your safety, every device has been signed out. Sign in with your new password.",
+    "signIn": "Sign in",
+    "invalidTitle": "This link is invalid or has expired",
+    "invalidBody": "It may have been used already, or it's more than an hour old. You can ask for a new one.",
+    "requestNew": "Send a new link"
+  },
+  "changePassword": {
+    "title": "Change password",
+    "intro": "Other devices signed in to your account will be signed out.",
+    "current": "Current password",
+    "new": "New password",
+    "showPasswords": "Show passwords",
+    "submit": "Change password",
+    "submitting": "Saving…",
+    "doneTitle": "Your password has been changed",
+    "doneBody": "Other devices have been signed out. We've emailed you to confirm the change."
   },
   "verify": {
     "checking": "Confirming your email…",
@@ -69,6 +104,7 @@
     "network_error": "We couldn't connect. Check your internet connection and try again.",
     "unexpected": "Something went wrong. Please try again.",
     "invalid_credentials": "The email or password is incorrect.",
-    "signOutFailed": "We couldn't sign you out. Please try again."
+    "signOutFailed": "We couldn't sign you out. Please try again.",
+    "incorrect": "That isn't your current password."
   }
 }
