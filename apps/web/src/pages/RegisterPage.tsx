@@ -2,13 +2,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { postJson } from '../api'
-
-const MIN_PASSWORD_LENGTH = 15
-
-/** Characters as a person counts them (Arabic letters and emoji count as one), matching the API. */
-function passwordLength(password: string): number {
-  return [...password.normalize('NFKC')].length
-}
+import { MIN_PASSWORD_LENGTH, passwordLength } from '../password'
 
 export default function RegisterPage() {
   const { t, i18n } = useTranslation()

@@ -65,18 +65,7 @@ class LoginService {
             return Optional.empty();
         }
         if (!correct) {
-            jdbc.sql("""
-                            UPDATE users
-                            SET failed_logins = failed_logins + 1,
-                                locked_until = CASE WHEN failed_logins + 1 >= :max
-                                                    THEN now() + interval '15 minutes'
-                                                    ELSE locked_until END,
-                                updated_at = now()
-                            WHERE id = :id
-                            """)
-                    .param("max", MAX_FAILURES_BEFORE_LOCK)
-                    .param("id", user.id())
-                    .update();
+            recordWrongPassword(user.id());
             log.info("Failed sign-in for account {}", user.id());
             return Optional.empty();
         }
@@ -85,6 +74,25 @@ class LoginService {
                 .param("id", user.id())
                 .update();
         return Optional.of(new Account(user.id(), user.email(), user.language()));
+    }
+
+    /**
+     * Counts a wrong password towards the temporary lock (5 in a row = 15 minutes). Shared by sign-in and
+     * change-password, so a stolen session can't be used to guess the password without limit.
+     */
+    void recordWrongPassword(UUID id) {
+        jdbc.sql("""
+                        UPDATE users
+                        SET failed_logins = failed_logins + 1,
+                            locked_until = CASE WHEN failed_logins + 1 >= :max
+                                                THEN now() + interval '15 minutes'
+                                                ELSE locked_until END,
+                            updated_at = now()
+                        WHERE id = :id
+                        """)
+                .param("max", MAX_FAILURES_BEFORE_LOCK)
+                .param("id", id)
+                .update();
     }
 
     Optional<Account> findAccount(UUID id) {

@@ -118,6 +118,9 @@ export default function SignInPage() {
             />
             {t('signIn.showPassword')}
           </label>
+          <Link to="/forgot-password" className="self-start text-sm font-semibold underline underline-offset-4">
+            {t('signIn.forgotPassword')}
+          </Link>
         </div>
 
         <button

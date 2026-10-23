@@ -9,16 +9,24 @@ import { type Account, type Auth, AuthContext, type AuthState } from './context'
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' })
 
+  const ask = useCallback(async (): Promise<AuthState> => {
+    const result = await getJson<Account>('/api/v1/auth/me')
+    return result.ok && result.data ? { status: 'signedIn', account: result.data } : { status: 'signedOut' }
+  }, [])
+
   useEffect(() => {
     let current = true
-    void getJson<Account>('/api/v1/auth/me').then((result) => {
-      if (!current) return
-      setState(result.ok && result.data ? { status: 'signedIn', account: result.data } : { status: 'signedOut' })
+    void ask().then((answer) => {
+      if (current) setState(answer)
     })
     return () => {
       current = false
     }
-  }, [])
+  }, [ask])
+
+  const refresh = useCallback(async () => {
+    setState(await ask())
+  }, [ask])
 
   const signIn = useCallback(async (email: string, password: string) => {
     const result = await postJson<Account>('/api/v1/auth/login', { email, password }, { csrf: true })
@@ -33,6 +41,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return true
   }, [])
 
-  const auth = useMemo<Auth>(() => ({ state, signIn, signOut }), [state, signIn, signOut])
+  const auth = useMemo<Auth>(() => ({ state, signIn, signOut, refresh }), [state, signIn, signOut, refresh])
   return <AuthContext value={auth}>{children}</AuthContext>
 }

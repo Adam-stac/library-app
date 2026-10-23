@@ -1,6 +1,5 @@
 package io.github.adamstac.libraryapp.users;
 
-import io.github.adamstac.libraryapp.FieldValidationException;
 import io.github.adamstac.libraryapp.InvalidRequestException;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -19,19 +18,19 @@ class RegistrationService {
 
     private final JdbcClient jdbc;
     private final PasswordHashing passwordHashing;
-    private final PasswordBreachCheck breachCheck;
+    private final NewPasswordRules newPasswords;
     private final MailDispatcher mail;
     private final String baseUrl;
 
     RegistrationService(
             JdbcClient jdbc,
             PasswordHashing passwordHashing,
-            PasswordBreachCheck breachCheck,
+            NewPasswordRules newPasswords,
             MailDispatcher mail,
             @Value("${app.base-url}") String baseUrl) {
         this.jdbc = jdbc;
         this.passwordHashing = passwordHashing;
-        this.breachCheck = breachCheck;
+        this.newPasswords = newPasswords;
         this.mail = mail;
         this.baseUrl = baseUrl;
     }
@@ -42,16 +41,7 @@ class RegistrationService {
         String email = EmailAddresses.normalize(rawEmail);
         String password = PasswordPolicy.normalize(rawPassword);
 
-        int length = PasswordPolicy.length(password);
-        if (length < PasswordPolicy.MIN_LENGTH) {
-            throw new FieldValidationException("password", "too_short");
-        }
-        if (length > PasswordPolicy.MAX_LENGTH) {
-            throw new FieldValidationException("password", "too_long");
-        }
-        if (breachCheck.isCompromised(password)) {
-            throw new FieldValidationException("password", "compromised");
-        }
+        newPasswords.check(password, "password");
 
         // Hash on every path, so new and existing emails take the same time (no enumeration by timing)
         String passwordHash = passwordHashing.hash(password);

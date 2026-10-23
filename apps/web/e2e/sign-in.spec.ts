@@ -7,6 +7,7 @@ test.describe('Sign in and sign out', () => {
   test('sign in with a confirmed account, stay signed in, then sign out', async ({ page, context, request }, testInfo) => {
     // The journey sends real requests and emails, so it runs once, on desktop
     test.skip(testInfo.project.name !== 'desktop', 'journey covered on desktop')
+    test.slow() // real emails and password hashing: allow three times the usual 30 seconds
     const address = `e2e-sign-in-${Date.now()}@example.com`
     await page.addInitScript(() => localStorage.setItem('language', 'en'))
 
