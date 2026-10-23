@@ -34,7 +34,8 @@ class AuthRateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v1/auth/");
+        // Only state-changing requests count; reads like /me and /csrf are cheap
+        return !"POST".equals(request.getMethod()) || !request.getRequestURI().startsWith("/api/v1/auth/");
     }
 
     @Override

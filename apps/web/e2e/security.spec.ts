@@ -21,6 +21,6 @@ test.describe('Security from the outside', () => {
   test('the API is reached through /api and is closed by default', async ({ request }) => {
     const response = await request.get('/api/v1/authors')
 
-    expect(response.status()).toBe(403)
+    expect(response.status()).toBe(401)
   })
 })

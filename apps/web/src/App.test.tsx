@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import i18n from './i18n'
 
@@ -17,6 +17,11 @@ describe('App', () => {
   beforeEach(async () => {
     localStorage.clear()
     await i18n.changeLanguage('ar')
+    // Not signed in
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => Promise.resolve(new Response(null, { status: 401 }))))
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it('shows Arabic, right-to-left, by default', () => {
@@ -54,7 +59,7 @@ describe('App', () => {
     const user = userEvent.setup()
     renderApp()
 
-    await user.click(screen.getByRole('link', { name: 'إنشاء حساب' }))
+    await user.click(await screen.findByRole('link', { name: 'إنشاء حساب' }))
 
     expect(await screen.findByRole('heading', { name: 'إنشاء حساب' })).toBeInTheDocument()
   })

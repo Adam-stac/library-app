@@ -6,10 +6,29 @@
   "language": {
     "switchTo": "العربية"
   },
+  "nav": {
+    "label": "Account and language",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as"
+  },
   "home": {
     "title": "Welcome",
     "comingSoon": "Coming soon: authors, places and books.",
-    "createAccount": "Create an account"
+    "createAccount": "Create an account",
+    "signIn": "Sign in",
+    "signedIn": "You're signed in as"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "lockoutHint": "After several wrong attempts in a row, sign-in is paused for 15 minutes to protect your account.",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create one"
   },
   "register": {
     "title": "Create an account",
@@ -22,7 +41,9 @@
     "submit": "Create account",
     "submitting": "Sending…",
     "checkInboxTitle": "Check your inbox",
-    "checkInboxBody": "If {{email}} can be used to register, we've sent it a link to confirm your account. The link expires in 24 hours."
+    "checkInboxBody": "If {{email}} can be used to register, we've sent it a link to confirm your account. The link expires in 24 hours.",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in"
   },
   "verify": {
     "checking": "Confirming your email…",
@@ -32,7 +53,8 @@
     "invalidBody": "It may have been used already, or it's more than 24 hours old. You can register again to get a new link.",
     "registerAgain": "Register again",
     "errorTitle": "We couldn't confirm your email just now",
-    "goHome": "Back to the home page"
+    "goHome": "Back to the home page",
+    "signIn": "Sign in"
   },
   "errors": {
     "required": "This field is required.",
@@ -45,6 +67,8 @@
     "busy": "We're busy right now. Please try again in a moment.",
     "request_too_large": "What you sent is too large.",
     "network_error": "We couldn't connect. Check your internet connection and try again.",
-    "unexpected": "Something went wrong. Please try again."
+    "unexpected": "Something went wrong. Please try again.",
+    "invalid_credentials": "The email or password is incorrect.",
+    "signOutFailed": "We couldn't sign you out. Please try again."
   }
 }

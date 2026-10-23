@@ -3,6 +3,7 @@ package io.github.adamstac.libraryapp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -10,6 +11,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
 /**
@@ -20,22 +25,51 @@ import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWrite
 @EnableWebSecurity
 class SecurityConfig {
 
-    /** Public because they happen before anyone is signed in. */
-    private static final String[] PUBLIC_AUTH_ENDPOINTS = {"/api/v1/auth/register", "/api/v1/auth/verify-email"};
+    /** Open to anyone; each has its own protections (rate limits, generic responses). */
+    private static final String[] PUBLIC_POSTS = {
+        "/api/v1/auth/register", "/api/v1/auth/verify-email", "/api/v1/auth/login", "/api/v1/auth/logout"
+    };
+
+    /** Happen before any session exists, so there is no session for CSRF to ride on. */
+    private static final String[] BEFORE_ANY_SESSION = {"/api/v1/auth/register", "/api/v1/auth/verify-email"};
+
+    /**
+     * CSRF tokens in a cookie the web app can read (other sites can't) and must echo back in the
+     * X-XSRF-TOKEN header on every state-changing request.
+     */
+    @Bean
+    CsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookieCustomizer(cookie -> cookie.secure(true).sameSite("Lax").path("/"));
+        return repository;
+    }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, CsrfTokenRepository csrfTokenRepository)
+            throws Exception {
+        CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
+        csrfHandler.setCsrfRequestAttributeName(null); // load the token on every request, so the cookie is always set
+
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/error")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_AUTH_ENDPOINTS)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf")
                         .permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POSTS)
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/me")
+                        .permitAll() // 204 when nobody is signed in
                         .anyRequest()
                         .denyAll())
-                // Registration happens before any session exists, so there is no session for CSRF to ride on.
-                // CSRF protection for signed-in requests arrives with sign-in (slice 2).
-                .csrf(csrf -> csrf.ignoringRequestMatchers(PUBLIC_AUTH_ENDPOINTS))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository)
+                        .csrfTokenRequestHandler(csrfHandler)
+                        .ignoringRequestMatchers(BEFORE_ANY_SESSION))
+                // Sessions are created only at sign-in (stored server-side by Spring Session)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                // Never create a session just to remember a refused request
+                .requestCache(AbstractHttpConfigurer::disable)
+                // Not signed in = 401
+                .exceptionHandling(errors -> errors.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
@@ -47,7 +81,7 @@ class SecurityConfig {
         return http.build();
     }
 
-    /** No sign-in yet. Stops Spring Boot generating a default user with a random password. */
+    /** Sign-in is handled by our own endpoint. Stops Spring Boot generating a default user with a random password. */
     @Bean
     UserDetailsService userDetailsService() {
         return new InMemoryUserDetailsManager();
