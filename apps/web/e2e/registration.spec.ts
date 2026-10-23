@@ -9,6 +9,7 @@ test.describe('Registration', () => {
     test(`register, confirm by email, and the link works only once (${language})`, async ({ page, request }, testInfo) => {
       // The full journey runs once per language on desktop; it sends real requests and emails
       test.skip(testInfo.project.name !== 'desktop', 'journey covered on desktop')
+      test.slow() // real emails and password hashing: allow three times the usual 30 seconds
       const address = `e2e-${language}-${Date.now()}@example.com`
       const ui =
         language === 'ar'

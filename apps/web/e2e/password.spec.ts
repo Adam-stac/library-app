@@ -26,6 +26,7 @@ test.describe('Passwords', () => {
   test('forgot password: reset by email link, then change it while signed in', async ({ page, request }, testInfo) => {
     // The journey sends real requests and emails, so it runs once, on desktop
     test.skip(testInfo.project.name !== 'desktop', 'journey covered on desktop')
+    test.slow() // real emails and password hashing: allow three times the usual 30 seconds
     const address = `e2e-password-${Date.now()}@example.com`
     await page.addInitScript(() => localStorage.setItem('language', 'en'))
     await confirmedAccount(page, request, address)
