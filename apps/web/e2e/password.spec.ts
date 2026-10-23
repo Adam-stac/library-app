@@ -34,6 +34,7 @@ test.describe('Passwords', () => {
     // Forgot password
     await page.goto('/sign-in')
     await page.getByRole('link', { name: 'Forgot your password?' }).click()
+    await expect(page.getByRole('heading', { name: 'Forgot your password?' })).toBeVisible() // wait for the new page before typing
     await page.getByLabel('Email').fill(address)
     await page.getByRole('button', { name: 'Send reset link' }).click()
     await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible()
