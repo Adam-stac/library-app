@@ -1,5 +1,5 @@
 # Runs the whole app locally: docker compose up -d --build
-# Then open http://localhost:3000
+# App: http://localhost:3000   Test inbox (every email the app sends): http://localhost:8025
 name: library-app
 
 services:
@@ -20,6 +20,13 @@ services:
       - no-new-privileges:true
     # No ports published: the database is reachable only by the API, on the internal network
 
+  mailpit:
+    image: axllent/mailpit:v1.32.0 # catches all emails locally; nothing is really sent
+    ports:
+      - "127.0.0.1:8025:8025" # inbox web page, only reachable from this computer
+    security_opt:
+      - no-new-privileges:true
+
   api:
     build: apps/api
     environment:
@@ -27,9 +34,14 @@ services:
       DB_USERNAME: ${POSTGRES_USER:-library_app}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
+      APP_BASE_URL: http://localhost:3000
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     read_only: true # the container can't modify its own files
     tmpfs:
       - /tmp

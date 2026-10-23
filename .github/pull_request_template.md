@@ -9,15 +9,12 @@
 - [ ] Security
 - [ ] Chore / CI / docs
 
-## Checklist
+## Feature security checklist
 
-- [ ] Tests added or updated, and passing locally
-- [ ] Access control tested (users can't reach each other's data), if this touches data
-- [ ] Works in Arabic (RTL) and English (LTR), if this touches the UI
-- [ ] Database changes are a new Flyway migration, never an edit to an old one
-- [ ] No secrets, tokens or personal data in code, tests or logs
-- [ ] ADR added in `docs/adr` if this is a significant decision
+- [ ] Followed `docs/security/feature-checklist.md` (features: required; others: where relevant)
+- [ ] Threat model added or updated in `docs/security/threat-models/`, or not a feature
+- [ ] Tests cover every layer in `docs/TESTING.md` that this change touches
 
 ## Security considerations
 
-<!-- What could go wrong with this change, and how is it prevented? Write "None" only if it truly touches nothing sensitive. -->
+<!-- The threats, the controls, and which tests prove them. Write "None" only if it truly touches nothing sensitive. -->
