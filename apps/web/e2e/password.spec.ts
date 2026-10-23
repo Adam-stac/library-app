@@ -40,7 +40,8 @@ test.describe('Passwords', () => {
 
     const link = await emailedLink(request, address, 'reset-password')
     await page.goto(link)
-    expect(page.url()).not.toContain('token=') // the one-time token leaves the address bar at once
+    await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeVisible()
+    await expect(page).not.toHaveURL(/token=/) // the one-time token leaves the address bar once the page starts
     await page.getByLabel('New password').fill(NEW_PASSWORD)
     await page.getByRole('button', { name: 'Save new password' }).click()
     await expect(page.getByRole('heading', { name: 'Your password has been changed' })).toBeVisible()
