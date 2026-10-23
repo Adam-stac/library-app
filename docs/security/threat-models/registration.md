@@ -32,3 +32,14 @@
 ## Still to come
 - Bot protection (Cloudflare Turnstile) when the site goes live.
 - Web pages for registration and verification (slice 1b), with end-to-end tests.
+
+## Web pages (slice 1b)
+
+| STRIDE | Threat | Control | Proven by |
+| --- | --- | --- | --- |
+| Information disclosure | Verification token stays in the address bar, browser history or a screenshot | Token read once from the URL fragment, then removed with `history.replaceState` | `VerifyEmailPage.test.tsx`, e2e journey (`page.url()` has no token) |
+| Information disclosure | "Check your inbox" reveals whether an account exists | Neutral wording for every outcome ("If this address can be used…") | `RegisterPage.test.tsx` |
+| Tampering / repeat | Verification sent twice (e.g. React running effects twice) | Guarded so the token is sent at most once | `confirms the token once…` |
+| Spoofing | Password managers can't help, pushing users to weak passwords | `autocomplete="email"` / `"new-password"`, pasting allowed, no maximum below 128 | `uses autocomplete hints so password managers work` |
+| Information disclosure | Error text leaks internals | The UI only shows translated messages for known codes | `RegisterPage.test.tsx` |
+| (Accessibility) | Forms unusable with keyboard or screen reader | Labels, `aria-invalid`, `aria-describedby`, focus moved to the problem field, live regions | axe WCAG 2.2 AA e2e tests, focus assertions |
