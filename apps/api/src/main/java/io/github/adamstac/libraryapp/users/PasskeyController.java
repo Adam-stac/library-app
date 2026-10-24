@@ -105,7 +105,7 @@ class PasskeyController {
         LoginService.Account account = passkeys.finishSignIn(challenge, body.credential())
                 .orElseThrow(() -> new InvalidRequestException("invalid_passkey"));
         signIns.startFresh(request);
-        signIns.complete(account, request, response);
+        signIns.complete(account, SignInSessions.BY_PASSKEY, request, response);
         return new SessionController.SignInResult(account.email(), account.language(), false);
     }
 

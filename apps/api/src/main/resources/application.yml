@@ -63,6 +63,8 @@ app:
   rate-limit:
     auth:
       requests-per-minute: 10 # per client IP, across all /api/v1/auth endpoints
+  session:
+    max-age: 7d # a sign-in ends after 7 days however active it is (idle limit: server.servlet.session.timeout)
   two-factor:
     # 32 random bytes, base64 (openssl rand -base64 32). Encrypts authenticator-app secrets at rest.
     # Required: the API refuses to start without it. Never commit a real key.

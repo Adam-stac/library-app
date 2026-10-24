@@ -37,11 +37,17 @@ class SessionController {
     private final TwoFactorService twoFactor;
     private final CsrfTokenRepository csrfTokens;
     private final SignInSessions signIns;
+    private final SecurityEvents events;
     private final SecurityContextHolderStrategy contextHolder = SecurityContextHolder.getContextHolderStrategy();
 
     SessionController(
-            LoginService logins, TwoFactorService twoFactor, CsrfTokenRepository csrfTokens, SignInSessions signIns) {
+            LoginService logins,
+            TwoFactorService twoFactor,
+            CsrfTokenRepository csrfTokens,
+            SignInSessions signIns,
+            SecurityEvents events) {
         this.signIns = signIns;
+        this.events = events;
         this.logins = logins;
         this.twoFactor = twoFactor;
         this.csrfTokens = csrfTokens;
@@ -87,7 +93,7 @@ class SessionController {
             session.setAttribute(PENDING_SINCE, System.currentTimeMillis());
             return new SignInResult(null, null, true);
         }
-        completeSignIn(account, request, response);
+        signIns.complete(account, SignInSessions.BY_PASSWORD, request, response);
         return new SignInResult(account.email(), account.language(), false);
     }
 
@@ -113,18 +119,18 @@ class SessionController {
         session.removeAttribute(PENDING_USER);
         session.removeAttribute(PENDING_SINCE);
         request.changeSessionId(); // a new session ID now that the person is fully signed in
-        completeSignIn(account, request, response);
+        signIns.complete(account, SignInSessions.BY_PASSWORD_AND_CODE, request, response);
         return new SignInResult(account.email(), account.language(), false);
-    }
-
-    private void completeSignIn(LoginService.Account account, HttpServletRequest request, HttpServletResponse response) {
-        signIns.complete(account, request, response);
     }
 
     /** Ends the session on the server, so a copied cookie stops working immediately. */
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication current = contextHolder.getContext().getAuthentication();
+        if (current != null && current.isAuthenticated() && !(current instanceof AnonymousAuthenticationToken)) {
+            events.record(UUID.fromString(current.getName()), SecurityEvents.SIGN_OUT);
+        }
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();

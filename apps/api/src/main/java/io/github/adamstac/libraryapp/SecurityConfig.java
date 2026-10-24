@@ -40,7 +40,7 @@ class SecurityConfig {
 
     /** Signed-in accounts only. */
     private static final String[] SIGNED_IN_POSTS = {
-        "/api/v1/auth/change-password", "/api/v1/auth/2fa/**", "/api/v1/auth/passkeys/**"
+        "/api/v1/auth/change-password", "/api/v1/auth/2fa/**", "/api/v1/auth/passkeys/**", "/api/v1/auth/sessions/**"
     };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
@@ -74,7 +74,12 @@ class SecurityConfig {
                         .permitAll() // 204 when nobody is signed in
                         .requestMatchers(HttpMethod.POST, SIGNED_IN_POSTS)
                         .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/2fa", "/api/v1/auth/passkeys")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/auth/2fa",
+                                "/api/v1/auth/passkeys",
+                                "/api/v1/auth/sessions",
+                                "/api/v1/auth/security-events")
                         .authenticated()
                         .anyRequest()
                         .denyAll())

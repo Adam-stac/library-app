@@ -34,6 +34,11 @@ export default function HomePage() {
                 {t('home.passkeys')}
               </Link>
             </li>
+            <li>
+              <Link to="/security" className="font-semibold underline underline-offset-4">
+                {t('home.security')}
+              </Link>
+            </li>
           </ul>
         </>
       )}

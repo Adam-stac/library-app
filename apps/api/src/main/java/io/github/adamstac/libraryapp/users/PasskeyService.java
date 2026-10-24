@@ -76,13 +76,20 @@ class PasskeyService {
     private final LoginService logins;
     private final MailDispatcher mail;
     private final String baseUrl;
+    private final SecurityEvents events;
     private final Origin origin;
     private final String rpId;
     private final ObjectConverter objectConverter = new ObjectConverter();
     private final AttestedCredentialDataConverter credentialDataConverter = new AttestedCredentialDataConverter(objectConverter);
     private final WebAuthnManager webAuthn = WebAuthnManager.createNonStrictWebAuthnManager(objectConverter);
 
-    PasskeyService(JdbcClient jdbc, LoginService logins, MailDispatcher mail, @Value("${app.base-url}") String baseUrl) {
+    PasskeyService(
+            JdbcClient jdbc,
+            LoginService logins,
+            MailDispatcher mail,
+            SecurityEvents events,
+            @Value("${app.base-url}") String baseUrl) {
+        this.events = events;
         this.jdbc = jdbc;
         this.logins = logins;
         this.mail = mail;
@@ -175,6 +182,7 @@ class PasskeyService {
             throw new InvalidRequestException("passkey_already_registered");
         }
         log.info("Passkey added to account {}", userId);
+        events.record(userId, SecurityEvents.PASSKEY_ADDED, label);
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.passkeyAdded(owner.language(), label, forgotPasswordLink()));
         return list(userId).stream().filter(p -> p.id().equals(id)).findFirst().orElseThrow();
@@ -191,6 +199,7 @@ class PasskeyService {
                 .optional()
                 .orElseThrow(() -> new InvalidRequestException("not_found"));
         log.info("Passkey removed from account {}", userId);
+        events.record(userId, SecurityEvents.PASSKEY_REMOVED, label);
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.passkeyRemoved(owner.language(), label, forgotPasswordLink()));
     }

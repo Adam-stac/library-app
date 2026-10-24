@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,24 @@ class LoginService {
 
     private final JdbcClient jdbc;
     private final PasswordHashing passwordHashing;
+    private final SecurityEvents events;
+    private final MailDispatcher mail;
+    private final String baseUrl;
     /** Checked against when the email is unknown, so every attempt does the same work (no timing leak). */
     private final String dummyHash;
 
-    LoginService(JdbcClient jdbc, PasswordHashing passwordHashing, PasswordEncoder passwordEncoder) {
+    LoginService(
+            JdbcClient jdbc,
+            PasswordHashing passwordHashing,
+            PasswordEncoder passwordEncoder,
+            SecurityEvents events,
+            MailDispatcher mail,
+            @Value("${app.base-url}") String baseUrl) {
         this.jdbc = jdbc;
         this.passwordHashing = passwordHashing;
+        this.events = events;
+        this.mail = mail;
+        this.baseUrl = baseUrl;
         this.dummyHash = passwordEncoder.encode("timing-equaliser-" + Tokens.generate());
     }
 
@@ -63,9 +76,11 @@ class LoginService {
 
         if (user.locked()) {
             log.info("Sign-in attempt on a locked account {}", user.id());
+            events.record(user.id(), SecurityEvents.SIGN_IN_FAILED, "locked");
             return Optional.empty();
         }
         if (!correct) {
+            events.record(user.id(), SecurityEvents.SIGN_IN_FAILED, "wrong_password");
             recordWrongPassword(user.id());
             log.info("Failed sign-in for account {}", user.id());
             return Optional.empty();
@@ -89,6 +104,7 @@ class LoginService {
      * change-password, so a stolen session can't be used to guess the password without limit.
      */
     void recordWrongPassword(UUID id) {
+        record Counted(int failures, String email, String language) {}
         jdbc.sql("""
                         UPDATE users
                         SET failed_logins = failed_logins + 1,
@@ -97,10 +113,22 @@ class LoginService {
                                                 ELSE locked_until END,
                             updated_at = now()
                         WHERE id = :id
+                        RETURNING failed_logins, email, preferred_language
                         """)
                 .param("max", MAX_FAILURES_BEFORE_LOCK)
                 .param("id", id)
-                .update();
+                .query((rs, rowNum) -> new Counted(
+                        rs.getInt("failed_logins"), rs.getString("email"), rs.getString("preferred_language")))
+                .optional()
+                // Tell the owner once, when the lock first starts
+                .filter(counted -> counted.failures() == MAX_FAILURES_BEFORE_LOCK)
+                .ifPresent(counted -> {
+                    log.warn("Account {} locked after {} wrong attempts", id, counted.failures());
+                    events.record(id, SecurityEvents.ACCOUNT_LOCKED);
+                    mail.sendAfterCommit(
+                            counted.email(),
+                            AccountEmails.accountLocked(counted.language(), baseUrl + "/forgot-password"));
+                });
     }
 
     void clearFailures(UUID id) {
@@ -130,6 +158,7 @@ class LoginService {
                 .orElseThrow(() -> new FieldValidationException(field, "incorrect"));
         boolean correct = rawPassword != null && passwordHashing.matches(PasswordPolicy.normalize(rawPassword), hash);
         if (!correct) {
+            events.record(id, SecurityEvents.SIGN_IN_FAILED, "wrong_password_confirmation");
             recordWrongPassword(id);
             log.info("Wrong password re-entered for account {}", id);
         }

@@ -25,6 +25,7 @@ class PasswordService {
     private final LoginService logins;
     private final MailDispatcher mail;
     private final String baseUrl;
+    private final SecurityEvents events;
 
     PasswordService(
             JdbcClient jdbc,
@@ -32,7 +33,9 @@ class PasswordService {
             NewPasswordRules newPasswords,
             LoginService logins,
             MailDispatcher mail,
+            SecurityEvents events,
             @Value("${app.base-url}") String baseUrl) {
+        this.events = events;
         this.jdbc = jdbc;
         this.passwordHashing = passwordHashing;
         this.newPasswords = newPasswords;
@@ -112,6 +115,7 @@ class PasswordService {
                 .param("name", user.id().toString())
                 .update();
         log.info("Password reset for account {}; {} session(s) ended", user.id(), ended);
+        events.record(user.id(), SecurityEvents.PASSWORD_RESET);
         mail.sendAfterCommit(user.email(), AccountEmails.passwordChanged(user.language(), forgotPasswordLink()));
     }
 
@@ -142,6 +146,7 @@ class PasswordService {
                 .param("current", currentSessionId)
                 .update();
         log.info("Password changed for account {}; {} other session(s) ended", user.id(), ended);
+        events.record(user.id(), SecurityEvents.PASSWORD_CHANGED);
         mail.sendAfterCommit(user.email(), AccountEmails.passwordChanged(user.language(), forgotPasswordLink()));
     }
 
