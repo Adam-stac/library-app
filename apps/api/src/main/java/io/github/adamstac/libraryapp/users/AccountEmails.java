@@ -170,4 +170,50 @@ final class AccountEmails {
                 %s
                 """.formatted(label, resetLink));
     }
+
+    static Email newSignIn(String language, String device, String securityLink, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("تسجيل دخول جديد إلى حسابك — مكتبتي", """
+                    السلام عليكم،
+
+                    سُجّل الدخول إلى حسابك في «مكتبتي» من جهاز جديد: %s.
+                    إن كنت أنت، فلا داعي لأي إجراء.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا:
+                    %s
+                    ويمكنك مراجعة نشاط حسابك وتسجيل الخروج من الأجهزة الأخرى من هنا:
+                    %s
+                    """.formatted(device, resetLink, securityLink));
+        }
+        return new Email("New sign-in to your account — My Library", """
+                Assalamu alaykum,
+
+                Someone signed in to your My Library account from a new device: %s.
+                If this was you, there's nothing to do.
+                If it wasn't you, reset your password straight away here:
+                %s
+                You can review your account's activity and sign out other devices here:
+                %s
+                """.formatted(device, resetLink, securityLink));
+    }
+
+    static Email accountLocked(String language, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("أُوقف تسجيل الدخول إلى حسابك مؤقتًا — مكتبتي", """
+                    السلام عليكم،
+
+                    أُدخلت كلمة مرور أو رمز خاطئ عدة مرات متتالية، فأوقفنا تسجيل الدخول إلى حسابك في «مكتبتي» ١٥ دقيقة لحمايته.
+                    إن كنت أنت، فانتظر قليلًا ثم حاول مجددًا.
+                    إن لم تكن أنت، فقد يكون أحدهم يحاول تخمين كلمة مرورك. يُستحسن تغييرها من هنا:
+                    %s
+                    """.formatted(resetLink));
+        }
+        return new Email("Sign-in to your account was paused — My Library", """
+                Assalamu alaykum,
+
+                A wrong password or code was entered several times in a row, so we've paused sign-in to your My Library account for 15 minutes to protect it.
+                If this was you, wait a little and try again.
+                If it wasn't you, someone may be trying to guess your password. It's a good idea to change it here:
+                %s
+                """.formatted(resetLink));
+    }
 }

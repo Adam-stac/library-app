@@ -13,15 +13,14 @@
 | Information disclosure | Discover which emails have accounts | Identical response and equal work (dummy hash) for unknown email, wrong password and locked account | `aWrongPasswordAndAnUnknownEmailLookIdentical` |
 | Information disclosure | Session cookie stolen by injected script | `HttpOnly`; `__Host-` prefix with `Secure`, `Path=/` | `signingInCreatesASecureServerSideSession` |
 | Information disclosure | Password hash or internals in responses | Responses contain only email and language; errors are codes | `signingInCreatesASecureServerSideSession`, `malformedSignInRequestsAreRejectedCleanly` |
-| Repudiation | Attacks can't be traced | Failed sign-ins and locked-account attempts logged with the account ID (no email or password) | Log review (security event log in slice 6) |
+| Repudiation | Attacks can't be traced | Failed sign-ins and locked-account attempts logged with the account ID (no email or password) | Server logs, and the security event log (see `security-activity.md`) |
 | Denial of service | Argon2 checks used to exhaust memory | Shared cap of 4 concurrent hashes/checks (503 when saturated) | `PasswordHashingTests` |
 | Denial of service | Attacker locks a victim out deliberately | Lock is temporary (15 minutes) and per account; per-IP limit slows mass locking | Accepted risk, below |
 | Elevation of privilege | Stolen cookie keeps working after sign-out | Session deleted on the server at sign-out | `signingOutEndsTheSessionOnTheServer` |
 | Elevation of privilege | Reaching data without signing in | Deny by default; anonymous requests get 401 | `SecurityBaselineTests`, `whoAmISaysNobodyWhenSignedOut` |
 
 ## Accepted risks
-- **Deliberate lockouts:** someone who knows a victim's email can lock them out for 15 minutes at a time. Mitigated by the per-IP limit; security emails about lockouts arrive in slice 6.
-- **No absolute session lifetime yet:** sessions end after 12 hours idle, but an always-active session never expires. An absolute maximum and the "active sessions" page arrive in slice 6.
+- **Deliberate lockouts:** someone who knows a victim's email can lock them out for 15 minutes at a time. Mitigated by the per-IP limit; the owner is emailed when sign-in is paused and can see the attempts on the security page.
 
 ## Slice 2b: web pages
 

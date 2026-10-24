@@ -19,7 +19,7 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 ## Accepted for now (recorded in the threat models)
 
 - The breached-password check fails open if Have I Been Pwned is unreachable.
-- Sessions end after 12 hours idle, with no absolute lifetime yet; "active sessions" and a security event log arrive in slice 6.
-- Someone who knows a victim's email can lock the account for 15 minutes.
+- Someone who knows a victim's email can lock the account for 15 minutes (the owner is emailed).
+- New-device emails go by device type ("Chrome on Windows"), which can be faked.
 - Authenticator codes can be phished in real time; passkeys (slice 5) fix that.
 - The rate limiter is in memory: it resets on restart and assumes a single API instance.

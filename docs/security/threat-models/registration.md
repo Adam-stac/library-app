@@ -11,7 +11,7 @@
 | Spoofing | Client fakes its IP to dodge rate limits | nginx overwrites `X-Forwarded-For` with the real address | nginx config; production proxy setup in Phase 3 |
 | Tampering | Extra JSON fields to set internal values (mass assignment) | Request records accept only email, password and language | `HostileInputTests` |
 | Tampering | Host header injection redirects email links to an attacker's site | Links built from configured `app.base-url`, never from the request | Code review: `RegistrationService` |
-| Repudiation | Abuse can't be traced | Log lines for limits, failures and account creation, without personal data | Log review (security event log comes in slice 6) |
+| Repudiation | Abuse can't be traced | Log lines for limits, failures and account creation, without personal data | Log review |
 | Information disclosure | Discover who has an account (enumeration) | Identical 202 response; password hashed on every path; owner notified by email | `anExistingAccountGetsTheSameResponseAndANoticeInsteadOfALink` |
 | Information disclosure | Token stolen from logs, database or Referer headers | 256-bit token, stored only as SHA-256; sent in the URL fragment; `Referrer-Policy: no-referrer` | `registeringSendsAVerificationEmailAndStoresOnlyAHashOfTheToken`, e2e header tests |
 | Information disclosure | Errors leak internals | Error codes only; no stack traces | `invalidFieldsAreRejectedWithCodes`, `HostileInputTests` |

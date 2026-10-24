@@ -15,6 +15,8 @@ class TestBrowser {
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
     final Map<String, String> cookies = new LinkedHashMap<>();
+    /** Sent as the User-Agent header when set, to look like a particular browser. */
+    String userAgent;
     private final int port;
 
     TestBrowser(int port) {
@@ -48,6 +50,9 @@ class TestBrowser {
             request.header("Cookie", cookies.entrySet().stream()
                     .map(cookie -> cookie.getKey() + "=" + cookie.getValue())
                     .collect(Collectors.joining("; ")));
+        }
+        if (userAgent != null) {
+            request.header("User-Agent", userAgent);
         }
         if (withCsrfHeader && cookies.containsKey("XSRF-TOKEN")) {
             request.header("X-XSRF-TOKEN", cookies.get("XSRF-TOKEN"));

@@ -41,6 +41,7 @@ class TwoFactorService {
     private final MailDispatcher mail;
     private final String baseUrl;
     private final Clock clock;
+    private final SecurityEvents events;
 
     @Autowired
     TwoFactorService(
@@ -48,12 +49,20 @@ class TwoFactorService {
             SecretBox secretBox,
             LoginService logins,
             MailDispatcher mail,
+            SecurityEvents events,
             @Value("${app.base-url}") String baseUrl) {
-        this(jdbc, secretBox, logins, mail, baseUrl, Clock.systemUTC());
+        this(jdbc, secretBox, logins, mail, events, baseUrl, Clock.systemUTC());
     }
 
     TwoFactorService(
-            JdbcClient jdbc, SecretBox secretBox, LoginService logins, MailDispatcher mail, String baseUrl, Clock clock) {
+            JdbcClient jdbc,
+            SecretBox secretBox,
+            LoginService logins,
+            MailDispatcher mail,
+            SecurityEvents events,
+            String baseUrl,
+            Clock clock) {
+        this.events = events;
         this.jdbc = jdbc;
         this.secretBox = secretBox;
         this.logins = logins;
@@ -133,6 +142,7 @@ class TwoFactorService {
         List<String> codes = replaceRecoveryCodes(userId);
         int ended = logins.endOtherSessions(userId, currentSessionId);
         log.info("Two-step verification turned on for account {}; {} other session(s) ended", userId, ended);
+        events.record(userId, SecurityEvents.TWO_FACTOR_ON);
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.twoFactorTurnedOn(owner.language(), forgotPasswordLink()));
         return codes;
@@ -153,6 +163,7 @@ class TwoFactorService {
         jdbc.sql("DELETE FROM recovery_codes WHERE user_id = :id").param("id", userId).update();
         int ended = logins.endOtherSessions(userId, currentSessionId);
         log.info("Two-step verification turned off for account {}; {} other session(s) ended", userId, ended);
+        events.record(userId, SecurityEvents.TWO_FACTOR_OFF);
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.twoFactorTurnedOff(owner.language(), forgotPasswordLink()));
     }
@@ -166,6 +177,7 @@ class TwoFactorService {
         }
         List<String> codes = replaceRecoveryCodes(userId);
         log.info("New recovery codes created for account {}", userId);
+        events.record(userId, SecurityEvents.RECOVERY_CODES_NEW);
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.newRecoveryCodes(owner.language(), forgotPasswordLink()));
         return codes;
@@ -189,6 +201,7 @@ class TwoFactorService {
         if (!checkCode(userId, code)) {
             logins.recordWrongPassword(userId);
             log.info("Wrong second-step code for account {}", userId);
+            events.record(userId, SecurityEvents.SECOND_STEP_FAILED);
             return false;
         }
         logins.clearFailures(userId);
@@ -238,6 +251,7 @@ class TwoFactorService {
         }
         int left = status(userId).recoveryCodesLeft();
         log.info("Recovery code used for account {}; {} left", userId, left);
+        events.record(userId, SecurityEvents.RECOVERY_CODE_USED, left + " left");
         Owner owner = owner(userId);
         mail.sendAfterCommit(owner.email(), AccountEmails.recoveryCodeUsed(owner.language(), left, forgotPasswordLink()));
         return true;
