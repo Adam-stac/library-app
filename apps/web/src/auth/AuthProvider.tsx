@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type ApiResult, getJson, postJson } from '../api'
 import { signInWithPasskey as passkeySignIn } from '../passkeys'
 import { type Account, type Auth, AuthContext, type AuthState, type SignInResult } from './context'
@@ -9,6 +9,9 @@ import { type Account, type Auth, AuthContext, type AuthState, type SignInResult
  */
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' })
+  // Every change of state gets a number; an answer to an older question is ignored. Otherwise a slow /me sent
+  // when the page opened could land after a newer one (e.g. after changing the email) and show stale details.
+  const latest = useRef(0)
 
   const ask = useCallback(async (): Promise<AuthState> => {
     const result = await getJson<Account>('/api/v1/auth/me')
@@ -16,22 +19,26 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    let current = true
+    const question = ++latest.current
+    let active = true
     void ask().then((answer) => {
-      if (current) setState(answer)
+      if (active && question === latest.current) setState(answer)
     })
     return () => {
-      current = false
+      active = false
     }
   }, [ask])
 
   const refresh = useCallback(async () => {
-    setState(await ask())
+    const question = ++latest.current
+    const answer = await ask()
+    if (question === latest.current) setState(answer)
   }, [ask])
 
   /** Signed in only when the API says so; after the password alone it may still need the second step. */
   const finish = useCallback((result: ApiResult<SignInResult>) => {
     if (result.ok && result.data?.email && !result.data.secondStepRequired) {
+      latest.current++ // the sign-in answer is newer than any /me still on its way
       setState({ status: 'signedIn', account: { email: result.data.email, language: result.data.language ?? 'ar' } })
     }
     return result
@@ -51,6 +58,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const result = await postJson('/api/v1/auth/logout', undefined, { csrf: true })
     if (!result.ok && result.status !== 401) return false
+    latest.current++
     setState({ status: 'signedOut' })
     return true
   }, [])
