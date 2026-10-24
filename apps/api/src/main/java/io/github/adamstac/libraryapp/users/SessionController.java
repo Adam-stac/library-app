@@ -13,14 +13,9 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,10 +36,12 @@ class SessionController {
     private final LoginService logins;
     private final TwoFactorService twoFactor;
     private final CsrfTokenRepository csrfTokens;
-    private final SecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+    private final SignInSessions signIns;
     private final SecurityContextHolderStrategy contextHolder = SecurityContextHolder.getContextHolderStrategy();
 
-    SessionController(LoginService logins, TwoFactorService twoFactor, CsrfTokenRepository csrfTokens) {
+    SessionController(
+            LoginService logins, TwoFactorService twoFactor, CsrfTokenRepository csrfTokens, SignInSessions signIns) {
+        this.signIns = signIns;
         this.logins = logins;
         this.twoFactor = twoFactor;
         this.csrfTokens = csrfTokens;
@@ -121,14 +118,7 @@ class SessionController {
     }
 
     private void completeSignIn(LoginService.Account account, HttpServletRequest request, HttpServletResponse response) {
-        SecurityContext context = contextHolder.createEmptyContext();
-        context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
-                account.id().toString(), null, AuthorityUtils.createAuthorityList("ROLE_USER")));
-        contextHolder.setContext(context);
-        contextRepository.saveContext(context, request, response);
-
-        // A fresh CSRF token after sign-in (the old one is cleared; the next request receives a new one)
-        csrfTokens.saveToken(null, request, response);
+        signIns.complete(account, request, response);
     }
 
     /** Ends the session on the server, so a copied cookie stops working immediately. */

@@ -13,6 +13,8 @@ type Props = {
   inputRef?: Ref<HTMLInputElement>
   maxLength?: number
   mono?: boolean
+  /** Passwords and codes are always left-to-right; names follow what's typed. */
+  dir?: 'ltr' | 'auto'
 }
 
 /** A labelled text input with an optional hint and its error, wired up for screen readers. */
@@ -28,6 +30,7 @@ export default function FormField({
   inputRef,
   maxLength = 1024,
   mono = false,
+  dir = 'ltr',
 }: Props) {
   const { t } = useTranslation()
   const describedBy = [hint ? `${id}-hint` : undefined, error ? `${id}-error` : undefined].filter(Boolean).join(' ')
@@ -42,7 +45,7 @@ export default function FormField({
         id={id}
         name={id}
         type={type}
-        dir="ltr"
+        dir={dir}
         autoComplete={autoComplete}
         spellCheck={false}
         maxLength={maxLength}

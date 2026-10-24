@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
+import PasskeysPage from './pages/PasskeysPage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SignInPage from './pages/SignInPage'
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/two-step-verification" element={<TwoFactorPage />} />
+          <Route path="/passkeys" element={<PasskeysPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Layout>

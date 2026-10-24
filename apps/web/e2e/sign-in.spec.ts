@@ -23,11 +23,11 @@ test.describe('Sign in and sign out', () => {
     // A wrong password gets the same message whatever was wrong
     await page.getByLabel('Email').fill(address)
     await page.getByLabel('Password', { exact: true }).fill('not the right password at all')
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
     await expect(page.getByRole('alert')).toContainText('The email or password is incorrect.')
 
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
     await expect(page.getByText("You're signed in as")).toBeVisible()
     await expect(page).toHaveURL(/\/$/)
 

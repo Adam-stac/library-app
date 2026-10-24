@@ -26,3 +26,18 @@ export async function emailedLink(request: APIRequestContext, address: string, p
 export function verificationLinkFor(request: APIRequestContext, address: string): Promise<string> {
   return emailedLink(request, address, 'verify-email')
 }
+
+/** Waits for an email to `address` whose subject contains `subject`, and returns its text. */
+export async function emailText(request: APIRequestContext, address: string, subject: string): Promise<string> {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const search = await request.get(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${address}"`)}`)
+    const { messages } = (await search.json()) as { messages?: { ID: string; Subject: string }[] }
+    const match = (messages ?? []).find((m) => m.Subject.includes(subject))
+    if (match) {
+      const message = await request.get(`${MAILPIT}/api/v1/message/${match.ID}`)
+      return ((await message.json()) as { Text: string }).Text
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200))
+  }
+  throw new Error(`No email about "${subject}" arrived for ${address}`)
+}

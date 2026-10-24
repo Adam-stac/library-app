@@ -33,11 +33,15 @@ class SecurityConfig {
         "/api/v1/auth/login/2fa",
         "/api/v1/auth/logout",
         "/api/v1/auth/password-reset/request",
-        "/api/v1/auth/password-reset/confirm"
+        "/api/v1/auth/password-reset/confirm",
+        "/api/v1/auth/passkeys/login/options",
+        "/api/v1/auth/passkeys/login"
     };
 
     /** Signed-in accounts only. */
-    private static final String[] SIGNED_IN_POSTS = {"/api/v1/auth/change-password", "/api/v1/auth/2fa/**"};
+    private static final String[] SIGNED_IN_POSTS = {
+        "/api/v1/auth/change-password", "/api/v1/auth/2fa/**", "/api/v1/auth/passkeys/**"
+    };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
     private static final String[] BEFORE_ANY_SESSION = {"/api/v1/auth/register", "/api/v1/auth/verify-email"};
@@ -70,7 +74,7 @@ class SecurityConfig {
                         .permitAll() // 204 when nobody is signed in
                         .requestMatchers(HttpMethod.POST, SIGNED_IN_POSTS)
                         .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/2fa")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/2fa", "/api/v1/auth/passkeys")
                         .authenticated()
                         .anyRequest()
                         .denyAll())

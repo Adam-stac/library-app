@@ -19,7 +19,7 @@ async function signIn(page: Page, address: string, password: string) {
   await page.goto('/sign-in')
   await page.getByLabel('Email').fill(address)
   await page.getByLabel('Password', { exact: true }).fill(password)
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 }
 
 test.describe('Passwords', () => {
