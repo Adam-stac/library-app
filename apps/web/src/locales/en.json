@@ -19,7 +19,8 @@
     "signIn": "Sign in",
     "signedIn": "You're signed in as",
     "changePassword": "Change password",
-    "twoFactor": "Two-step verification"
+    "twoFactor": "Two-step verification",
+    "passkeys": "Passkeys"
   },
   "signIn": {
     "title": "Sign in",
@@ -31,7 +32,9 @@
     "lockoutHint": "After several wrong attempts in a row, sign-in is paused for 15 minutes to protect your account.",
     "noAccount": "Don't have an account?",
     "createAccount": "Create one",
-    "forgotPassword": "Forgot your password?"
+    "forgotPassword": "Forgot your password?",
+    "or": "or",
+    "withPasskey": "Sign in with a passkey"
   },
   "secondStep": {
     "title": "Two-step verification",
@@ -124,6 +127,27 @@
     "turnOffBody": "Signing in will need only your password. Confirm with your password and a code from your app (or a recovery code).",
     "turnedOff": "Two-step verification is now off."
   },
+  "passkeys": {
+    "title": "Passkeys",
+    "intro": "Sign in with your fingerprint, face or device PIN instead of your password. Passkeys can't be guessed, and they only work on this website, so they can't be phished.",
+    "unsupported": "This browser can't use passkeys. Try an up-to-date Chrome, Edge, Safari or Firefox.",
+    "yours": "Your passkeys",
+    "none": "You haven't added a passkey yet.",
+    "added": "Added {{date}}",
+    "lastUsed": "last used {{date}}",
+    "neverUsed": "not used yet",
+    "remove": "Remove",
+    "removeNamed": "Remove {{label}}",
+    "removeBody": "Confirm with your password to remove “{{label}}”. It will stop working straight away.",
+    "removed": "“{{label}}” was removed.",
+    "add": "Add a passkey",
+    "addTitle": "Add a passkey",
+    "addBody": "Give it a name, confirm with your password, then follow your browser's prompt.",
+    "addSubmit": "Continue",
+    "addedNotice": "“{{label}}” was added. You can now use it to sign in.",
+    "name": "Name",
+    "nameHint": "So you can tell your passkeys apart, for example “Laptop” or “Phone”."
+  },
   "verify": {
     "checking": "Confirming your email…",
     "successTitle": "Your email is confirmed",
@@ -154,6 +178,13 @@
     "sign_in_again": "That took too long. Please sign in again.",
     "already_enabled": "Two-step verification is already on.",
     "not_enabled": "Two-step verification is already off.",
-    "setup_not_started": "Please start again: choose Turn on."
+    "setup_not_started": "Please start again: choose Turn on.",
+    "passkey_cancelled": "The passkey prompt was closed or timed out. Try again, or sign in with your password.",
+    "passkey_failed": "Your browser couldn't use a passkey. Try again, or sign in with your password.",
+    "invalid_passkey": "That passkey wasn't accepted. If you removed it from this account, sign in with your password.",
+    "passkey_already_registered": "This passkey is already added to your account.",
+    "too_many_passkeys": "You have the maximum of 10 passkeys. Remove one to add another.",
+    "start_again": "That took too long. Please try again.",
+    "not_found": "That passkey doesn't exist any more. Reload the page."
   }
 }

@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { type ApiResult, getJson, postJson } from '../api'
+import { signInWithPasskey as passkeySignIn } from '../passkeys'
 import { type Account, type Auth, AuthContext, type AuthState, type SignInResult } from './context'
 
 /**
@@ -54,9 +55,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return true
   }, [])
 
+  const signInWithPasskey = useCallback(async () => finish(await passkeySignIn<SignInResult>()), [finish])
+
   const auth = useMemo<Auth>(
-    () => ({ state, signIn, completeSecondStep, signOut, refresh }),
-    [state, signIn, completeSecondStep, signOut, refresh],
+    () => ({ state, signIn, completeSecondStep, signInWithPasskey, signOut, refresh }),
+    [state, signIn, completeSecondStep, signInWithPasskey, signOut, refresh],
   )
   return <AuthContext value={auth}>{children}</AuthContext>
 }

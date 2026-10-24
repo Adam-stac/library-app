@@ -29,6 +29,11 @@ export default function HomePage() {
                 {t('home.twoFactor')}
               </Link>
             </li>
+            <li>
+              <Link to="/passkeys" className="font-semibold underline underline-offset-4">
+                {t('home.passkeys')}
+              </Link>
+            </li>
           </ul>
         </>
       )}

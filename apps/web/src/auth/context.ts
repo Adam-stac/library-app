@@ -16,6 +16,8 @@ export type Auth = {
   signIn: (email: string, password: string) => Promise<ApiResult<SignInResult>>
   /** The second step of signing in: a code from the authenticator app, or a recovery code. */
   completeSecondStep: (code: string) => Promise<ApiResult<SignInResult>>
+  /** Signs in with a passkey: no password or code needed. */
+  signInWithPasskey: () => Promise<ApiResult<SignInResult>>
   /** True once the session has ended on the server. */
   signOut: () => Promise<boolean>
   /** Asks the API again, e.g. after a password reset has ended every session. */

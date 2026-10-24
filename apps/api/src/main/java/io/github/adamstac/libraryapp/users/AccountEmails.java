@@ -130,4 +130,44 @@ final class AccountEmails {
                 %s
                 """.formatted(resetLink));
     }
+
+    static Email passkeyAdded(String language, String label, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("أُضيف مفتاح مرور — مكتبتي", """
+                    السلام عليكم،
+
+                    أُضيف مفتاح مرور جديد («%s») إلى حسابك في «مكتبتي»، ويمكن استخدامه لتسجيل الدخول دون كلمة مرور.
+                    إن كنت أنت، فلا داعي لأي إجراء.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا، ثم احذف مفتاح المرور من صفحة مفاتيح المرور:
+                    %s
+                    """.formatted(label, resetLink));
+        }
+        return new Email("A passkey was added — My Library", """
+                Assalamu alaykum,
+
+                A new passkey ("%s") was added to your My Library account. It can be used to sign in without a password.
+                If this was you, there's nothing to do.
+                If it wasn't you, reset your password straight away here, then remove the passkey on the passkeys page:
+                %s
+                """.formatted(label, resetLink));
+    }
+
+    static Email passkeyRemoved(String language, String label, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("حُذف مفتاح مرور — مكتبتي", """
+                    السلام عليكم،
+
+                    حُذف مفتاح المرور «%s» من حسابك في «مكتبتي»، فلم يعد صالحًا لتسجيل الدخول.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا:
+                    %s
+                    """.formatted(label, resetLink));
+        }
+        return new Email("A passkey was removed — My Library", """
+                Assalamu alaykum,
+
+                The passkey "%s" was removed from your My Library account and can no longer be used to sign in.
+                If it wasn't you, reset your password straight away here:
+                %s
+                """.formatted(label, resetLink));
+    }
 }

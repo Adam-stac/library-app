@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
 import SecondStepForm from '../components/SecondStepForm'
+import { passkeysSupported } from '../passkeys'
 
 export default function SignInPage() {
   const { t } = useTranslation()
-  const { state, signIn } = useAuth()
+  const { state, signIn, signInWithPasskey } = useAuth()
+  const [canUsePasskeys] = useState(passkeysSupported)
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -54,6 +56,18 @@ export default function SignInPage() {
   }
 
   const describedBy = (id: string) => (fieldErrors[id] ? `${id}-error` : undefined)
+
+  /** A passkey needs no email or password: the browser shows the person's passkeys for this site. */
+  async function onPasskey() {
+    if (submitting) return
+    setFormError(null)
+    setFieldErrors({})
+    setSubmitting(true)
+    const result = await signInWithPasskey()
+    setSubmitting(false)
+    if (result.ok) navigate('/', { replace: true })
+    else setFormError(result.code)
+  }
 
   if (secondStep) {
     return (
@@ -150,6 +164,25 @@ export default function SignInPage() {
           {submitting ? t('signIn.submitting') : t('signIn.submit')}
         </button>
       </form>
+
+      {canUsePasskeys && (
+        <div className="mt-6 flex flex-col gap-4">
+          <p className="flex items-center gap-3 text-sm text-stone-700" aria-hidden="true">
+            <span className="h-px flex-1 bg-stone-300" />
+            {t('signIn.or')}
+            <span className="h-px flex-1 bg-stone-300" />
+          </p>
+          <button
+            type="button"
+            onClick={() => void onPasskey()}
+            disabled={submitting}
+            aria-busy={submitting || undefined}
+            className="min-h-11 rounded-full border border-stone-900 px-6 font-semibold hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60"
+          >
+            {t('signIn.withPasskey')}
+          </button>
+        </div>
+      )}
 
       <p className="mt-8 text-stone-700">
         {t('signIn.noAccount')}{' '}
