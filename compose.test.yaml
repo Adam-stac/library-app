@@ -1,0 +1,9 @@
+# Browser-test settings, layered on top of compose.yaml (locally and in CI).
+# .env sets COMPOSE_FILE=compose.yaml:compose.test.yaml, so plain "docker compose" commands include this file.
+# Never deploy this file.
+services:
+  api:
+    environment:
+      # The browser tests make many sign-in requests from one address within a minute.
+      # Production keeps the default of 10 per minute from application.yml; CI checks it stays that way.
+      APP_RATE_LIMIT_AUTH_REQUESTS_PER_MINUTE: "100"
