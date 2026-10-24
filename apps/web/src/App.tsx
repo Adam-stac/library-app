@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SignInPage from './pages/SignInPage'
+import TwoFactorPage from './pages/TwoFactorPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
+          <Route path="/two-step-verification" element={<TwoFactorPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Layout>

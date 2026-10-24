@@ -18,7 +18,8 @@
     "createAccount": "Create an account",
     "signIn": "Sign in",
     "signedIn": "You're signed in as",
-    "changePassword": "Change password"
+    "changePassword": "Change password",
+    "twoFactor": "Two-step verification"
   },
   "signIn": {
     "title": "Sign in",
@@ -31,6 +32,15 @@
     "noAccount": "Don't have an account?",
     "createAccount": "Create one",
     "forgotPassword": "Forgot your password?"
+  },
+  "secondStep": {
+    "title": "Two-step verification",
+    "intro": "Enter the 6-digit code from your authenticator app.",
+    "code": "Code",
+    "hint": "Lost your phone? Enter one of your recovery codes instead.",
+    "submit": "Verify",
+    "submitting": "Checking…",
+    "startAgain": "Sign in with a different account"
   },
   "register": {
     "title": "Create an account",
@@ -80,6 +90,40 @@
     "doneTitle": "Your password has been changed",
     "doneBody": "Other devices have been signed out. We've emailed you to confirm the change."
   },
+  "twoFactor": {
+    "title": "Two-step verification",
+    "intro": "Signing in will also need a code from an authenticator app on your phone, so a stolen password alone isn't enough.",
+    "statusLabel": "Two-step verification is",
+    "on": "on",
+    "off": "off",
+    "offBody": "You'll need an authenticator app, such as Google Authenticator, Microsoft Authenticator, Aegis or 2FAS.",
+    "codesLeft_one": "You have {{count}} recovery code left.",
+    "codesLeft_other": "You have {{count}} recovery codes left.",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off",
+    "turnOnTitle": "Turn on two-step verification",
+    "passwordFirst": "First, confirm it's you.",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "step1": "1. Add your account to the app",
+    "step1Body": "In your authenticator app, add an account and scan this QR code.",
+    "qrLabel": "QR code to add My Library to your authenticator app",
+    "manualKey": "Can't scan it? Enter this key instead:",
+    "step2": "2. Enter the code the app shows",
+    "codeFromApp": "6-digit code",
+    "codesTitle": "Your recovery codes",
+    "codesBody": "If you lose your phone, each of these codes lets you sign in once. Save them somewhere safe, such as a password manager or a printed copy. They won't be shown again.",
+    "copy": "Copy codes",
+    "copied": "Copied.",
+    "download": "Download as a file",
+    "saved": "I've saved them",
+    "newCodesTitle": "New recovery codes",
+    "newCodesBody": "Your current recovery codes will stop working. Confirm it's you to create new ones.",
+    "createCodes": "Create new recovery codes",
+    "turnOffTitle": "Turn off two-step verification",
+    "turnOffBody": "Signing in will need only your password. Confirm with your password and a code from your app (or a recovery code).",
+    "turnedOff": "Two-step verification is now off."
+  },
   "verify": {
     "checking": "Confirming your email…",
     "successTitle": "Your email is confirmed",
@@ -105,6 +149,11 @@
     "unexpected": "Something went wrong. Please try again.",
     "invalid_credentials": "The email or password is incorrect.",
     "signOutFailed": "We couldn't sign you out. Please try again.",
-    "incorrect": "That isn't your current password."
+    "incorrect": "That isn't your current password.",
+    "invalid_code": "That code didn't work. Check the app shows the code for My Library, then try the newest code.",
+    "sign_in_again": "That took too long. Please sign in again.",
+    "already_enabled": "Two-step verification is already on.",
+    "not_enabled": "Two-step verification is already off.",
+    "setup_not_started": "Please start again: choose Turn on."
   }
 }

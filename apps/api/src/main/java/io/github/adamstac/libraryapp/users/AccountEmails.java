@@ -50,4 +50,84 @@ final class AccountEmails {
                 %s
                 """.formatted(resetLink));
     }
+
+    static Email twoFactorTurnedOn(String language, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("تم تفعيل التحقق بخطوتين — مكتبتي", """
+                    السلام عليكم،
+
+                    فُعّل التحقق بخطوتين لحسابك في «مكتبتي»: سيُطلب منك رمز من تطبيق المصادقة عند كل تسجيل دخول.
+                    احفظ رموز الاسترداد في مكان آمن؛ فهي طريقك إلى حسابك إن فقدت هاتفك.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا:
+                    %s
+                    """.formatted(resetLink));
+        }
+        return new Email("Two-step verification turned on — My Library", """
+                Assalamu alaykum,
+
+                Two-step verification was turned on for your My Library account: signing in now also needs a code from your authenticator app.
+                Keep your recovery codes somewhere safe; they get you in if you lose your phone.
+                If this wasn't you, reset your password straight away here:
+                %s
+                """.formatted(resetLink));
+    }
+
+    static Email twoFactorTurnedOff(String language, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("تم إيقاف التحقق بخطوتين — مكتبتي", """
+                    السلام عليكم،
+
+                    أُوقف التحقق بخطوتين لحسابك في «مكتبتي»، فأصبح تسجيل الدخول بكلمة المرور وحدها.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا، ثم فعّل التحقق بخطوتين من جديد:
+                    %s
+                    """.formatted(resetLink));
+        }
+        return new Email("Two-step verification turned off — My Library", """
+                Assalamu alaykum,
+
+                Two-step verification was turned off for your My Library account, so signing in now needs only your password.
+                If this wasn't you, reset your password straight away here, then turn two-step verification back on:
+                %s
+                """.formatted(resetLink));
+    }
+
+    static Email recoveryCodeUsed(String language, int left, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("استُخدم رمز استرداد — مكتبتي", """
+                    السلام عليكم،
+
+                    سُجّل الدخول إلى حسابك في «مكتبتي» باستخدام رمز استرداد. بقي لديك %d من رموز الاسترداد.
+                    إن قلّت رموزك، فأنشئ رموزًا جديدة من صفحة التحقق بخطوتين.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا:
+                    %s
+                    """.formatted(left, resetLink));
+        }
+        return new Email("A recovery code was used — My Library", """
+                Assalamu alaykum,
+
+                Someone signed in to your My Library account with a recovery code. You have %d recovery codes left.
+                If you're running low, create new ones on the two-step verification page.
+                If this wasn't you, reset your password straight away here:
+                %s
+                """.formatted(left, resetLink));
+    }
+
+    static Email newRecoveryCodes(String language, String resetLink) {
+        if ("ar".equals(language)) {
+            return new Email("رموز استرداد جديدة — مكتبتي", """
+                    السلام عليكم،
+
+                    أُنشئت رموز استرداد جديدة لحسابك في «مكتبتي»، ولم تعد الرموز القديمة صالحة.
+                    إن لم تكن أنت، فأعد تعيين كلمة المرور فورًا من هنا:
+                    %s
+                    """.formatted(resetLink));
+        }
+        return new Email("New recovery codes — My Library", """
+                Assalamu alaykum,
+
+                New recovery codes were created for your My Library account, and the old ones no longer work.
+                If this wasn't you, reset your password straight away here:
+                %s
+                """.formatted(resetLink));
+    }
 }

@@ -63,5 +63,9 @@ app:
   rate-limit:
     auth:
       requests-per-minute: 10 # per client IP, across all /api/v1/auth endpoints
+  two-factor:
+    # 32 random bytes, base64 (openssl rand -base64 32). Encrypts authenticator-app secrets at rest.
+    # Required: the API refuses to start without it. Never commit a real key.
+    encryption-key: ${TOTP_ENCRYPTION_KEY:}
   password-hashing:
     max-concurrent: 4 # Argon2 uses 19 MiB each: caps memory at about 76 MiB under attack
