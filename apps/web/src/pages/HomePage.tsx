@@ -18,11 +18,18 @@ export default function HomePage() {
               {state.account.email}
             </bdi>
           </p>
-          <p className="mt-4">
-            <Link to="/change-password" className="font-semibold underline underline-offset-4">
-              {t('home.changePassword')}
-            </Link>
-          </p>
+          <ul className="mt-4 flex flex-col gap-2">
+            <li>
+              <Link to="/change-password" className="font-semibold underline underline-offset-4">
+                {t('home.changePassword')}
+              </Link>
+            </li>
+            <li>
+              <Link to="/two-step-verification" className="font-semibold underline underline-offset-4">
+                {t('home.twoFactor')}
+              </Link>
+            </li>
+          </ul>
         </>
       )}
       {state.status === 'signedOut' && (

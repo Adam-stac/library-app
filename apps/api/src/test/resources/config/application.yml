@@ -1,0 +1,5 @@
+# Test-only settings, layered over src/main/resources/application.yml.
+app:
+  two-factor:
+    # An all-zero key: fine for tests, obviously not a secret. Real keys come from TOTP_ENCRYPTION_KEY.
+    encryption-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=

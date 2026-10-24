@@ -1,5 +1,6 @@
 package io.github.adamstac.libraryapp.users;
 
+import io.github.adamstac.libraryapp.FieldValidationException;
 import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -70,7 +71,14 @@ class LoginService {
             return Optional.empty();
         }
 
-        jdbc.sql("UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = :id")
+        // With two-step verification on, the count is only cleared once the second step succeeds; otherwise
+        // signing in again with the password would allow unlimited guesses at the code
+        jdbc.sql("""
+                        UPDATE users SET failed_logins = 0, locked_until = NULL
+                        WHERE id = :id
+                          AND NOT EXISTS (SELECT 1 FROM totp_credentials
+                                          WHERE user_id = :id AND confirmed_at IS NOT NULL)
+                        """)
                 .param("id", user.id())
                 .update();
         return Optional.of(new Account(user.id(), user.email(), user.language()));
@@ -92,6 +100,49 @@ class LoginService {
                         """)
                 .param("max", MAX_FAILURES_BEFORE_LOCK)
                 .param("id", id)
+                .update();
+    }
+
+    void clearFailures(UUID id) {
+        jdbc.sql("UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = :id")
+                .param("id", id)
+                .update();
+    }
+
+    boolean isLocked(UUID id) {
+        return jdbc.sql("SELECT locked_until IS NOT NULL AND locked_until > now() FROM users WHERE id = :id")
+                .param("id", id)
+                .query(Boolean.class)
+                .optional()
+                .orElse(true);
+    }
+
+    /**
+     * Re-checks the password of a signed-in account before a sensitive change. Throws a field error "incorrect"
+     * if it's wrong or the account is locked; wrong guesses count towards the lock. Callers' transactions must
+     * not roll back on {@link FieldValidationException}, or the count would be lost.
+     */
+    void requirePassword(UUID id, String rawPassword, String field) {
+        String hash = jdbc.sql("SELECT password_hash FROM users WHERE id = :id FOR UPDATE")
+                .param("id", id)
+                .query(String.class)
+                .optional()
+                .orElseThrow(() -> new FieldValidationException(field, "incorrect"));
+        boolean correct = rawPassword != null && passwordHashing.matches(PasswordPolicy.normalize(rawPassword), hash);
+        if (!correct) {
+            recordWrongPassword(id);
+            log.info("Wrong password re-entered for account {}", id);
+        }
+        if (!correct || isLocked(id)) {
+            throw new FieldValidationException(field, "incorrect");
+        }
+    }
+
+    /** Ends every session of the account on the server, except the one given. */
+    int endOtherSessions(UUID id, String keepSessionId) {
+        return jdbc.sql("DELETE FROM spring_session WHERE principal_name = :name AND session_id <> :keep")
+                .param("name", id.toString())
+                .param("keep", keepSessionId)
                 .update();
     }
 

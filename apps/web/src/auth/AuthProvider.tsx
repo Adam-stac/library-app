@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { getJson, postJson } from '../api'
-import { type Account, type Auth, AuthContext, type AuthState } from './context'
+import { type ApiResult, getJson, postJson } from '../api'
+import { type Account, type Auth, AuthContext, type AuthState, type SignInResult } from './context'
 
 /**
  * Knows whether we're signed in. The session itself lives on the server, in a cookie JavaScript can't
@@ -28,11 +28,24 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setState(await ask())
   }, [ask])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const result = await postJson<Account>('/api/v1/auth/login', { email, password }, { csrf: true })
-    if (result.ok && result.data) setState({ status: 'signedIn', account: result.data })
+  /** Signed in only when the API says so; after the password alone it may still need the second step. */
+  const finish = useCallback((result: ApiResult<SignInResult>) => {
+    if (result.ok && result.data?.email && !result.data.secondStepRequired) {
+      setState({ status: 'signedIn', account: { email: result.data.email, language: result.data.language ?? 'ar' } })
+    }
     return result
   }, [])
+
+  const signIn = useCallback(
+    async (email: string, password: string) =>
+      finish(await postJson<SignInResult>('/api/v1/auth/login', { email, password }, { csrf: true })),
+    [finish],
+  )
+
+  const completeSecondStep = useCallback(
+    async (code: string) => finish(await postJson<SignInResult>('/api/v1/auth/login/2fa', { code }, { csrf: true })),
+    [finish],
+  )
 
   const signOut = useCallback(async () => {
     const result = await postJson('/api/v1/auth/logout', undefined, { csrf: true })
@@ -41,6 +54,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     return true
   }, [])
 
-  const auth = useMemo<Auth>(() => ({ state, signIn, signOut, refresh }), [state, signIn, signOut, refresh])
+  const auth = useMemo<Auth>(
+    () => ({ state, signIn, completeSecondStep, signOut, refresh }),
+    [state, signIn, completeSecondStep, signOut, refresh],
+  )
   return <AuthContext value={auth}>{children}</AuthContext>
 }

@@ -33,6 +33,7 @@ services:
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-library}
       DB_USERNAME: ${POSTGRES_USER:-library_app}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?Set TOTP_ENCRYPTION_KEY in .env (openssl rand -base64 32)}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
       MAIL_HOST: mailpit
       MAIL_PORT: "1025"

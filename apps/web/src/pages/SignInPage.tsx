@@ -2,6 +2,7 @@ import { type FormEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
+import SecondStepForm from '../components/SecondStepForm'
 
 export default function SignInPage() {
   const { t } = useTranslation()
@@ -13,6 +14,7 @@ export default function SignInPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [secondStep, setSecondStep] = useState(false)
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
 
@@ -36,6 +38,11 @@ export default function SignInPage() {
     const result = await signIn(email, password)
     setSubmitting(false)
 
+    if (result.ok && result.data?.secondStepRequired) {
+      setPassword('')
+      setSecondStep(true)
+      return
+    }
     if (result.ok) {
       navigate('/', { replace: true })
       return
@@ -47,6 +54,17 @@ export default function SignInPage() {
   }
 
   const describedBy = (id: string) => (fieldErrors[id] ? `${id}-error` : undefined)
+
+  if (secondStep) {
+    return (
+      <SecondStepForm
+        onStartAgain={(reason) => {
+          setSecondStep(false)
+          setFormError(reason)
+        }}
+      />
+    )
+  }
 
   return (
     <section className="max-w-md">
