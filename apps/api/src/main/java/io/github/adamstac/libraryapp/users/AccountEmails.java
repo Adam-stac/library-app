@@ -216,4 +216,101 @@ final class AccountEmails {
                 %s
                 """.formatted(resetLink));
     }
+
+    static Email confirmNewEmail(String language, String link) {
+        if ("ar".equals(language)) {
+            return new Email("أكّد عنوان بريدك الجديد — مكتبتي", """
+                    السلام عليكم،
+
+                    طلب أحدهم أن يصبح هذا العنوان هو البريد الإلكتروني لحسابه في «مكتبتي». لتأكيد ذلك، افتح الرابط التالي:
+                    %s
+
+                    ينتهي هذا الرابط خلال ساعة واحدة، ولا يُستخدم إلا مرة واحدة.
+                    إن لم تطلب ذلك، فتجاهل هذه الرسالة: لن يتغيّر شيء.
+                    """.formatted(link));
+        }
+        return new Email("Confirm your new email address — My Library", """
+                Assalamu alaykum,
+
+                Someone asked for this to become the email address of their My Library account. To confirm, open this link:
+                %s
+
+                The link expires in 1 hour and can only be used once.
+                If you didn't ask for this, you can ignore this email: nothing will change.
+                """.formatted(link));
+    }
+
+    static Email emailChangeAddressTaken(String language) {
+        if ("ar".equals(language)) {
+            return new Email("محاولة استخدام عنوان بريدك — مكتبتي", """
+                    السلام عليكم،
+
+                    حاول أحدهم نقل حساب آخر في «مكتبتي» إلى عنوان بريدك الإلكتروني، ولديك حساب بهذا العنوان بالفعل، فلم يتغيّر شيء.
+                    لا داعي لأي إجراء.
+                    """);
+        }
+        return new Email("Someone tried to use your email address — My Library", """
+                Assalamu alaykum,
+
+                Someone tried to move another My Library account to your email address. You already have an account with it, so nothing changed.
+                There's nothing you need to do.
+                """);
+    }
+
+    static Email emailChangeRequested(String language, String maskedNewEmail, String securityLink) {
+        if ("ar".equals(language)) {
+            return new Email("طلب تغيير بريد حسابك — مكتبتي", """
+                    السلام عليكم،
+
+                    طُلب تغيير البريد الإلكتروني لحسابك في «مكتبتي» إلى %s. لن يتغيّر شيء ما لم يُفتح الرابط المرسَل إلى ذلك العنوان.
+                    إن كنت أنت، فلا داعي لأي إجراء.
+                    إن لم تكن أنت، فأحدهم يعرف كلمة مرورك: غيّرها فورًا، وسجّل الخروج من الأجهزة الأخرى من هنا:
+                    %s
+                    """.formatted(maskedNewEmail, securityLink));
+        }
+        return new Email("A change to your account's email was requested — My Library", """
+                Assalamu alaykum,
+
+                Someone asked to change the email address of your My Library account to %s. Nothing changes unless the link sent to that address is opened.
+                If this was you, there's nothing to do.
+                If it wasn't you, someone knows your password: change it straight away, and sign out other devices here:
+                %s
+                """.formatted(maskedNewEmail, securityLink));
+    }
+
+    static Email emailChanged(String language, String maskedNewEmail) {
+        if ("ar".equals(language)) {
+            return new Email("تغيّر بريد حسابك — مكتبتي", """
+                    السلام عليكم،
+
+                    تغيّر البريد الإلكتروني لحسابك في «مكتبتي» إلى %s، وسُجّل الخروج من الأجهزة الأخرى. لن تصل رسائل الحساب إلى هذا العنوان بعد الآن.
+                    إن كنت أنت، فلا داعي لأي إجراء.
+                    إن لم تكن أنت، فقد استولى أحدهم على حسابك. تواصل مع مسؤول الموقع فورًا، واذكر وقت هذه الرسالة.
+                    """.formatted(maskedNewEmail));
+        }
+        return new Email("Your account's email address was changed — My Library", """
+                Assalamu alaykum,
+
+                The email address of your My Library account was changed to %s, and other devices were signed out. Account emails won't come to this address any more.
+                If this was you, there's nothing to do.
+                If it wasn't you, someone else has taken control of your account. Contact the site's administrator straight away, giving the time of this email.
+                """.formatted(maskedNewEmail));
+    }
+
+    static Email accountDeleted(String language) {
+        if ("ar".equals(language)) {
+            return new Email("حُذف حسابك — مكتبتي", """
+                    السلام عليكم،
+
+                    حُذف حسابك في «مكتبتي» وكل ما فيه، بناءً على طلبك. لا يمكن التراجع عن ذلك.
+                    يمكنك إنشاء حساب جديد بهذا العنوان متى شئت.
+                    """);
+        }
+        return new Email("Your account was deleted — My Library", """
+                Assalamu alaykum,
+
+                Your My Library account and everything in it were deleted, as you asked. This can't be undone.
+                You're welcome to create a new account with this address at any time.
+                """);
+    }
 }

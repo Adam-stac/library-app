@@ -2,6 +2,7 @@ import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
+import { saveLanguage } from '../language'
 
 const pill =
   'inline-flex min-h-11 items-center rounded-full border border-stone-300 px-4 text-sm hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
@@ -53,6 +54,7 @@ function AccountControls() {
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation()
+  const { state } = useAuth()
   const nextLanguage = i18n.language === 'ar' ? 'en' : 'ar'
 
   return (
@@ -66,7 +68,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <AccountControls />
             <button
               type="button"
-              onClick={() => void i18n.changeLanguage(nextLanguage)}
+              onClick={() => void saveLanguage(nextLanguage, state.status === 'signedIn')}
               lang={nextLanguage}
               className={pill}
             >

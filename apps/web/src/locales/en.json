@@ -21,7 +21,8 @@
     "changePassword": "Change password",
     "twoFactor": "Two-step verification",
     "passkeys": "Passkeys",
-    "security": "Security"
+    "security": "Security",
+    "account": "Account settings"
   },
   "signIn": {
     "title": "Sign in",
@@ -191,8 +192,38 @@
       "recovery_codes_new": "New recovery codes were made",
       "passkey_added": "Passkey “{{label}}” added",
       "passkey_removed": "Passkey “{{label}}” removed",
-      "other": "Account security changed"
+      "other": "Account security changed",
+      "email_change_requested": "A change of email to {{email}} was requested",
+      "email_changed": "Email address changed to {{email}}"
     }
+  },
+  "account": {
+    "title": "Account settings",
+    "languageTitle": "Language",
+    "languageBody": "The language for this site and for the emails we send you.",
+    "languageSaved": "Saved. Emails will come in this language.",
+    "emailTitle": "Email address",
+    "emailNow": "Your email address is",
+    "emailIntro": "We'll send a link to the new address; the change happens when you open it. We'll also tell your current address.",
+    "newEmail": "New email address",
+    "code": "Code from your authenticator app",
+    "codeHint": "Or one of your recovery codes.",
+    "emailSubmit": "Send the link",
+    "emailSent": "Check the inbox of {{email}} and open the link within an hour. Nothing changes until you do.",
+    "deleteTitle": "Delete your account",
+    "deleteIntro": "This deletes your account and everything in it, straight away and for good. It can't be undone.",
+    "deleteUnderstood": "I understand this can't be undone",
+    "deleteSubmit": "Delete my account",
+    "deletedTitle": "Your account was deleted",
+    "deletedBody": "Everything in it has been removed, and you've been signed out everywhere. We've sent a last email to confirm."
+  },
+  "confirmEmail": {
+    "checking": "Confirming your new email address…",
+    "successTitle": "Your email address has been changed",
+    "successBody": "Sign in with the new address from now on. Other devices have been signed out.",
+    "invalidTitle": "This link doesn't work",
+    "invalidBody": "It may have expired, been used already, or been replaced by a newer link. You can ask for a new one from your account settings.",
+    "tryAgain": "Account settings"
   },
   "verify": {
     "checking": "Confirming your email…",
@@ -231,6 +262,8 @@
     "passkey_already_registered": "This passkey is already added to your account.",
     "too_many_passkeys": "You have the maximum of 10 passkeys. Remove one to add another.",
     "start_again": "That took too long. Please try again.",
-    "not_found": "That passkey doesn't exist any more. Reload the page."
+    "not_found": "That passkey doesn't exist any more. Reload the page.",
+    "same_email": "That's already your email address.",
+    "confirm_delete": "Tick the box to confirm."
   }
 }

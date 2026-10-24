@@ -168,6 +168,26 @@ class TwoFactorService {
         mail.sendAfterCommit(owner.email(), AccountEmails.twoFactorTurnedOff(owner.language(), forgotPasswordLink()));
     }
 
+    /**
+     * For the most sensitive changes (new email address, deleting the account): when two-step verification is on,
+     * a current code (or a recovery code) is needed as well as the password, so the password alone isn't enough.
+     * Wrong codes count towards the sign-in lock. Callers' transactions must not roll back on
+     * {@link FieldValidationException}.
+     */
+    void requireCodeIfEnabled(UUID userId, String code) {
+        if (!isEnabled(userId)) {
+            return;
+        }
+        if (code == null || code.isBlank()) {
+            throw new FieldValidationException("code", "required");
+        }
+        if (!checkCode(userId, code)) {
+            logins.recordWrongPassword(userId);
+            events.record(userId, SecurityEvents.SECOND_STEP_FAILED);
+            throw new FieldValidationException("code", "invalid_code");
+        }
+    }
+
     /** New recovery codes; the old ones stop working. Needs the password. */
     @Transactional(noRollbackFor = FieldValidationException.class)
     List<String> newRecoveryCodes(UUID userId, String currentPassword) {
