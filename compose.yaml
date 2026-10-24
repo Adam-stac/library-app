@@ -1,4 +1,7 @@
 # Runs the whole app locally: docker compose up -d --build
+# For local development and CI only. Never deploy this file: email goes to a test inbox (Mailpit).
+# Browser-test settings live in compose.test.yaml; production needs its own configuration
+# (see docs/security/go-live-checklist.md).
 # App: http://localhost:3000   Test inbox (every email the app sends): http://localhost:8025
 name: library-app
 
@@ -38,7 +41,6 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: "1025"
       APP_BASE_URL: http://localhost:3000
-      APP_RATE_LIMIT_AUTH_REQUESTS_PER_MINUTE: "100" # local and CI test stack only; production keeps 10
     depends_on:
       db:
         condition: service_healthy

@@ -32,6 +32,14 @@ jobs:
           java-version: '25'
           cache: maven
           cache-dependency-path: apps/api/pom.xml
+      - name: Production keeps the sign-in rate limit at 10 per minute
+        working-directory: .
+        run: |
+          grep -Eq '^ +requests-per-minute: 10( |$)' apps/api/src/main/resources/application.yml
+          if grep -n -i 'rate.limit' compose.yaml apps/api/src/main/resources/application-prod.yml; then
+            echo "::error::The sign-in rate limit may only be raised in compose.test.yaml (browser tests)"
+            exit 1
+          fi
       - name: Build and test (real Postgres via Testcontainers)
         run: ./mvnw -B -ntp verify
 
