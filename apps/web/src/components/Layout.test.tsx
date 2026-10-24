@@ -77,4 +77,37 @@ describe('Layout account controls', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't sign you out")
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
   })
+
+  it('switching language while signed in saves it to the account, for emails', async () => {
+    const fetchMock = vi.fn((path: string) =>
+      Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const user = renderLayout()
+
+    await screen.findByText('reader@example.com')
+    await user.click(screen.getByRole('button', { name: 'العربية' }))
+
+    await vi.waitFor(() => expect(fetchMock.mock.calls.map(([path]) => path)).toContain('/api/v1/auth/preferences'))
+    const [, init] = fetchMock.mock.calls.find(([path]) => path === '/api/v1/auth/preferences') as unknown as [
+      string,
+      RequestInit,
+    ]
+    expect(JSON.parse(init.body as string)).toEqual({ language: 'ar' })
+    expect(i18n.language).toBe('ar')
+    await i18n.changeLanguage('en')
+  })
+
+  it('switching language while signed out saves nothing', async () => {
+    const fetchMock = vi.fn((_path: string) => Promise.resolve(json(204)))
+    vi.stubGlobal('fetch', fetchMock)
+    const user = renderLayout()
+
+    await screen.findByRole('link', { name: 'Sign in' })
+    await user.click(screen.getByRole('button', { name: 'العربية' }))
+
+    expect(i18n.language).toBe('ar')
+    expect(fetchMock.mock.calls.map(([path]) => path)).not.toContain('/api/v1/auth/preferences')
+    await i18n.changeLanguage('en')
+  })
 })

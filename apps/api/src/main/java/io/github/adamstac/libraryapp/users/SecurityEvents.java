@@ -30,6 +30,8 @@ class SecurityEvents {
     static final String OTHER_SESSIONS_ENDED = "other_sessions_ended";
     static final String PASSWORD_CHANGED = "password_changed";
     static final String PASSWORD_RESET = "password_reset";
+    static final String EMAIL_CHANGE_REQUESTED = "email_change_requested";
+    static final String EMAIL_CHANGED = "email_changed";
     static final String TWO_FACTOR_ON = "two_factor_on";
     static final String TWO_FACTOR_OFF = "two_factor_off";
     static final String RECOVERY_CODE_USED = "recovery_code_used";

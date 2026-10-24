@@ -39,6 +39,11 @@ export default function HomePage() {
                 {t('home.security')}
               </Link>
             </li>
+            <li>
+              <Link to="/account" className="font-semibold underline underline-offset-4">
+                {t('home.account')}
+              </Link>
+            </li>
           </ul>
         </>
       )}

@@ -35,12 +35,19 @@ class SecurityConfig {
         "/api/v1/auth/password-reset/request",
         "/api/v1/auth/password-reset/confirm",
         "/api/v1/auth/passkeys/login/options",
-        "/api/v1/auth/passkeys/login"
+        "/api/v1/auth/passkeys/login",
+        "/api/v1/auth/confirm-email-change"
     };
 
     /** Signed-in accounts only. */
     private static final String[] SIGNED_IN_POSTS = {
-        "/api/v1/auth/change-password", "/api/v1/auth/2fa/**", "/api/v1/auth/passkeys/**", "/api/v1/auth/sessions/**"
+        "/api/v1/auth/change-password",
+        "/api/v1/auth/2fa/**",
+        "/api/v1/auth/passkeys/**",
+        "/api/v1/auth/sessions/**",
+        "/api/v1/auth/preferences",
+        "/api/v1/auth/change-email",
+        "/api/v1/auth/delete-account"
     };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */

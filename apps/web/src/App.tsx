@@ -1,7 +1,10 @@
 import { Route, Routes } from 'react-router'
 import AuthProvider from './auth/AuthProvider'
 import Layout from './components/Layout'
+import AccountDeletedPage from './pages/AccountDeletedPage'
+import AccountPage from './pages/AccountPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
+import ConfirmEmailChangePage from './pages/ConfirmEmailChangePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
 import PasskeysPage from './pages/PasskeysPage'
@@ -27,6 +30,9 @@ export default function App() {
           <Route path="/two-step-verification" element={<TwoFactorPage />} />
           <Route path="/passkeys" element={<PasskeysPage />} />
           <Route path="/security" element={<SecurityPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
+          <Route path="/account-deleted" element={<AccountDeletedPage />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Layout>

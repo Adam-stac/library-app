@@ -12,6 +12,7 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 - [ ] **Real email provider with SPF, DKIM and DMARC.** Password reset and every security notice depend on email. Without these records, attackers can send convincing fake emails from our domain, and real ones land in spam. *Check:* a test message passes SPF, DKIM and DMARC.
 - [ ] **Secrets in the platform, never in Git.** `POSTGRES_PASSWORD` and `TOTP_ENCRYPTION_KEY` live in Coolify secrets. The TOTP key is backed up somewhere separate and safe: losing it breaks every authenticator setup.
 - [ ] **Least-privilege database users.** A migration user that owns the schema, and an application user that can only read and write rows. A hole in the app must not be able to drop tables.
+- [ ] **A way for people to reach the administrator, and a privacy notice.** Account emails tell people to contact the site's administrator if their email was changed without them (there is no self-service undo yet). The privacy notice says what is stored, for how long (including in backups), and that deleting the account removes it.
 - [ ] **Bot protection on registration and password reset.** Per-IP and per-address limits don't stop a botnet from making us email thousands of strangers (which gets the domain blacklisted). Add Cloudflare Turnstile to those forms.
 - [ ] **Backups, encrypted and restore-tested.** Database backups encrypted at rest, kept off the server, with one test restore done before go-live.
 - [ ] **Monitoring and alerts.** Uptime checks, plus alerts on spikes in failed sign-ins, lockouts and 5xx errors.
@@ -20,6 +21,7 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 
 - The breached-password check fails open if Have I Been Pwned is unreachable.
 - Someone who knows a victim's email can lock the account for 15 minutes (the owner is emailed).
+- An email change can't be undone by the owner alone; they're told at both steps and must contact the administrator.
 - New-device emails go by device type ("Chrome on Windows"), which can be faked.
 - Authenticator codes can be phished in real time; passkeys (slice 5) fix that.
 - The rate limiter is in memory: it resets on restart and assumes a single API instance.

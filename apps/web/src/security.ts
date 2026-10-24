@@ -48,6 +48,9 @@ export function eventText(event: SecurityEvent, t: T): string {
       return t('security.events.other_sessions_ended', { count: parseInt(detail, 10) || 0 })
     case 'session_ended':
       return t('security.events.session_ended', { device: deviceName(detail, t) })
+    case 'email_change_requested':
+    case 'email_changed':
+      return t(`security.events.${event.type}`, { email: detail })
     case 'passkey_added':
     case 'passkey_removed':
       return t(`security.events.${event.type}`, { label: detail })
