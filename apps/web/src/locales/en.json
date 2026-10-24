@@ -194,7 +194,8 @@
       "passkey_removed": "Passkey “{{label}}” removed",
       "other": "Account security changed",
       "email_change_requested": "A change of email to {{email}} was requested",
-      "email_changed": "Email address changed to {{email}}"
+      "email_changed": "Email address changed to {{email}}",
+      "registration_attempt": "Someone tried to create an account with your email address"
     }
   },
   "account": {

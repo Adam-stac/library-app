@@ -20,6 +20,7 @@
 | Denial of service | Huge request bodies | 4 KB limit on auth endpoints; length required | `oversizedRequestsAreRefusedBeforeAnyWork` |
 | Denial of service | Breach-check service hangs | 3-second timeout, fail open | `failsOpenQuicklyWhenTheServiceHangs` |
 | Denial of service | Email bombing a victim | At most 3 verification emails per address per hour, plus per-IP limit | `atMostThreeVerificationEmailsPerAddressPerHour` |
+| Denial of service | Email bombing an existing account with "someone tried to register" notices | At most 3 notices per account per hour; each one is in the owner's security activity | `anExistingAccountIsToldAtMostThreeTimesAnHourAndSeesItInTheActivity` |
 | Elevation of privilege | Reuse or brute-force of verification links | Single-use, 24-hour expiry, 256-bit random | `verifyingCreatesTheAccountWithAnArgon2HashAndTheLinkWorksOnlyOnce`, `expiredLinksAreRejected`, `unknownOrMalformedTokensAreRejected` |
 | (Integrity) | Email sent for a change that was rolled back | Emails sent only after commit | `noEmailIsSentIfTheDatabaseChangeIsRolledBack` |
 | (Privacy) | Unverified data kept forever | Hourly deletion of expired registrations | `expiredRegistrationsAreDeletedAutomatically` |

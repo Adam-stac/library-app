@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 class AccountService {
 
     static final int MAX_EMAIL_CHANGES_PER_HOUR = 3;
+    /** Across all accounts, so several accounts can't be used together to flood one stranger's inbox. */
+    static final int MAX_EMAILS_PER_NEW_ADDRESS_PER_HOUR = 3;
 
     private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
@@ -81,6 +83,17 @@ class AccountService {
                 .single();
         if (recent >= MAX_EMAIL_CHANGES_PER_HOUR) {
             log.warn("Email change limit reached for account {}; no email sent", userId);
+            return;
+        }
+        long toThisAddress = jdbc.sql("""
+                        SELECT count(*) FROM email_changes
+                        WHERE new_email = :email AND created_at > now() - interval '1 hour'
+                        """)
+                .param("email", newEmail)
+                .query(Long.class)
+                .single();
+        if (toThisAddress >= MAX_EMAILS_PER_NEW_ADDRESS_PER_HOUR) {
+            log.warn("Email change limit reached for an address (asked by account {}); no email sent", userId);
             return;
         }
 

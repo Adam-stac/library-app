@@ -15,6 +15,7 @@
 | Information disclosure | Another account's activity or sessions are seen | Lists are filtered by the signed-in account; ending a session checks it belongs to that account | `anotherAccountsSessionCantBeEnded` |
 | Information disclosure | More personal data than needed is kept | Only a short device description is stored; events are deleted after 90 days | `signingInIsRecordedWithTheDeviceButNotTheRawBrowserString`, `eventsOlderThan90DaysAreDeleted` |
 | Denial of service | Emails flood the owner | New-device email only for a device type not seen in the log; lock email only when the lock starts | `theOwnerIsEmailedAboutASignInFromANewDevice`, `wrongPasswordsAndTheLockAreRecordedAndTheOwnerIsTold` |
+| Denial of service | A flood of wrong guesses fills the log and pushes real events out of view | At most 100 failure events per account per hour are logged; the lock still counts every guess, and server logs keep each attempt | `aFloodOfFailuresIsCappedInTheLogButStillCountsTowardsTheLock` |
 | Elevation of privilege | Viewing or ending sessions without signing in | All four endpoints need a signed-in session (401 otherwise) | `theActivityIsOnlyVisibleWhenSignedIn` |
 | Elevation of privilege | A stolen session stays in after the owner acts | The owner can end any other session, or all of them, and it stops working at once | `signingOutAnotherDeviceEndsItsSession`, `signingOutEverywhereElseKeepsOnlyThisDevice`, e2e `security-activity` |
 

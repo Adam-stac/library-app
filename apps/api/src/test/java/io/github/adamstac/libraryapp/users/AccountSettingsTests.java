@@ -223,6 +223,21 @@ class AccountSettingsTests {
     }
 
     @Test
+    void severalAccountsCantFloodOneAddress() throws Exception {
+        for (int i = 0; i < 4; i++) {
+            String email = "sender" + i + "@example.com";
+            createUser(email);
+            rateLimitFilter.reset();
+            TestBrowser browser = new TestBrowser(port);
+            assertThat(browser.signIn(email, PASSWORD).statusCode()).isEqualTo(200);
+            assertThat(requestChange(browser, NEW_EMAIL, PASSWORD).statusCode()).isEqualTo(202);
+        }
+
+        assertThat(mailer.sent.stream().filter(email -> email.to().equals(NEW_EMAIL)))
+                .hasSize(AccountService.MAX_EMAILS_PER_NEW_ADDRESS_PER_HOUR);
+    }
+
+    @Test
     void expiredLinksAreRefusedAndThenDeleted() throws Exception {
         TestBrowser browser = signedIn();
         requestChange(browser, NEW_EMAIL, PASSWORD);

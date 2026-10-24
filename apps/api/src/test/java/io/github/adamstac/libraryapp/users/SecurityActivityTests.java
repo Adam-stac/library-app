@@ -103,6 +103,25 @@ class SecurityActivityTests {
     }
 
     @Test
+    void aFloodOfFailuresIsCappedInTheLogButStillCountsTowardsTheLock() throws Exception {
+        jdbc.sql("""
+                        INSERT INTO security_events (id, user_id, type, detail)
+                        SELECT gen_random_uuid(), :id, 'sign_in_failed', 'wrong_password' FROM generate_series(1, :n)
+                        """)
+                .param("id", userId)
+                .param("n", SecurityEvents.MAX_FAILURES_LOGGED_PER_HOUR)
+                .update();
+
+        new TestBrowser(port).signIn(EMAIL, "one more wrong password");
+
+        assertThat(jdbc.sql("SELECT count(*) FROM security_events WHERE type = 'sign_in_failed'")
+                        .query(Long.class)
+                        .single())
+                .isEqualTo(SecurityEvents.MAX_FAILURES_LOGGED_PER_HOUR);
+        assertThat(jdbc.sql("SELECT failed_logins FROM users").query(Integer.class).single()).isEqualTo(1);
+    }
+
+    @Test
     void securityChangesAreRecorded() throws Exception {
         TestBrowser browser = signedIn(null);
         browser.post("/api/v1/auth/change-password", """

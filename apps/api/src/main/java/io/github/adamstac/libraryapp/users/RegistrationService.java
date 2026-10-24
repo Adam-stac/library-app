@@ -20,6 +20,7 @@ class RegistrationService {
     private final PasswordHashing passwordHashing;
     private final NewPasswordRules newPasswords;
     private final MailDispatcher mail;
+    private final SecurityEvents events;
     private final String baseUrl;
 
     RegistrationService(
@@ -27,7 +28,9 @@ class RegistrationService {
             PasswordHashing passwordHashing,
             NewPasswordRules newPasswords,
             MailDispatcher mail,
+            SecurityEvents events,
             @Value("${app.base-url}") String baseUrl) {
+        this.events = events;
         this.jdbc = jdbc;
         this.passwordHashing = passwordHashing;
         this.newPasswords = newPasswords;
@@ -46,7 +49,22 @@ class RegistrationService {
         // Hash on every path, so new and existing emails take the same time (no enumeration by timing)
         String passwordHash = passwordHashing.hash(password);
 
-        if (accountExists(email)) {
+        UUID existing = accountId(email);
+        if (existing != null) {
+            // The owner is told, at most 3 times an hour, so this can't be used to flood their inbox
+            long recent = jdbc.sql("""
+                            SELECT count(*) FROM security_events
+                            WHERE user_id = :id AND type = :type AND occurred_at > now() - interval '1 hour'
+                            """)
+                    .param("id", existing)
+                    .param("type", SecurityEvents.REGISTRATION_ATTEMPT)
+                    .query(Long.class)
+                    .single();
+            if (recent >= MAX_EMAILS_PER_ADDRESS_PER_HOUR) {
+                log.warn("Registration notice limit reached for account {}; no email sent", existing);
+                return;
+            }
+            events.record(existing, SecurityEvents.REGISTRATION_ATTEMPT);
             mail.sendAfterCommit(email, RegistrationEmails.alreadyRegistered(language));
             return;
         }
@@ -114,11 +132,12 @@ class RegistrationService {
         }
     }
 
-    private boolean accountExists(String email) {
-        return jdbc.sql("SELECT EXISTS (SELECT 1 FROM users WHERE email = :email)")
+    private UUID accountId(String email) {
+        return jdbc.sql("SELECT id FROM users WHERE email = :email")
                 .param("email", email)
-                .query(Boolean.class)
-                .single();
+                .query(UUID.class)
+                .optional()
+                .orElse(null);
     }
 
     private record Pending(String email, String passwordHash, String language) {}

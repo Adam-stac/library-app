@@ -202,7 +202,8 @@
       "passkey_removed": "حُذف مفتاح المرور «{{label}}»",
       "other": "تغيّر إعداد أمان في الحساب",
       "email_change_requested": "طُلب تغيير البريد إلى {{email}}",
-      "email_changed": "تغيّر البريد الإلكتروني إلى {{email}}"
+      "email_changed": "تغيّر البريد الإلكتروني إلى {{email}}",
+      "registration_attempt": "حاول أحدهم إنشاء حساب بعنوان بريدك الإلكتروني"
     }
   },
   "account": {
