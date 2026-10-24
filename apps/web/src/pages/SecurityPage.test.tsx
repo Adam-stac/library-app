@@ -73,6 +73,7 @@ describe('SecurityPage', () => {
             event('sign_in_failed', 'wrong_password'),
             event('sign_in', 'passkey'),
             event('recovery_code_used', '7 left'),
+            event('registration_attempt'),
             event('something_new'),
           ]),
       },
@@ -94,6 +95,7 @@ describe('SecurityPage', () => {
     expect(within(activity).getByText('Signed in with a passkey')).toBeInTheDocument()
     expect(within(activity).getByText('A recovery code was used (7 left)')).toBeInTheDocument()
     expect(within(activity).getByText('Account security changed')).toBeInTheDocument()
+    expect(within(activity).getByText('Someone tried to create an account with your email address')).toBeInTheDocument()
   })
 
   it('signs out another device', async () => {

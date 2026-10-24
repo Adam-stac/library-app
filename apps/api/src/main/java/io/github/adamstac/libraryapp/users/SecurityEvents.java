@@ -3,6 +3,7 @@ package io.github.adamstac.libraryapp.users;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +39,15 @@ class SecurityEvents {
     static final String RECOVERY_CODES_NEW = "recovery_codes_new";
     static final String PASSKEY_ADDED = "passkey_added";
     static final String PASSKEY_REMOVED = "passkey_removed";
+    static final String REGISTRATION_ATTEMPT = "registration_attempt";
 
     static final int RETENTION_DAYS = 90;
+    /**
+     * Failures anyone can cause just by knowing the email address. Capped per account per hour, so a flood of
+     * guesses can't fill the database or push real events out of the owner's view. The lock still counts every guess.
+     */
+    static final Set<String> FAILURES = Set.of(SIGN_IN_FAILED, SECOND_STEP_FAILED);
+    static final int MAX_FAILURES_LOGGED_PER_HOUR = 100;
 
     private static final Logger log = LoggerFactory.getLogger(SecurityEvents.class);
 
@@ -56,6 +64,9 @@ class SecurityEvents {
     }
 
     void record(UUID userId, String type, String detail) {
+        if (FAILURES.contains(type) && failuresInTheLastHour(userId) >= MAX_FAILURES_LOGGED_PER_HOUR) {
+            return; // already plenty of evidence; server logs still record each attempt
+        }
         HttpServletRequest request = currentRequest();
         jdbc.sql("""
                         INSERT INTO security_events (id, user_id, type, detail, device, ip)
@@ -68,6 +79,17 @@ class SecurityEvents {
                 .param("device", currentDevice())
                 .param("ip", request == null ? null : truncate(request.getRemoteAddr(), 45))
                 .update();
+    }
+
+    private long failuresInTheLastHour(UUID userId) {
+        return jdbc.sql("""
+                        SELECT count(*) FROM security_events
+                        WHERE user_id = :id AND type IN (:types) AND occurred_at > now() - interval '1 hour'
+                        """)
+                .param("id", userId)
+                .param("types", FAILURES)
+                .query(Long.class)
+                .single();
     }
 
     List<Event> recent(UUID userId, int limit) {

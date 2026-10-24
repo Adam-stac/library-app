@@ -182,6 +182,24 @@ class RegistrationTests {
     }
 
     @Test
+    void anExistingAccountIsToldAtMostThreeTimesAnHourAndSeesItInTheActivity() throws Exception {
+        register("reader@example.com", STRONG_PASSWORD, "en");
+        verify(tokenFrom(mailer.sent.getFirst()));
+        mailer.sent.clear();
+
+        for (int i = 0; i < 4; i++) {
+            rateLimitFilter.reset();
+            assertThat(register("reader@example.com", "a different long passphrase " + i, "en").statusCode())
+                    .as("the same answer every time")
+                    .isEqualTo(202);
+        }
+
+        assertThat(mailer.sent).hasSize(RegistrationService.MAX_EMAILS_PER_ADDRESS_PER_HOUR);
+        assertThat(count("SELECT count(*) FROM security_events WHERE type = :v", "registration_attempt"))
+                .isEqualTo(RegistrationService.MAX_EMAILS_PER_ADDRESS_PER_HOUR);
+    }
+
+    @Test
     void anAttackersEarlierRegistrationCannotBecomeTheVictimsAccount() throws Exception {
         register("victim@example.com", "attackers own long password", "en");
         String attackerToken = tokenFrom(mailer.sent.get(0));
