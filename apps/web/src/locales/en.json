@@ -14,7 +14,7 @@
   },
   "home": {
     "title": "Welcome",
-    "comingSoon": "Coming soon: authors, places and books.",
+    "comingSoon": "Coming soon: places and books.",
     "createAccount": "Create an account",
     "signIn": "Sign in",
     "signedIn": "You're signed in as",
@@ -22,7 +22,8 @@
     "twoFactor": "Two-step verification",
     "passkeys": "Passkeys",
     "security": "Security",
-    "account": "Account settings"
+    "account": "Account settings",
+    "authors": "Authors"
   },
   "signIn": {
     "title": "Sign in",
@@ -237,6 +238,87 @@
     "goHome": "Back to the home page",
     "signIn": "Sign in"
   },
+  "authors": {
+    "title": "Authors",
+    "intro": "The authors of the books in your library.",
+    "count_one": "{{number}} author",
+    "count_other": "{{number}} authors",
+    "none": "You haven't added any authors yet.",
+    "add": "Add an author",
+    "pages": "Pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "loadFailed": "We couldn't load this. Please try again.",
+    "notFound": "This author isn't in your library. It may have been deleted.",
+    "all": "All authors",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {{name}}? This can't be undone.",
+    "deleteYes": "Yes, delete",
+    "cancel": "Cancel",
+    "added": "Author added.",
+    "saved": "Changes saved.",
+    "deleted": "{{name}} was deleted.",
+    "addTitle": "Add an author",
+    "editTitle": "Edit {{name}}",
+    "save": "Save",
+    "stale": "This author was changed on another device after you opened it. Load the latest version, then make your changes again.",
+    "loadLatest": "Load the latest version",
+    "born": "Born",
+    "died": "Died",
+    "biography": "Biography",
+    "names": "Names",
+    "workedOut": "CE years in brackets are worked out from the Hijri year.",
+    "form": {
+      "nameAr": "Name in Arabic",
+      "nameEn": "Name in English",
+      "namesHint": "The name the author is best known by, such as البخاري or al-Bukhari. Fill in at least one.",
+      "moreNames": "Full name, ism, kunya, laqab and nisba (optional)",
+      "fullName": "Full name",
+      "ism": "Ism (given name)",
+      "kunya": "Kunya",
+      "laqab": "Laqab",
+      "nisba": "Nisba",
+      "ceHint": "Optional: fill it in if your book gives one. Otherwise we show the CE years the Hijri year falls in.",
+      "ah": "AH",
+      "bh": "BH (before the Hijra)",
+      "ce": "CE",
+      "bce": "BCE",
+      "shownAs": "Shown as: {{text}}",
+      "biography": "Biography",
+      "biographyHint": "Plain text, up to 10,000 characters.",
+      "birth": {
+        "legend": "Birth",
+        "hijri": "Hijri year of birth",
+        "hijriEra": "Birth year: AH or BH",
+        "ce": "CE year of birth",
+        "ceEra": "Birth year: CE or BCE",
+        "approximate": "The year of birth is approximate"
+      },
+      "death": {
+        "legend": "Death",
+        "hijri": "Hijri year of death",
+        "hijriEra": "Death year: AH or BH",
+        "ce": "CE year of death",
+        "ceEra": "Death year: CE or BCE",
+        "approximate": "The year of death is approximate"
+      }
+    }
+  },
+  "years": {
+    "hijri": "{{year}} AH",
+    "beforeHijra": "{{year}} BH",
+    "ce": "{{year}} CE",
+    "bce": "{{year}} BCE",
+    "ceRange": "{{from}}–{{to}} CE",
+    "bceRange": "{{from}}–{{to}} BCE",
+    "both": "{{hijri}} ({{ce}})",
+    "approximate": "c. {{year}}",
+    "born": "Born {{year}}",
+    "died": "Died {{year}}",
+    "lifespan": "{{birth}} – {{death}}"
+  },
   "errors": {
     "required": "This field is required.",
     "invalid_email": "Enter a valid email address.",
@@ -265,6 +347,13 @@
     "start_again": "That took too long. Please try again.",
     "not_found": "That passkey doesn't exist any more. Reload the page.",
     "same_email": "That's already your email address.",
-    "confirm_delete": "Tick the box to confirm."
+    "confirm_delete": "Tick the box to confirm.",
+    "name_required": "Fill in the name in Arabic or in English.",
+    "invalid_characters": "This contains characters that can't be used, such as hidden text-direction marks.",
+    "invalid_year": "Check this year: it must be a whole number in a possible range, such as 256.",
+    "before_birth": "The year of death can't be before the year of birth.",
+    "stale_version": "This was changed on another device. Load the latest version, then try again.",
+    "version_required": "Please reload the page and try again.",
+    "limit_reached": "Your library has reached its limit for this. Delete something to add more."
   }
 }

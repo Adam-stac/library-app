@@ -3,6 +3,9 @@ import AuthProvider from './auth/AuthProvider'
 import Layout from './components/Layout'
 import AccountDeletedPage from './pages/AccountDeletedPage'
 import AccountPage from './pages/AccountPage'
+import AuthorFormPage from './pages/AuthorFormPage'
+import AuthorPage from './pages/AuthorPage'
+import AuthorsPage from './pages/AuthorsPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import ConfirmEmailChangePage from './pages/ConfirmEmailChangePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
@@ -33,6 +36,10 @@ export default function App() {
           <Route path="/account" element={<AccountPage />} />
           <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
           <Route path="/account-deleted" element={<AccountDeletedPage />} />
+          <Route path="/authors" element={<AuthorsPage />} />
+          <Route path="/authors/new" element={<AuthorFormPage mode="add" />} />
+          <Route path="/authors/:id" element={<AuthorPage />} />
+          <Route path="/authors/:id/edit" element={<AuthorFormPage mode="edit" />} />
           <Route path="*" element={<HomePage />} />
         </Routes>
       </Layout>

@@ -2,6 +2,7 @@ package io.github.adamstac.libraryapp;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -32,6 +33,19 @@ class ApiErrorHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, body, headers, status, request);
     }
 
+    /**
+     * A query parameter or path part of the wrong type (e.g. {@code ?size=abc}). Spring's default answer repeats
+     * the value back; this one names only the parameter.
+     */
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
+        String field = ex.getPropertyName();
+        body.setProperty("errors", List.of(fieldError(field == null ? "request" : field, "invalid")));
+        return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
     @ExceptionHandler(FieldValidationException.class)
     ProblemDetail fieldValidation(FieldValidationException ex) {
         ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request content.");
@@ -45,6 +59,20 @@ class ApiErrorHandler extends ResponseEntityExceptionHandler {
                 ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "The request could not be completed.");
         body.setProperty("code", ex.code());
         return body;
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<ProblemDetail> notFound() {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Not found.");
+        body.setProperty("code", "not_found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request could not be completed.");
+        body.setProperty("code", ex.code());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(ServiceBusyException.class)

@@ -63,6 +63,8 @@ app:
   rate-limit:
     auth:
       requests-per-minute: 10 # per client IP, across all /api/v1/auth endpoints
+    library:
+      changes-per-minute: 120 # per signed-in account: adding, editing and deleting library records
   session:
     max-age: 7d # a sign-in ends after 7 days however active it is (idle limit: server.servlet.session.timeout)
   two-factor:

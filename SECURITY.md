@@ -27,7 +27,7 @@ Please **do not** open a public issue. Use GitHub's private reporting instead: *
 
 | Risk | In place | Planned |
 | --- | --- | --- |
-| A01 Broken Access Control | Deny-by-default API, tested | Per-user data scoping with cross-user access tests (Phase 4) |
+| A01 Broken Access Control | Deny-by-default API, tested; each user's authors scoped to their account, with cross-user access tests | The same for places, works and editions |
 | A02 Security Misconfiguration | Security headers, no CORS, only health endpoint exposed, safe errors, tested | Non-root containers, pinned images (Phase 2); server hardening (Phase 3) |
 | A03 Software Supply Chain Failures | Dependabot, lockfiles, pinned Postgres, signed commits | Dependency and image scanning, SBOM, actions pinned to SHAs (Phase 3) |
 | A04 Cryptographic Failures | No secrets in code or config | HTTPS + HSTS, Argon2id passwords, encrypted backups (Phases 3–4) |

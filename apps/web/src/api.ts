@@ -91,11 +91,35 @@ export async function postJson<T = unknown>(
   body?: unknown,
   options: { csrf?: boolean } = {},
 ): Promise<ApiResult<T>> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const token = options.csrf ? await csrfToken() : readCookie(CSRF_COOKIE)
+  return change<T>('POST', path, body, options.csrf ?? false)
+}
+
+/**
+ * Saves an edit to a library record. `version` is the version the edit started from: the API refuses the edit
+ * (409 stale_version) if the record was changed in the meantime, for example on another device.
+ */
+export async function putJson<T = unknown>(path: string, body: unknown, version: number): Promise<ApiResult<T>> {
+  return change<T>('PUT', path, body, true, `"${version}"`)
+}
+
+export async function deleteJson(path: string): Promise<ApiResult> {
+  return change('DELETE', path, undefined, true)
+}
+
+async function change<T>(
+  method: 'POST' | 'PUT' | 'DELETE',
+  path: string,
+  body: unknown,
+  ensureCsrf: boolean,
+  ifMatch?: string,
+): Promise<ApiResult<T>> {
+  const headers: Record<string, string> = {}
+  if (method !== 'DELETE') headers['Content-Type'] = 'application/json'
+  const token = ensureCsrf ? await csrfToken() : readCookie(CSRF_COOKIE)
   if (token) headers[CSRF_HEADER] = token
+  if (ifMatch) headers['If-Match'] = ifMatch
   return send<T>(path, {
-    method: 'POST',
+    method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
   })
