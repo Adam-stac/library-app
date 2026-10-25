@@ -66,14 +66,14 @@ export default function ResetPasswordPage() {
     const done = status === 'done'
     return (
       <section role="status" className="max-w-md">
-        <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold focus:outline-none">
+        <h1 ref={headingRef} tabIndex={-1} className="page-title focus:outline-none">
           {done ? t('reset.doneTitle') : t('reset.invalidTitle')}
         </h1>
-        <p className="mt-4 text-lg text-stone-700">{done ? t('reset.doneBody') : t('reset.invalidBody')}</p>
+        <p className="lede mt-3">{done ? t('reset.doneBody') : t('reset.invalidBody')}</p>
         <p className="mt-8">
           <Link
             to={done ? '/sign-in' : '/forgot-password'}
-            className="font-semibold underline underline-offset-4"
+            className="link"
           >
             {done ? t('reset.signIn') : t('reset.requestNew')}
           </Link>
@@ -84,11 +84,11 @@ export default function ResetPasswordPage() {
 
   return (
     <section className="max-w-md">
-      <h1 className="text-3xl font-semibold">{t('reset.title')}</h1>
+      <h1 className="page-title">{t('reset.title')}</h1>
 
       <form noValidate onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
         {formError && (
-          <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+          <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
             {t(`errors.${formError}`, { defaultValue: t('errors.unexpected') })}
           </p>
         )}
@@ -118,7 +118,7 @@ export default function ResetPasswordPage() {
           type="submit"
           disabled={submitting}
           aria-busy={submitting || undefined}
-          className="min-h-11 rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60"
+          className="btn btn-primary"
         >
           {submitting ? t('reset.submitting') : t('reset.submit')}
         </button>

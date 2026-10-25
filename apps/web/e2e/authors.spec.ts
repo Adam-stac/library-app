@@ -34,7 +34,7 @@ test.describe('Authors', () => {
     await page.getByLabel('Email').fill(address)
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // An empty list
     await page.getByRole('link', { name: 'Authors', exact: true }).click()

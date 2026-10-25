@@ -1,8 +1,31 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { displayName, formatYear, lifeYears, otherName } from './authors'
+import { displayName, formatYear, indexYear, lifeYears, otherName } from './authors'
 import i18n from './i18n'
 
 const year = (hijri: number | null, ce: number | null = null, approximate = false) => ({ hijri, ce, approximate })
+
+describe('indexYear', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
+  it('cites the year of death, as classical books do, or else the year of birth', async () => {
+    await i18n.changeLanguage('en')
+    const t = i18n.t.bind(i18n)
+    expect(indexYear({ birth: year(194), death: year(256) }, t, 'en')).toBe('d. 256 AH')
+    expect(indexYear({ birth: year(194), death: year(null) }, t, 'en')).toBe('b. 194 AH')
+    expect(indexYear({ birth: year(null), death: year(null, 1449) }, t, 'en')).toBe('d. 1449 CE')
+    expect(indexYear({ birth: year(null), death: year(150, null, true) }, t, 'en')).toBe('d. c. 150 AH')
+    expect(indexYear({ birth: year(null), death: year(null) }, t, 'en')).toBeNull()
+  })
+
+  it('in Arabic, with ت for died', async () => {
+    await i18n.changeLanguage('ar')
+    const t = i18n.t.bind(i18n)
+    expect(indexYear({ birth: year(194), death: year(256) }, t, 'ar')).toBe('ت ٢٥٦هـ')
+    expect(indexYear({ birth: year(-51), death: year(null) }, t, 'ar')).toBe('وُلد ٥١ ق.هـ')
+  })
+})
 
 describe('formatYear', () => {
   afterEach(async () => {
@@ -33,9 +56,7 @@ describe('formatYear', () => {
   it('puts birth and death together', async () => {
     await i18n.changeLanguage('en')
     const t = i18n.t.bind(i18n)
-    expect(lifeYears({ birth: year(194), death: year(256) }, t, 'en')).toBe(
-      '194 AH (809–810 CE) – 256 AH (869–870 CE)',
-    )
+    expect(lifeYears({ birth: year(194), death: year(256) }, t, 'en')).toBe('194 AH (809–810 CE) – 256 AH (869–870 CE)')
     expect(lifeYears({ birth: year(null), death: year(256) }, t, 'en')).toBe('Died 256 AH (869–870 CE)')
     expect(lifeYears({ birth: year(null), death: year(null) }, t, 'en')).toBeNull()
   })

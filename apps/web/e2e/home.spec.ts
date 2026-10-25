@@ -34,13 +34,13 @@ test.describe('Home page', () => {
 
   test('the layout mirrors between Arabic and English', async ({ page }) => {
     await page.goto('/')
-    const name = page.getByText('مكتبتي', { exact: true })
+    const name = page.getByRole('link', { name: 'خِزانة', exact: true })
     const toggle = page.getByRole('button', { name: 'English' })
     // Arabic: the app name is on the right, the language button on the left
     expect((await name.boundingBox())!.x).toBeGreaterThan((await toggle.boundingBox())!.x)
 
     await toggle.click()
-    const englishName = page.getByText('My Library', { exact: true })
+    const englishName = page.getByRole('link', { name: 'Khizāna', exact: true })
     const englishToggle = page.getByRole('button', { name: 'العربية' })
     // English: the app name is on the left, the language button on the right
     expect((await englishName.boundingBox())!.x).toBeLessThan((await englishToggle.boundingBox())!.x)

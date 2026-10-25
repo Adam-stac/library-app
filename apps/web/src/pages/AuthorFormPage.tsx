@@ -5,13 +5,12 @@ import { getJson, postJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import { type Author, displayName } from '../authors'
 import FormField from '../components/FormField'
+import Icon from '../components/Icon'
 import TextAreaField from '../components/TextAreaField'
 import YearFields from '../components/YearFields'
 import { draftOf, EMPTY_YEAR, type YearDraft, yearOf } from '../yearDraft'
 
-const button =
-  'min-h-11 rounded-full px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-const primary = `${button} bg-stone-900 text-white hover:bg-stone-700`
+const primary = 'btn btn-primary'
 
 type TextFields = {
   nameAr: string
@@ -161,11 +160,11 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
   if (mode === 'edit' && loadError) {
     return (
       <section className="max-w-2xl">
-        <p role="alert" className="text-red-800">
+        <p role="alert" className="text-danger">
           {t(`authors.${loadError}`)}
         </p>
         <p className="mt-4">
-          <Link to="/authors" className="font-semibold underline underline-offset-4">
+          <Link to="/authors" className="link">
             {t('authors.all')}
           </Link>
         </p>
@@ -178,20 +177,16 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
 
   return (
     <section className="max-w-2xl">
-      <p>
-        <Link
-          to={editing ? `/authors/${encodeURIComponent(editing.id)}` : '/authors'}
-          className="font-semibold underline underline-offset-4"
-        >
-          {editing ? displayName(editing, language) : t('authors.all')}
-        </Link>
-      </p>
-      <h1 className="mt-6 text-3xl font-semibold break-words">
+      <Link to={editing ? `/authors/${encodeURIComponent(editing.id)}` : '/authors'} className="back-link">
+        <Icon name="back" className="size-4" />
+        <bdi>{editing ? displayName(editing, language) : t('authors.all')}</bdi>
+      </Link>
+      <h1 className="page-title mt-6 break-words">
         <bdi>{title}</bdi>
       </h1>
 
       {formError === 'stale_version' ? (
-        <div role="alert" className="mt-6 rounded-lg border border-red-300 bg-white p-4">
+        <div role="alert" className="mt-6 rounded-lg border border-danger-line bg-surface p-4">
           <p>{t('authors.stale')}</p>
           <button type="button" className={`${primary} mt-4`} onClick={() => void load()}>
             {t('authors.loadLatest')}
@@ -199,13 +194,13 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
         </div>
       ) : (
         formError && (
-          <p role="alert" className="mt-6 text-red-800">
+          <p role="alert" className="mt-6 text-danger">
             {t(`errors.${formError}`, { defaultValue: t('errors.unexpected') })}
           </p>
         )
       )}
 
-      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-8 flex flex-col gap-6">
+      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-10 flex flex-col gap-7">
         <FormField
           id="nameAr"
           label={t('authors.form.nameAr')}
@@ -215,6 +210,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           error={errors.nameAr}
           maxLength={200}
           dir="auto"
+          book
         />
         <FormField
           id="nameEn"
@@ -224,14 +220,22 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           error={errors.nameEn}
           maxLength={200}
           dir="auto"
+          book
         />
 
         <details
           open={moreNamesOpen}
           onToggle={(e) => setMoreNamesOpen(e.currentTarget.open)}
-          className="rounded-lg border border-stone-200 bg-white p-4">
-          <summary className="cursor-pointer font-semibold">{t('authors.form.moreNames')}</summary>
-          <div className="mt-4 flex flex-col gap-4">
+          className="group rounded-xl border border-line bg-surface"
+        >
+          <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-5 text-sm font-medium [&::-webkit-details-marker]:hidden">
+            <Icon
+              name="forward"
+              className="size-4 text-muted transition-transform duration-150 group-open:rotate-90 rtl:group-open:-rotate-90"
+            />
+            {t('authors.form.moreNames')}
+          </summary>
+          <div className="flex flex-col gap-5 px-5 pt-1 pb-5">
             <FormField
               id="fullName"
               label={t('authors.form.fullName')}
@@ -240,6 +244,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
               error={errors.fullName}
               maxLength={500}
               dir="auto"
+              book
             />
             {(['ism', 'kunya', 'laqab', 'nisba'] as const).map((field) => (
               <FormField
@@ -251,6 +256,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
                 error={errors[field]}
                 maxLength={200}
                 dir="auto"
+                book
               />
             ))}
           </div>
@@ -277,6 +283,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           onChange={setText('biography')}
           error={errors.biography}
           maxLength={10000}
+          book
         />
 
         <p>

@@ -24,10 +24,10 @@ describe('App', () => {
     vi.unstubAllGlobals()
   })
 
-  it('shows Arabic, right-to-left, by default', () => {
+  it('shows Arabic, right-to-left, by default', async () => {
     renderApp()
 
-    expect(screen.getByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('lang', 'ar')
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
   })
@@ -62,5 +62,23 @@ describe('App', () => {
     await user.click(await screen.findByRole('link', { name: 'إنشاء حساب' }))
 
     expect(await screen.findByRole('heading', { name: 'إنشاء حساب' })).toBeInTheDocument()
+  })
+
+  it('says so when an address has no page, rather than showing the home page', async () => {
+    const user = userEvent.setup()
+    renderApp('/books/somewhere')
+
+    expect(screen.getByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'اذهب إلى الصفحة الرئيسية' }))
+
+    expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
+  })
+
+  it('names the app خِزانة, in Amiri, with its Latin name on the English page', async () => {
+    renderApp()
+    expect(screen.getByRole('link', { name: 'خِزانة' })).toHaveAttribute('href', '/')
+
+    await i18n.changeLanguage('en')
+    expect(await screen.findByRole('link', { name: 'Khizāna' })).toHaveAttribute('href', '/')
   })
 })

@@ -47,7 +47,7 @@ describe('TwoFactorPage', () => {
       {
         '/api/v1/auth/2fa': () => json(200, { enabled, recoveryCodesLeft: enabled ? 10 : 0 }),
         '/api/v1/auth/2fa/totp/setup': () =>
-          json(200, { secret: SECRET, otpauthUri: `otpauth://totp/My%20Library:reader?secret=${SECRET}` }),
+          json(200, { secret: SECRET, otpauthUri: `otpauth://totp/Khizana:reader?secret=${SECRET}` }),
         '/api/v1/auth/2fa/totp/confirm': () => {
           enabled = true
           return json(200, { recoveryCodes: CODES })

@@ -1,4 +1,4 @@
-# Library App
+# Khizāna (خِزانة)
 
 A personal digital library for cataloguing physical books, starting with classical Islamic works: authors, their biographies, birth and death years, birthplaces, and the books you own. Arabic is the primary language, English secondary.
 

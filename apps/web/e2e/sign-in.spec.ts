@@ -28,7 +28,7 @@ test.describe('Sign in and sign out', () => {
 
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
     await expect(page).toHaveURL(/\/$/)
 
     // The session cookie can't be read by scripts, is HTTPS-only, and isn't sent by other sites' forms
@@ -39,8 +39,9 @@ test.describe('Sign in and sign out', () => {
 
     // Still signed in after a reload (the session is on the server)
     await page.reload()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
+    await page.getByRole('button', { name: /^Your account/ }).click() // the account menu
     await page.getByRole('button', { name: 'Sign out' }).click()
     await expect(page.getByRole('navigation').getByRole('link', { name: 'Sign in' })).toBeVisible()
     expect((await page.request.get('/api/v1/auth/me')).status()).toBe(204)

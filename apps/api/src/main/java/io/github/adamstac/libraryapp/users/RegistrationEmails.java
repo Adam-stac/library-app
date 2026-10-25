@@ -9,20 +9,20 @@ final class RegistrationEmails {
 
     static Email verification(String language, String link) {
         if ("ar".equals(language)) {
-            return new Email("تأكيد بريدك الإلكتروني — مكتبتي", """
+            return new Email("تأكيد بريدك الإلكتروني — خِزانة", """
                     السلام عليكم،
 
-                    لإكمال إنشاء حسابك في «مكتبتي»، افتح الرابط التالي:
+                    لإكمال إنشاء حسابك في «خِزانة»، افتح الرابط التالي:
                     %s
 
                     ينتهي هذا الرابط خلال ٢٤ ساعة، ولا يُستخدم إلا مرة واحدة.
                     إن لم تطلب إنشاء حساب، فتجاهل هذه الرسالة.
                     """.formatted(link));
         }
-        return new Email("Confirm your email — My Library", """
+        return new Email("Confirm your email — Khizāna", """
                 Assalamu alaykum,
 
-                To finish creating your My Library account, open this link:
+                To finish creating your Khizāna account, open this link:
                 %s
 
                 The link expires in 24 hours and can only be used once.
@@ -32,18 +32,18 @@ final class RegistrationEmails {
 
     static Email alreadyRegistered(String language) {
         if ("ar".equals(language)) {
-            return new Email("محاولة تسجيل بعنوان بريدك — مكتبتي", """
+            return new Email("محاولة تسجيل بعنوان بريدك — خِزانة", """
                     السلام عليكم،
 
-                    حاول أحدهم إنشاء حساب في «مكتبتي» بعنوان بريدك الإلكتروني، ولديك حساب بالفعل.
+                    حاول أحدهم إنشاء حساب في «خِزانة» بعنوان بريدك الإلكتروني، ولديك حساب بالفعل.
                     إن كنت أنت، فسجّل الدخول، أو أعد تعيين كلمة المرور إن نسيتها.
                     إن لم تكن أنت، فلا داعي لأي إجراء: لم يتغيّر شيء في حسابك.
                     """);
         }
-        return new Email("Someone tried to register with your email — My Library", """
+        return new Email("Someone tried to register with your email — Khizāna", """
                 Assalamu alaykum,
 
-                Someone tried to create a My Library account with your email address, but you already have one.
+                Someone tried to create a Khizāna account with your email address, but you already have one.
                 If it was you, sign in, or reset your password if you've forgotten it.
                 If it wasn't you, there's nothing to do: nothing about your account has changed.
                 """);

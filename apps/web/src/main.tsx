@@ -1,5 +1,6 @@
-import '@fontsource/ibm-plex-sans-arabic/400.css'
-import '@fontsource/ibm-plex-sans-arabic/600.css'
+// Fonts are bundled, not fetched from a font service (index.css explains which is used for what)
+import '@fontsource-variable/geist/wght.css'
+import '@fontsource-variable/readex-pro/wght.css'
 import './index.css'
 import './i18n'
 import { StrictMode } from 'react'

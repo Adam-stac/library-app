@@ -19,7 +19,7 @@ export default function NewPasswordField({ id, label, value, onChange, visible, 
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-semibold">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       <input
@@ -34,14 +34,14 @@ export default function NewPasswordField({ id, label, value, onChange, visible, 
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className="min-h-11 rounded-lg border border-stone-400 bg-white px-3 aria-invalid:border-red-700"
+        className="field"
       />
-      <p id={`${id}-hint`} className="text-sm text-stone-700">
+      <p id={`${id}-hint`} className="text-sm text-muted">
         {t('register.passwordHint')}{' '}
         <span aria-live="polite">{t('register.passwordCount', { count: passwordLength(value) })}</span>
       </p>
       {error && (
-        <p id={`${id}-error`} className="text-sm text-red-800">
+        <p id={`${id}-error`} className="text-sm text-danger">
           {t(`errors.${error}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}

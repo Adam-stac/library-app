@@ -19,6 +19,7 @@ async function addVirtualAuthenticator(page: Page) {
 }
 
 async function signOut(page: Page) {
+  await page.getByRole('button', { name: /^Your account/ }).click() // the account menu
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Sign in' })).toBeVisible()
 }
@@ -43,9 +44,10 @@ test.describe('Passkeys', () => {
     await page.getByLabel('Email').fill(address)
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // Add a passkey
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await page.getByRole('link', { name: 'Passkeys' }).click()
     await expect(page.getByText("You haven't added a passkey yet.")).toBeVisible()
     await page.getByRole('button', { name: 'Add a passkey' }).click()
@@ -62,7 +64,7 @@ test.describe('Passkeys', () => {
     await signOut(page)
     await page.goto('/sign-in')
     await page.getByRole('button', { name: 'Sign in with a passkey' }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
     expect((await page.request.get('/api/v1/auth/me')).status()).toBe(200)
   })
 })

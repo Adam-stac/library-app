@@ -39,7 +39,7 @@ class SmtpMailerTests {
         RegistrationEmails.Email email =
                 RegistrationEmails.verification("ar", "http://localhost:3000/verify-email#token=abc");
 
-        new SmtpMailer(sender, "My Library <no-reply@library.local>").send("reader@example.com", email.subject(), email.body());
+        new SmtpMailer(sender, "Khizana <no-reply@library.local>").send("reader@example.com", email.subject(), email.body());
 
         String inbox = "";
         for (int attempt = 0; attempt < 50 && !inbox.contains("reader@example.com"); attempt++) {

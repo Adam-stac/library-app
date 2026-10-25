@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "My Library",
-    "tagline": "Know your library: your books, their authors, and their biographies."
+    "name": "Khizāna",
+    "tagline": "Your maktabah: your books, their authors, and what you learn from them."
   },
   "language": {
     "switchTo": "العربية"
@@ -10,20 +10,38 @@
     "label": "Account and language",
     "signIn": "Sign in",
     "signOut": "Sign out",
-    "signedInAs": "Signed in as"
+    "signedInAs": "Signed in as",
+    "main": "Library",
+    "home": "Home",
+    "authors": "Authors",
+    "settings": "Settings",
+    "yourAccount": "Your account"
   },
   "home": {
     "title": "Welcome",
-    "comingSoon": "Coming soon: places and books.",
     "createAccount": "Create an account",
     "signIn": "Sign in",
-    "signedIn": "You're signed in as",
-    "changePassword": "Change password",
-    "twoFactor": "Two-step verification",
-    "passkeys": "Passkeys",
-    "security": "Security",
+    "authors": "Your authors",
+    "allAuthors": "See all {{number}}",
+    "noAuthors": "Add the authors of your books and they'll be listed here."
+  },
+  "settings": {
+    "title": "Settings",
     "account": "Account settings",
-    "authors": "Authors"
+    "accountAbout": "Language, email address, and deleting your account.",
+    "security": "Security",
+    "securityAbout": "Where you're signed in, and what has happened to your account.",
+    "changePassword": "Change password",
+    "changePasswordAbout": "Choose a new password and sign out other devices.",
+    "twoFactor": "Two-step verification",
+    "twoFactorAbout": "A code from an authenticator app when you sign in.",
+    "passkeys": "Passkeys",
+    "passkeysAbout": "Sign in with your fingerprint, face or device PIN."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "There's nothing at this address. It may have been mistyped, or the page may have moved.",
+    "home": "Go to the home page"
   },
   "signIn": {
     "title": "Sign in",
@@ -113,7 +131,7 @@
     "cancel": "Cancel",
     "step1": "1. Add your account to the app",
     "step1Body": "In your authenticator app, add an account and scan this QR code.",
-    "qrLabel": "QR code to add My Library to your authenticator app",
+    "qrLabel": "QR code to add Khizana to your authenticator app",
     "manualKey": "Can't scan it? Enter this key instead:",
     "step2": "2. Enter the code the app shows",
     "codeFromApp": "6-digit code",
@@ -317,7 +335,9 @@
     "approximate": "c. {{year}}",
     "born": "Born {{year}}",
     "died": "Died {{year}}",
-    "lifespan": "{{birth}} – {{death}}"
+    "lifespan": "{{birth}} – {{death}}",
+    "diedShort": "d. {{year}}",
+    "bornShort": "b. {{year}}"
   },
   "errors": {
     "required": "This field is required.",
@@ -334,7 +354,7 @@
     "invalid_credentials": "The email or password is incorrect.",
     "signOutFailed": "We couldn't sign you out. Please try again.",
     "incorrect": "That isn't your current password.",
-    "invalid_code": "That code didn't work. Check the app shows the code for My Library, then try the newest code.",
+    "invalid_code": "That code didn't work. Check the app shows the code for Khizana, then try the newest code.",
     "sign_in_again": "That took too long. Please sign in again.",
     "already_enabled": "Two-step verification is already on.",
     "not_enabled": "Two-step verification is already off.",

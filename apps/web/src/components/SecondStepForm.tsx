@@ -44,12 +44,12 @@ export default function SecondStepForm({ onStartAgain }: { onStartAgain: (reason
 
   return (
     <section className="max-w-md">
-      <h1 className="text-3xl font-semibold">{t('secondStep.title')}</h1>
-      <p className="mt-3 text-stone-700">{t('secondStep.intro')}</p>
+      <h1 className="page-title">{t('secondStep.title')}</h1>
+      <p className="lede">{t('secondStep.intro')}</p>
 
       <form noValidate onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <label htmlFor="code" className="font-semibold">
+          <label htmlFor="code" className="label">
             {t('secondStep.code')}
           </label>
           <input
@@ -66,13 +66,13 @@ export default function SecondStepForm({ onStartAgain }: { onStartAgain: (reason
             onChange={(e) => setCode(e.target.value)}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? 'code-hint code-error' : 'code-hint'}
-            className="min-h-11 rounded-lg border border-stone-400 bg-white px-3 font-mono tracking-widest aria-invalid:border-red-700"
+            className="field font-mono tracking-widest"
           />
-          <p id="code-hint" className="text-sm text-stone-700">
+          <p id="code-hint" className="text-sm text-muted">
             {t('secondStep.hint')}
           </p>
           {error && (
-            <p id="code-error" role="alert" className="text-sm text-red-800">
+            <p id="code-error" role="alert" className="text-sm text-danger">
               {t(`errors.${error}`, { defaultValue: t('errors.unexpected') })}
             </p>
           )}
@@ -82,7 +82,7 @@ export default function SecondStepForm({ onStartAgain }: { onStartAgain: (reason
           type="submit"
           disabled={submitting}
           aria-busy={submitting || undefined}
-          className="min-h-11 rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60"
+          className="btn btn-primary"
         >
           {submitting ? t('secondStep.submitting') : t('secondStep.submit')}
         </button>
@@ -92,7 +92,7 @@ export default function SecondStepForm({ onStartAgain }: { onStartAgain: (reason
         <button
           type="button"
           onClick={() => onStartAgain(null)}
-          className="min-h-11 font-semibold underline underline-offset-4"
+          className="min-h-11 link"
         >
           {t('secondStep.startAgain')}
         </button>

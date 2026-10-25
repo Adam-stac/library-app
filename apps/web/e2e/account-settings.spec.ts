@@ -24,9 +24,10 @@ test.describe('Account settings', () => {
     await page.getByLabel('Email').fill(address)
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // Ask to change the email address
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await page.getByRole('link', { name: 'Account settings' }).click()
     await expect(page.getByRole('heading', { name: 'Account settings', level: 1 })).toBeVisible()
     const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
@@ -41,7 +42,7 @@ test.describe('Account settings', () => {
     await page.goto(await emailedLink(request, newAddress, 'confirm-email-change'))
     await expect(page.getByRole('heading', { name: 'Your email address has been changed' })).toBeVisible()
     await expect(page).not.toHaveURL(/token=/)
-    await expect(page.getByRole('navigation')).toContainText(newAddress)
+    await expect(page.getByRole('button', { name: /^Your account/ })).toContainText(newAddress)
     expect(await emailText(request, address, 'was changed')).toContain('e•••@example.com')
 
     // Delete the account

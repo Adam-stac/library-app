@@ -69,10 +69,10 @@ export default function RegisterPage() {
   if (sentTo) {
     return (
       <section className="max-w-md">
-        <h1 ref={doneHeadingRef} tabIndex={-1} className="text-3xl font-semibold focus:outline-none">
+        <h1 ref={doneHeadingRef} tabIndex={-1} className="page-title focus:outline-none">
           {t('register.checkInboxTitle')}
         </h1>
-        <p className="mt-4 text-lg text-stone-700">
+        <p className="lede mt-3">
           {t('register.checkInboxBody', { email: sentTo })}
         </p>
       </section>
@@ -84,18 +84,18 @@ export default function RegisterPage() {
 
   return (
     <section className="max-w-md">
-      <h1 className="text-3xl font-semibold">{t('register.title')}</h1>
-      <p className="mt-3 text-stone-700">{t('register.intro')}</p>
+      <h1 className="page-title">{t('register.title')}</h1>
+      <p className="lede">{t('register.intro')}</p>
 
       <form noValidate onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
         {formError && (
-          <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+          <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
             {errorText(formError)}
           </p>
         )}
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="font-semibold">
+          <label htmlFor="email" className="label">
             {t('register.email')}
           </label>
           <input
@@ -111,17 +111,17 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={fieldErrors.email ? true : undefined}
             aria-describedby={describedBy('email')}
-            className="min-h-11 rounded-lg border border-stone-400 bg-white px-3 aria-invalid:border-red-700"
+            className="field"
           />
           {fieldErrors.email && (
-            <p id="email-error" className="text-sm text-red-800">
+            <p id="email-error" className="text-sm text-danger">
               {errorText(fieldErrors.email)}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="password" className="font-semibold">
+          <label htmlFor="password" className="label">
             {t('register.password')}
           </label>
           <input
@@ -136,14 +136,14 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             aria-invalid={fieldErrors.password ? true : undefined}
             aria-describedby={describedBy('password', 'password-hint')}
-            className="min-h-11 rounded-lg border border-stone-400 bg-white px-3 aria-invalid:border-red-700"
+            className="field"
           />
-          <p id="password-hint" className="text-sm text-stone-700">
+          <p id="password-hint" className="text-sm text-muted">
             {t('register.passwordHint')}{' '}
             <span aria-live="polite">{t('register.passwordCount', { count: passwordLength(password) })}</span>
           </p>
           {fieldErrors.password && (
-            <p id="password-error" className="text-sm text-red-800">
+            <p id="password-error" className="text-sm text-danger">
               {errorText(fieldErrors.password)}
             </p>
           )}
@@ -162,15 +162,15 @@ export default function RegisterPage() {
           type="submit"
           disabled={submitting}
           aria-busy={submitting || undefined}
-          className="min-h-11 rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60"
+          className="btn btn-primary"
         >
           {submitting ? t('register.submitting') : t('register.submit')}
         </button>
       </form>
 
-      <p className="mt-8 text-stone-700">
+      <p className="mt-8 text-muted">
         {t('register.haveAccount')}{' '}
-        <Link to="/sign-in" className="font-semibold text-stone-900 underline underline-offset-4">
+        <Link to="/sign-in" className="link">
           {t('register.signIn')}
         </Link>
       </p>

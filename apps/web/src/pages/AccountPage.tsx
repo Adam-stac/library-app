@@ -6,11 +6,9 @@ import { useAuth } from '../auth/context'
 import FormField from '../components/FormField'
 import { type Language, saveLanguage } from '../language'
 
-const button =
-  'min-h-11 rounded-full px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-const primary = `${button} bg-stone-900 text-white hover:bg-stone-700`
-const danger = `${button} bg-red-800 text-white hover:bg-red-700`
-const card = 'mt-4 rounded-lg border border-stone-200 bg-white p-6'
+const primary = 'btn btn-primary'
+const danger = 'btn btn-danger'
+const card = 'mt-4 rounded-lg border border-line bg-surface p-6'
 
 /** Account settings: language, email address, and deleting the account. Signed-in accounts only. */
 export default function AccountPage() {
@@ -45,12 +43,12 @@ export default function AccountPage() {
 
   return (
     <section className="max-w-xl">
-      <h1 className="text-3xl font-semibold">{t('account.title')}</h1>
+      <h1 className="page-title">{t('account.title')}</h1>
 
-      <h2 className="mt-8 text-xl font-semibold">{t('account.languageTitle')}</h2>
+      <h2 className="section-title mt-12">{t('account.languageTitle')}</h2>
       <div className={card}>
         <fieldset>
-          <legend className="text-stone-700">{t('account.languageBody')}</legend>
+          <legend className="text-muted">{t('account.languageBody')}</legend>
           <div className="mt-3 flex flex-wrap gap-4">
             {(['ar', 'en'] as const).map((language) => (
               <label key={language} lang={language} className="flex min-h-11 items-center gap-2">
@@ -74,7 +72,7 @@ export default function AccountPage() {
         )}
       </div>
 
-      <h2 className="mt-10 text-xl font-semibold">{t('account.emailTitle')}</h2>
+      <h2 className="section-title mt-12">{t('account.emailTitle')}</h2>
       <div className={card}>
         <p>
           {t('account.emailNow')}{' '}
@@ -83,7 +81,7 @@ export default function AccountPage() {
           </bdi>
         </p>
         {emailSentTo ? (
-          <p role="status" className="mt-4 rounded-lg border border-stone-300 bg-stone-50 px-4 py-3">
+          <p role="status" className="mt-4 rounded-lg border border-line bg-paper px-4 py-3">
             {t('account.emailSent', { email: emailSentTo })}
           </p>
         ) : (
@@ -109,8 +107,8 @@ export default function AccountPage() {
         )}
       </div>
 
-      <h2 className="mt-10 text-xl font-semibold text-red-800">{t('account.deleteTitle')}</h2>
-      <div className="mt-4 rounded-lg border border-red-300 bg-white p-6">
+      <h2 className="section-title mt-12 text-danger">{t('account.deleteTitle')}</h2>
+      <div className="mt-4 rounded-lg border border-danger-line bg-surface p-6">
         {twoStepOn !== null && (
           <ConfirmForm
             intro={t('account.deleteIntro')}
@@ -204,9 +202,9 @@ function ConfirmForm({
 
   return (
     <form noValidate onSubmit={onSubmit} className="mt-4 flex flex-col gap-5">
-      <p className="text-stone-700">{intro}</p>
+      <p className="text-muted">{intro}</p>
       {formError && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
           {t(`errors.${formError}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}
@@ -260,7 +258,7 @@ function ConfirmForm({
             {t('account.deleteUnderstood')}
           </label>
           {errors.understood && (
-            <p id="understood-error" className="text-sm text-red-800">
+            <p id="understood-error" className="text-sm text-danger">
               {t('errors.confirm_delete')}
             </p>
           )}

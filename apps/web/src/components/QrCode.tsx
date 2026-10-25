@@ -24,7 +24,7 @@ export default function QrCode({ text, label }: { text: string; label: string })
       role="img"
       aria-label={label}
       shapeRendering="crispEdges"
-      className="size-52 rounded-lg border border-stone-300"
+      className="size-52 rounded-lg border border-line"
     >
       <rect width={size} height={size} fill="#ffffff" />
       <path d={path} fill="#000000" />

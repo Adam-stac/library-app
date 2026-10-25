@@ -14,10 +14,10 @@ export default function AccountDeletedPage() {
 
   return (
     <section role="status" className="max-w-md">
-      <h1 className="text-3xl font-semibold">{t('account.deletedTitle')}</h1>
-      <p className="mt-4 text-lg text-stone-700">{t('account.deletedBody')}</p>
+      <h1 className="page-title">{t('account.deletedTitle')}</h1>
+      <p className="lede mt-3">{t('account.deletedBody')}</p>
       <p className="mt-8">
-        <Link to="/" className="font-semibold underline underline-offset-4">
+        <Link to="/" className="link">
           {t('verify.goHome')}
         </Link>
       </p>

@@ -13,7 +13,7 @@ async function signIn(page: Page, address: string) {
   await page.getByLabel('Email').fill(address)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-  await expect(page.getByText("You're signed in as")).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 }
 
 test.describe('Security activity', () => {
@@ -48,6 +48,7 @@ test.describe('Security activity', () => {
     expect(email).toContain('/security')
 
     // The laptop sees both, itself first
+    await laptop.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await laptop.getByRole('link', { name: 'Security' }).click()
     await expect(laptop.getByRole('heading', { name: 'Security', level: 1 })).toBeVisible()
     const where = laptop.getByRole('list', { name: "Where you're signed in" })

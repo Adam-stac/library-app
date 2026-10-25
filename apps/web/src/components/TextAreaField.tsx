@@ -8,16 +8,18 @@ type Props = {
   error?: string
   hint?: string
   maxLength: number
+  /** Words for the library, such as a biography: typed in the font they will be shown in */
+  book?: boolean
 }
 
 /** A labelled box for several lines of text, such as a biography. Follows the direction of what's typed. */
-export default function TextAreaField({ id, label, value, onChange, error, hint, maxLength }: Props) {
+export default function TextAreaField({ id, label, value, onChange, error, hint, maxLength, book = false }: Props) {
   const { t } = useTranslation()
   const describedBy = [hint ? `${id}-hint` : undefined, error ? `${id}-error` : undefined].filter(Boolean).join(' ')
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-semibold">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       <textarea
@@ -30,15 +32,15 @@ export default function TextAreaField({ id, label, value, onChange, error, hint,
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className="rounded-lg border border-stone-400 bg-white px-3 py-2 aria-invalid:border-red-700"
+        className={`field py-2 ${book ? 'font-book text-[1.0625rem] leading-relaxed' : ''}`}
       />
       {hint && (
-        <p id={`${id}-hint`} className="text-sm text-stone-700">
+        <p id={`${id}-hint`} className="text-sm text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-error`} className="text-sm text-red-800">
+        <p id={`${id}-error`} className="text-sm text-danger">
           {t(`errors.${error}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}

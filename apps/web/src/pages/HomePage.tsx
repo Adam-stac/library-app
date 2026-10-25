@@ -1,79 +1,110 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { getJson } from '../api'
 import { useAuth } from '../auth/context'
+import { type AuthorPage, formatNumber } from '../authors'
+import AuthorIndex from '../components/AuthorIndex'
+import { Mark } from '../components/Brand'
+import EmptyState from '../components/EmptyState'
+import Icon from '../components/Icon'
 
+const SHOWN = 5
+
+/**
+ * The home page. Signed in: the first authors in the library, the way to all of them, and adding one (the summary
+ * of the whole library comes with the books' pages). Signed out: what the app is, creating an account and signing
+ * in.
+ */
 export default function HomePage() {
-  const { t } = useTranslation()
   const { state } = useAuth()
+  if (state.status === 'signedIn') return <Library />
+  if (state.status === 'signedOut') return <Welcome />
+  return null
+}
+
+function Welcome() {
+  const { t } = useTranslation()
 
   return (
-    <>
-      <h1 className="text-3xl font-semibold">{t('home.title')}</h1>
-      <p className="mt-3 text-lg text-stone-700">{t('app.tagline')}</p>
-      {state.status === 'signedIn' && (
-        <>
-          <p className="mt-8 text-lg">
-            {t('home.signedIn')}{' '}
-            <bdi dir="ltr" className="font-semibold">
-              {state.account.email}
-            </bdi>
-          </p>
-          <p className="mt-6">
+    <section className="flex max-w-lg flex-col items-center pt-4 text-center sm:pt-10">
+      <Mark className="h-24 sm:h-28" />
+      <h1 className="page-title mt-10">{t('home.title')}</h1>
+      <p className="lede text-[1.0625rem]">{t('app.tagline')}</p>
+      <p className="mt-9 flex flex-wrap justify-center gap-3">
+        <Link to="/register" className="btn btn-primary px-5">
+          {t('home.createAccount')}
+        </Link>
+        <Link to="/sign-in" className="btn px-5">
+          {t('home.signIn')}
+        </Link>
+      </p>
+    </section>
+  )
+}
+
+function Library() {
+  const { t, i18n } = useTranslation()
+  const { refresh } = useAuth()
+  const language = i18n.language === 'ar' ? 'ar' : 'en'
+  const [result, setResult] = useState<{ language: string; page: AuthorPage | null } | null>(null)
+
+  useEffect(() => {
+    let current = true
+    void getJson<AuthorPage>(`/api/v1/authors?page=0&size=${SHOWN}&sort=${language}`).then((response) => {
+      if (!current) return
+      if (response.ok && response.data) setResult({ language, page: response.data })
+      else if (response.status === 401) void refresh()
+      else setResult({ language, page: null })
+    })
+    return () => {
+      current = false
+    }
+  }, [refresh, language])
+
+  const shown = result?.language === language ? result : null
+  const authors = shown?.page
+
+  return (
+    <section>
+      <h1 className="page-title">{t('home.title')}</h1>
+      <p className="lede">{t('app.tagline')}</p>
+
+      <section aria-labelledby="authors-title" className="mt-14 max-w-3xl">
+        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <h2 id="authors-title" className="section-title">
+            {t('home.authors')}
+          </h2>
+          {authors && authors.total > 0 && (
             <Link
               to="/authors"
-              className="inline-flex min-h-11 items-center rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+              className="inline-flex min-h-10 items-center gap-1 text-sm font-medium text-accent hover:underline"
             >
-              {t('home.authors')}
+              {t('home.allAuthors', { number: formatNumber(authors.total, language) })}
+              <Icon name="forward" className="size-3.5" />
             </Link>
+          )}
+        </div>
+
+        {shown && !authors && (
+          <p role="alert" className="mt-4 text-danger">
+            {t('authors.loadFailed')}
           </p>
-          <ul className="mt-6 flex flex-col gap-2">
-            <li>
-              <Link to="/change-password" className="font-semibold underline underline-offset-4">
-                {t('home.changePassword')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/two-step-verification" className="font-semibold underline underline-offset-4">
-                {t('home.twoFactor')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/passkeys" className="font-semibold underline underline-offset-4">
-                {t('home.passkeys')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/security" className="font-semibold underline underline-offset-4">
-                {t('home.security')}
-              </Link>
-            </li>
-            <li>
-              <Link to="/account" className="font-semibold underline underline-offset-4">
-                {t('home.account')}
-              </Link>
-            </li>
-          </ul>
-        </>
-      )}
-      {state.status === 'signedOut' && (
-        <p className="mt-8 flex flex-wrap gap-3">
-          <Link
-            to="/register"
-            className="inline-flex min-h-11 items-center rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
-          >
-            {t('home.createAccount')}
-          </Link>
-          <Link
-            to="/sign-in"
-            className="inline-flex min-h-11 items-center rounded-full border border-stone-900 px-6 font-semibold hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
-          >
-            {t('home.signIn')}
-          </Link>
-        </p>
-      )}
-      <p className="mt-8 rounded-lg border-s-4 border-stone-400 bg-white ps-4 pe-4 py-3 text-stone-700">
-        {t('home.comingSoon')}
-      </p>
-    </>
+        )}
+        {authors && authors.total === 0 && (
+          <EmptyState text={t('home.noAuthors')}>
+            <Link to="/authors/new" className="btn btn-primary">
+              <Icon name="plus" className="size-4" />
+              {t('authors.add')}
+            </Link>
+          </EmptyState>
+        )}
+        {authors && authors.total > 0 && (
+          <div className="border-t border-line">
+            <AuthorIndex authors={authors.items} />
+          </div>
+        )}
+      </section>
+    </section>
   )
 }

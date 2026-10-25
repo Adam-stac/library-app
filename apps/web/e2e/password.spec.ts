@@ -58,9 +58,10 @@ test.describe('Passwords', () => {
     await signIn(page, address, PASSWORD)
     await expect(page.getByRole('alert')).toContainText('The email or password is incorrect.')
     await signIn(page, address, NEW_PASSWORD)
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // Change password while signed in
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await page.getByRole('link', { name: 'Change password' }).click()
     await page.getByLabel('Current password').fill(NEW_PASSWORD)
     await page.getByLabel('New password').fill(NEWER_PASSWORD)

@@ -53,7 +53,7 @@ describe('PasskeysPage', () => {
     const api = fakeApi(
       {
         '/api/v1/auth/passkeys': () => json(200, saved ? [PHONE] : []),
-        '/api/v1/auth/passkeys/register/options': () => json(200, { challenge: 'abc', rp: { id: 'localhost', name: 'My Library' } }),
+        '/api/v1/auth/passkeys/register/options': () => json(200, { challenge: 'abc', rp: { id: 'localhost', name: 'Khizana' } }),
         '/api/v1/auth/passkeys/register': () => {
           saved = true
           return json(201, PHONE)
@@ -72,7 +72,7 @@ describe('PasskeysPage', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent('“Phone” was added.')
     expect(screen.getByText('Phone')).toBeInTheDocument()
-    expect(browser.startRegistration).toHaveBeenCalledWith({ optionsJSON: { challenge: 'abc', rp: { id: 'localhost', name: 'My Library' } } })
+    expect(browser.startRegistration).toHaveBeenCalledWith({ optionsJSON: { challenge: 'abc', rp: { id: 'localhost', name: 'Khizana' } } })
     expect(JSON.parse(callTo(api, '/api/v1/auth/passkeys/register/options').body as string)).toEqual({ currentPassword: PASSWORD })
     const register = callTo(api, '/api/v1/auth/passkeys/register')
     expect(JSON.parse(register.body as string)).toEqual({ label: 'Phone', credential: { id: 'cred', response: {} } })

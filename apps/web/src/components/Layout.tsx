@@ -1,83 +1,105 @@
-import { type ReactNode, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import { useAuth } from '../auth/context'
 import { saveLanguage } from '../language'
+import AccountMenu from './AccountMenu'
+import Brand from './Brand'
+import Icon, { type IconName } from './Icon'
 
-const pill =
-  'inline-flex min-h-11 items-center rounded-full border border-stone-300 px-4 text-sm hover:bg-stone-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-
-function AccountControls() {
-  const { t } = useTranslation()
-  const { state, signOut } = useAuth()
-  const navigate = useNavigate()
-  const [signingOut, setSigningOut] = useState(false)
-  const [failed, setFailed] = useState(false)
-
-  if (state.status === 'loading') return null
-  if (state.status === 'signedOut') {
-    return (
-      <Link to="/sign-in" className={pill}>
-        {t('nav.signIn')}
-      </Link>
-    )
-  }
-
-  async function onSignOut() {
-    setSigningOut(true)
-    setFailed(false)
-    const done = await signOut()
-    setSigningOut(false)
-    if (done) navigate('/', { replace: true })
-    else setFailed(true)
-  }
-
-  return (
-    <div className="flex items-center gap-3">
-      <span className="hidden max-w-56 truncate text-sm text-stone-700 sm:inline">
-        {t('nav.signedInAs')}{' '}
-        <bdi dir="ltr" className="font-semibold text-stone-900">
-          {state.account.email}
-        </bdi>
-      </span>
-      <button type="button" onClick={() => void onSignOut()} disabled={signingOut} className={pill}>
-        {t('nav.signOut')}
-      </button>
-      {failed && (
-        <p role="alert" className="text-sm text-red-800">
-          {t('errors.signOutFailed')}
-        </p>
-      )}
-    </div>
-  )
-}
-
-export default function Layout({ children }: { children: ReactNode }) {
+/** The button that switches between Arabic and English, labelled in the language it switches to. */
+function LanguageButton({ className = '' }: { className?: string }) {
   const { t, i18n } = useTranslation()
   const { state } = useAuth()
   const nextLanguage = i18n.language === 'ar' ? 'en' : 'ar'
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
-      <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-          <Link to="/" className="text-xl font-semibold">
-            {t('app.name')}
-          </Link>
-          <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-3">
-            <AccountControls />
-            <button
-              type="button"
-              onClick={() => void saveLanguage(nextLanguage, state.status === 'signedIn')}
-              lang={nextLanguage}
-              className={pill}
+    <button
+      type="button"
+      onClick={() => void saveLanguage(nextLanguage, state.status === 'signedIn')}
+      lang={nextLanguage}
+      className={`btn btn-ghost px-3 ${className}`}
+    >
+      <Icon name="languages" className="size-4" />
+      {t('language.switchTo')}
+    </button>
+  )
+}
+
+const SECTIONS: { to: string; key: string; icon: IconName; end?: boolean }[] = [
+  { to: '/', key: 'home', icon: 'home', end: true },
+  { to: '/authors', key: 'authors', icon: 'feather' },
+  { to: '/settings', key: 'settings', icon: 'settings' },
+]
+
+const navLink = ({ isActive }: { isActive: boolean }) =>
+  `flex min-h-10 shrink-0 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium transition-colors duration-150 ${
+    isActive ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-hover hover:text-ink'
+  }`
+
+/**
+ * The frame around every page.
+ *
+ * Signed in: the library's sections, the language and the account menu. Wide screens get a sidebar; phones get a
+ * frosted top bar (the page scrolls under it) with the sections in a row under it. Pages sit at the start of the
+ * space beside the sidebar, up to the width of a list; forms and reading pages narrow themselves.
+ *
+ * Signed out, or while checking: the mark, signing in and the language along the top, and the page in a single
+ * centred column. Every link here leads to a page that exists; sections are added as their pages are built.
+ */
+export default function Layout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation()
+  const { state } = useAuth()
+
+  if (state.status === 'signedIn') {
+    return (
+      <div className="min-h-screen lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
+        <aside className="glass-bar sticky top-0 z-10 border-b border-line lg:h-screen lg:border-e lg:border-b-0 lg:bg-paper lg:backdrop-filter-none">
+          <div className="grid grid-cols-[1fr_auto] items-center gap-x-1 gap-y-2 px-4 pt-3 pb-2 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-0 lg:px-3 lg:pt-6 lg:pb-3">
+            <div className="px-1 lg:px-2">
+              <Brand />
+            </div>
+            <nav
+              aria-label={t('nav.main')}
+              className="col-span-2 row-start-2 -mx-1 flex gap-1 overflow-x-auto px-1 lg:mx-0 lg:mt-8 lg:flex-col lg:overflow-visible lg:px-0"
             >
-              {t('language.switchTo')}
-            </button>
+              {SECTIONS.map(({ to, key, icon, end }) => (
+                <NavLink key={to} to={to} end={end} className={navLink}>
+                  <Icon name={icon} />
+                  {t(`nav.${key}`)}
+                </NavLink>
+              ))}
+            </nav>
+            <div className="col-start-2 row-start-1 flex items-center gap-1 lg:relative lg:mt-auto lg:flex-col lg:items-stretch">
+              <LanguageButton className="lg:justify-start" />
+              <AccountMenu email={state.account.email} />
+            </div>
+          </div>
+        </aside>
+        <main className="min-w-0 px-4 pt-8 pb-16 sm:px-8 lg:px-14 lg:pt-14">
+          <div className="max-w-5xl">{children}</div>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen">
+      <header>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
+          <Brand />
+          <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
+            {state.status === 'signedOut' && (
+              <Link to="/sign-in" className="btn btn-ghost">
+                {t('nav.signIn')}
+              </Link>
+            )}
+            <LanguageButton />
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-4 py-12">{children}</main>
+      {/* Each page sets its own width (most are narrow forms) and is centred */}
+      <main className="px-4 pt-10 pb-20 sm:px-8 sm:pt-16 [&>*]:mx-auto">{children}</main>
     </div>
   )
 }

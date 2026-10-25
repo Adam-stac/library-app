@@ -43,7 +43,7 @@ describe('AuthorsPage', () => {
     expect(await screen.findByRole('heading', { name: 'Sign in page' })).toBeInTheDocument()
   })
 
-  it('lists your authors with their names and years', async () => {
+  it('lists your authors as an index: names, the year of death, and the letter each is filed under', async () => {
     fakeApi(
       { [list('en')]: () => json(200, { items: [BUKHARI, TABARI], page: 0, size: 50, total: 2 }) },
       'reader@example.com',
@@ -53,10 +53,13 @@ describe('AuthorsPage', () => {
     expect(await screen.findByText('2 authors')).toBeInTheDocument()
     expect(screen.getByText('al-Bukhari').closest('a')).toHaveAttribute('href', '/authors/a1')
     expect(screen.getByText('البخاري')).toBeInTheDocument()
-    expect(screen.getByText('194 AH (809–810 CE) – 256 AH (869–870 CE)')).toBeInTheDocument()
+    expect(screen.getByText('d. 256 AH')).toBeInTheDocument()
     // Only an Arabic name: it is shown even on the English page
     expect(screen.getByText('الطبري').closest('a')).toHaveAttribute('href', '/authors/a2')
-    expect(screen.getByText('Died 310 AH (922–923 CE)')).toBeInTheDocument()
+    expect(screen.getByText('d. 310 AH')).toBeInTheDocument()
+    // al-Bukhari under B (the article is skipped), الطبري under ط; the letters are only for the eye
+    expect(screen.getByText('B')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByText('ط')).toHaveAttribute('aria-hidden', 'true')
     expect(screen.getByRole('link', { name: 'Add an author' })).toHaveAttribute('href', '/authors/new')
   })
 
@@ -69,7 +72,8 @@ describe('AuthorsPage', () => {
     renderPage()
 
     expect(await screen.findByText('مؤلفان')).toBeInTheDocument()
-    expect(screen.getByText('١٩٤هـ (٨٠٩–٨١٠م) – ٢٥٦هـ (٨٦٩–٨٧٠م)')).toBeInTheDocument()
+    expect(screen.getByText('ت ٢٥٦هـ')).toBeInTheDocument()
+    expect(screen.getByText('ب')).toHaveAttribute('aria-hidden', 'true')
     expect(api.mock.calls.some(([path]) => path === list('ar'))).toBe(true)
   })
 
@@ -82,7 +86,12 @@ describe('AuthorsPage', () => {
 
   it('moves between pages', async () => {
     const page = (n: number) => () =>
-      json(200, { items: [{ ...BUKHARI, id: `p${n}`, nameEn: `Author on page ${n + 1}` }], page: n, size: 50, total: 120 })
+      json(200, {
+        items: [{ ...BUKHARI, id: `p${n}`, nameEn: `Author on page ${n + 1}` }],
+        page: n,
+        size: 50,
+        total: 120,
+      })
     fakeApi({ [list('en', 0)]: page(0), [list('en', 1)]: page(1) }, 'reader@example.com')
     const user = renderPage()
 
