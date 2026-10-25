@@ -6,6 +6,7 @@ import io.github.adamstac.libraryapp.NotFoundException;
 import io.github.adamstac.libraryapp.TextInput;
 import io.github.adamstac.libraryapp.library.EditionController.EditionInput;
 import io.github.adamstac.libraryapp.library.EditionController.PriceInput;
+import io.github.adamstac.libraryapp.library.BookmarkService.Bookmark;
 import io.github.adamstac.libraryapp.library.EditionController.PublishedInput;
 import io.github.adamstac.libraryapp.library.WorkService.WorkSummary;
 import java.sql.ResultSet;
@@ -74,13 +75,20 @@ class EditionService {
             LocalDate startedOn,
             LocalDate finishedOn,
             String status,
+            Bookmark bookmark,
             int version,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt) {}
 
     /** One row of the list. {@code status} is not_started, reading or finished, worked out from the dates. */
     public record EditionSummary(
-            UUID id, WorkSummary work, String title, Integer volumes, LocalDate purchasedOn, String status) {}
+            UUID id,
+            WorkSummary work,
+            String title,
+            Integer volumes,
+            LocalDate purchasedOn,
+            String status,
+            Bookmark bookmark) {}
 
     public record Page(List<EditionSummary> items, int page, int size, long total) {}
 
@@ -125,8 +133,10 @@ class EditionService {
             e.id, e.work_id, e.title, e.language, e.translator, e.muhaqqiq, e.publisher, e.publication_place,
             e.published_hijri, e.published_ce, e.edition_number, e.volumes, e.isbn, e.legal_deposit, e.shelf,
             e.notes, e.purchased_on, e.price_minor, e.price_currency, e.started_on, e.finished_on,
-            e.version, e.created_at, e.updated_at
+            e.version, e.created_at, e.updated_at,
+            b.volume AS bookmark_volume, b.page AS bookmark_page, b.moved_at AS bookmark_moved_at
             """;
+    private static final String WITH_BOOKMARK = " LEFT JOIN bookmarks b ON b.edition_id = e.id";
 
     private final JdbcClient jdbc;
     private final WorkService works;
@@ -145,7 +155,7 @@ class EditionService {
         JdbcClient.StatementSpec count = jdbc.sql("SELECT count(*) FROM editions e WHERE " + where)
                 .param("owner", ownerId);
         JdbcClient.StatementSpec select = jdbc.sql("SELECT " + COLUMNS
-                        + " FROM editions e JOIN works w ON w.id = e.work_id WHERE " + where
+                        + " FROM editions e JOIN works w ON w.id = e.work_id" + WITH_BOOKMARK + " WHERE " + where
                         + " ORDER BY " + sort.order + " LIMIT :limit OFFSET :offset")
                 .param("owner", ownerId)
                 .param("limit", size)
@@ -166,7 +176,8 @@ class EditionService {
                             edition.title(),
                             edition.volumes(),
                             edition.purchasedOn(),
-                            edition.status());
+                            edition.status(),
+                            edition.bookmark());
                 })
                 .toList();
         return new Page(items, page, size, total);
@@ -177,7 +188,8 @@ class EditionService {
     }
 
     private Optional<Edition> find(UUID ownerId, UUID id) {
-        return jdbc.sql("SELECT " + COLUMNS + " FROM editions e WHERE e.id = :id AND e.owner_id = :owner")
+        return jdbc.sql("SELECT " + COLUMNS + " FROM editions e" + WITH_BOOKMARK
+                        + " WHERE e.id = :id AND e.owner_id = :owner")
                 .param("id", id)
                 .param("owner", ownerId)
                 .query(EditionService::row)
@@ -236,6 +248,7 @@ class EditionService {
             throw new FieldValidationException("workId", "work_required");
         }
         UUID workId = checkedWork(ownerId, input.workId());
+        refuseFewerVolumesThanTheBookmark(ownerId, id, fields.volumes());
         int changed = bind(jdbc.sql("""
                         UPDATE editions SET work_id = :work, title = :title, language = :language,
                                translator = :translator, muhaqqiq = :muhaqqiq, publisher = :publisher,
@@ -269,6 +282,33 @@ class EditionService {
                 .update();
         if (deleted == 0) {
             throw new NotFoundException();
+        }
+    }
+
+    /**
+     * An edit can't leave the bookmark in a volume the edition no longer has (say, 13 volumes changed to 3 while
+     * the bookmark is in volume 5). The edition is locked first, so a bookmark can't be moved at the same moment.
+     */
+    private void refuseFewerVolumesThanTheBookmark(UUID ownerId, UUID id, Integer volumes) {
+        jdbc.sql("SELECT id FROM editions WHERE id = :id AND owner_id = :owner FOR UPDATE")
+                .param("id", id)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional();
+        if (volumes == null) {
+            return; // unknown: any volume is possible
+        }
+        boolean beyond = jdbc.sql("""
+                        SELECT EXISTS (SELECT 1 FROM bookmarks
+                                       WHERE edition_id = :id AND owner_id = :owner AND volume > :volumes)
+                        """)
+                .param("id", id)
+                .param("owner", ownerId)
+                .param("volumes", volumes)
+                .query(Boolean.class)
+                .single();
+        if (beyond) {
+            throw new FieldValidationException("volumes", "below_bookmark");
         }
     }
 
@@ -436,10 +476,21 @@ class EditionService {
                 startedOn,
                 finishedOn,
                 status(startedOn, finishedOn),
+                bookmark(rs),
                 rs.getInt("version"),
                 rs.getObject("created_at", OffsetDateTime.class),
                 rs.getObject("updated_at", OffsetDateTime.class));
         return new Row(rs.getObject("work_id", UUID.class), edition);
+    }
+
+    private static Bookmark bookmark(ResultSet rs) throws SQLException {
+        Integer page = rs.getObject("bookmark_page", Integer.class);
+        return page == null
+                ? null
+                : new Bookmark(
+                        rs.getObject("bookmark_volume", Integer.class),
+                        page,
+                        rs.getObject("bookmark_moved_at", OffsetDateTime.class));
     }
 
     private static Edition withWork(Row row, WorkSummary work) {
@@ -447,6 +498,6 @@ class EditionService {
         return new Edition(e.id(), work, e.title(), e.language(), e.translator(), e.muhaqqiq(), e.publisher(),
                 e.publicationPlace(), e.published(), e.editionNumber(), e.volumes(), e.isbn(), e.legalDeposit(),
                 e.shelf(), e.notes(), e.purchasedOn(), e.price(), e.startedOn(), e.finishedOn(), e.status(),
-                e.version(), e.createdAt(), e.updatedAt());
+                e.bookmark(), e.version(), e.createdAt(), e.updatedAt());
     }
 }
