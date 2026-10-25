@@ -354,6 +354,8 @@
     "before_birth": "The year of death can't be before the year of birth.",
     "stale_version": "This was changed on another device. Load the latest version, then try again.",
     "version_required": "Please reload the page and try again.",
-    "limit_reached": "Your library has reached its limit for this. Delete something to add more."
+    "limit_reached": "Your library has reached its limit for this. Delete something to add more.",
+    "in_use": "This is still used elsewhere in your library, so it can't be deleted. Remove it from those records first.",
+    "conflict": "That change couldn't be saved. Reload the page and try again."
   }
 }

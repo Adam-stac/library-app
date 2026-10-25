@@ -119,4 +119,27 @@ describe('AuthorPage', () => {
     expect(path).toBe('/api/v1/authors/a1')
     expect(((init as RequestInit).headers as Record<string, string>)['X-XSRF-TOKEN']).toBe('csrf-123')
   })
+
+  it('explains when the author is still named in a work and stays on the page', async () => {
+    fakeApi(
+      {
+        '/api/v1/authors/a1': (init) =>
+          init.method === 'DELETE'
+            ? json(409, { code: 'in_use', usedBy: { works: 2 } })
+            : json(200, AUTHOR),
+      },
+      'reader@example.com',
+    )
+    const user = renderPage()
+
+    await user.click(await screen.findByRole('button', { name: 'Delete' }))
+    await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
+
+    expect(
+      await screen.findByText(
+        "This is still used elsewhere in your library, so it can't be deleted. Remove it from those records first.",
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'al-Bukhari', level: 1 })).toBeInTheDocument()
+  })
 })

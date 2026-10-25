@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.dao.DuplicateKeyException;
@@ -130,15 +131,48 @@ class ScienceService {
         return get(ownerId, id);
     }
 
+    /** Deletes one of the user's sciences, unless a work still has it (409 in_use). */
     @Transactional
     void delete(UUID ownerId, UUID id) {
-        int deleted = jdbc.sql("DELETE FROM sciences WHERE id = :id AND owner_id = :owner")
+        // Waits for any transaction that is giving a work this science (usableBy), so the count below includes it
+        if (!lockForDeleting(ownerId, id)) {
+            throw new NotFoundException();
+        }
+        long works = jdbc.sql("SELECT count(*) FROM works WHERE owner_id = :owner AND science_id = :id")
+                .param("owner", ownerId)
+                .param("id", id)
+                .query(Long.class)
+                .single();
+        if (works > 0) {
+            throw new ConflictException("in_use", Map.<String, Object>of("usedBy", Map.of("works", works)));
+        }
+        // The database checks the links again when the transaction commits (V12)
+        jdbc.sql("DELETE FROM sciences WHERE id = :id AND owner_id = :owner")
                 .param("id", id)
                 .param("owner", ownerId)
                 .update();
-        if (deleted == 0) {
-            throw new NotFoundException();
-        }
+    }
+
+    /**
+     * Whether the science is one of the user's own. Called inside the transaction that gives a work this science:
+     * the science is then locked against deletion until that transaction ends (many callers can hold it).
+     */
+    boolean usableBy(UUID ownerId, UUID id) {
+        return jdbc.sql("SELECT id FROM sciences WHERE id = :id AND owner_id = :owner FOR KEY SHARE")
+                .param("id", id)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional()
+                .isPresent();
+    }
+
+    private boolean lockForDeleting(UUID ownerId, UUID id) {
+        return jdbc.sql("SELECT id FROM sciences WHERE id = :id AND owner_id = :owner FOR UPDATE")
+                .param("id", id)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional()
+                .isPresent();
     }
 
     // ---- Rules -------------------------------------------------------------------------------------------------

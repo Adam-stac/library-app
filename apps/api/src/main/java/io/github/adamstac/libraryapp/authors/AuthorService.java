@@ -13,10 +13,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  * module's public interface.
  */
 @Service
-class AuthorService {
+class AuthorService implements Authors {
 
     static final int MAX_AUTHORS_PER_ACCOUNT = 2000;
     static final int MAX_NAME = 200;
@@ -89,10 +92,40 @@ class AuthorService {
 
     private final JdbcClient jdbc;
     private final Places places;
+    private final List<AuthorReferences> references;
 
-    AuthorService(JdbcClient jdbc, Places places) {
+    AuthorService(JdbcClient jdbc, Places places, List<AuthorReferences> references) {
         this.jdbc = jdbc;
         this.places = places;
+        this.references = references;
+    }
+
+    // ---- For other modules (Authors) ---------------------------------------------------------------------------
+
+    @Override
+    public boolean usableBy(UUID ownerId, UUID authorId) {
+        // FOR KEY SHARE: the author can't be deleted until the caller's transaction ends (many callers can hold it)
+        return jdbc.sql("SELECT id FROM authors WHERE id = :id AND owner_id = :owner FOR KEY SHARE")
+                .param("id", authorId)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional()
+                .isPresent();
+    }
+
+    @Override
+    public Map<UUID, AuthorName> names(UUID ownerId, Collection<UUID> authorIds) {
+        if (authorIds.isEmpty()) {
+            return Map.of();
+        }
+        return jdbc.sql("SELECT id, name_ar, name_en FROM authors WHERE id IN (:ids) AND owner_id = :owner")
+                .param("ids", List.copyOf(authorIds))
+                .param("owner", ownerId)
+                .query((rs, rowNum) -> new AuthorName(
+                        rs.getObject("id", UUID.class), rs.getString("name_ar"), rs.getString("name_en")))
+                .list()
+                .stream()
+                .collect(Collectors.toMap(AuthorName::id, name -> name));
     }
 
     // ---- Reading -----------------------------------------------------------------------------------------------
@@ -233,15 +266,33 @@ class AuthorService {
         return get(ownerId, id);
     }
 
+    /** Deletes one of the user's authors, unless one of their records still names them (409 in_use). */
     @Transactional
     void delete(UUID ownerId, UUID id) {
-        int deleted = jdbc.sql("DELETE FROM authors WHERE id = :id AND owner_id = :owner")
+        // Waits for any transaction that is naming this author (usableBy), so the count below includes it
+        boolean exists = jdbc.sql("SELECT id FROM authors WHERE id = :id AND owner_id = :owner FOR UPDATE")
+                .param("id", id)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional()
+                .isPresent();
+        if (!exists) {
+            throw new NotFoundException();
+        }
+        Map<String, Long> usedBy = new LinkedHashMap<>();
+        for (AuthorReferences reference : references) {
+            long count = reference.countUsing(ownerId, id);
+            if (count > 0) {
+                usedBy.put(reference.kind(), count);
+            }
+        }
+        if (!usedBy.isEmpty()) {
+            throw new ConflictException("in_use", Map.<String, Object>of("usedBy", usedBy));
+        }
+        jdbc.sql("DELETE FROM authors WHERE id = :id AND owner_id = :owner")
                 .param("id", id)
                 .param("owner", ownerId)
                 .update();
-        if (deleted == 0) {
-            throw new NotFoundException();
-        }
     }
 
     // ---- Rules -------------------------------------------------------------------------------------------------
