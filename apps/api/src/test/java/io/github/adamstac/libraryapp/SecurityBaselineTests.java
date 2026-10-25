@@ -41,7 +41,8 @@ class SecurityBaselineTests {
         assertThat(get("/api/v1/authors").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/places").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/sciences").statusCode()).isEqualTo(401); // signed-in accounts only
-        assertThat(get("/api/v1/works").statusCode()).isEqualTo(401); // not built yet: denied
+        assertThat(get("/api/v1/works").statusCode()).isEqualTo(401); // signed-in accounts only
+        assertThat(get("/api/v1/editions").statusCode()).isEqualTo(401); // not built yet: denied
         assertThat(get("/actuator/env").statusCode()).isEqualTo(401);
     }
 

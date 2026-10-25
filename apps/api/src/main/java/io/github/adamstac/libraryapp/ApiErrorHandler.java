@@ -2,7 +2,10 @@ package io.github.adamstac.libraryapp;
 
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +23,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  */
 @RestControllerAdvice
 class ApiErrorHandler extends ResponseEntityExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(ApiErrorHandler.class);
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -73,6 +78,19 @@ class ApiErrorHandler extends ResponseEntityExceptionHandler {
         ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request could not be completed.");
         body.setProperty("code", ex.code());
         ex.details().forEach(body::setProperty);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    /**
+     * The database's own checks (a CHECK, or a link between records checked at commit) refused a change that the
+     * API's rules let through. That is a bug in the API's rules, but the data stays safe; the answer is 409. The
+     * exception's message is never logged or returned, because it can contain what the user typed.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ProblemDetail> refusedByTheDatabase(DataIntegrityViolationException ex) {
+        log.warn("The database refused a change that the API allowed ({})", ex.getClass().getSimpleName());
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request could not be completed.");
+        body.setProperty("code", "conflict");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 

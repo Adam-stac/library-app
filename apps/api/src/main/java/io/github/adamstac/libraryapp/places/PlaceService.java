@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.core.support.AbstractSqlTypeValue;
 import org.springframework.stereotype.Service;
@@ -259,15 +258,11 @@ class PlaceService implements Places {
         if (!usedBy.isEmpty()) {
             throw new ConflictException("in_use", Map.<String, Object>of("usedBy", usedBy));
         }
-        try {
-            jdbc.sql("DELETE FROM places WHERE id = :id AND owner_id = :owner")
-                    .param("id", id)
-                    .param("owner", ownerId)
-                    .update();
-        } catch (DataIntegrityViolationException stillReferenced) {
-            // The database's own check (a foreign key); the lock above means this shouldn't happen
-            throw new ConflictException("in_use");
-        }
+        // The database checks the links again when the transaction commits (V12); ApiErrorHandler answers 409 if so
+        jdbc.sql("DELETE FROM places WHERE id = :id AND owner_id = :owner")
+                .param("id", id)
+                .param("owner", ownerId)
+                .update();
     }
 
     // ---- Rules -------------------------------------------------------------------------------------------------
