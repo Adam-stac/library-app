@@ -1,3 +1,7 @@
 10049	IGNORE	(Storable and Cacheable Content) Public static files are meant to be cached; API responses send Cache-Control: no-store.
 10109	IGNORE	(Modern Web Application) Informational: identifies a single-page app, not a vulnerability.
 10010	IGNORE	(XSRF-TOKEN must be readable by our scripts: double-submit CSRF. The session cookie is HttpOnly.)
+# 10027 (Suspicious Comments) on our built JavaScript only: ZAP 2.17 finds JavaScript comments with the regex //.*
+# so in a minified bundle (one long line) everything after any "//", such as in "https://", counts as a comment.
+# The built bundle has no comments at all (Vite removes them). HTML pages are still checked by this rule.
+10027	OUTOFSCOPE	http://localhost:3000/assets/.*\.js$
