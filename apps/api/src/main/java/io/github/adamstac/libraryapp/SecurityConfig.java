@@ -51,7 +51,9 @@ class SecurityConfig {
     };
 
     /** Each user's own library. Any method: reading, adding (POST), editing (PUT) and deleting (DELETE). */
-    private static final String[] LIBRARY = {"/api/v1/authors", "/api/v1/authors/**"};
+    private static final String[] LIBRARY = {
+        "/api/v1/authors", "/api/v1/authors/**", "/api/v1/places", "/api/v1/places/**"
+    };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
     private static final String[] BEFORE_ANY_SESSION = {"/api/v1/auth/register", "/api/v1/auth/verify-email"};

@@ -72,7 +72,15 @@ class ApiErrorHandler extends ResponseEntityExceptionHandler {
     ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
         ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "The request could not be completed.");
         body.setProperty("code", ex.code());
+        ex.details().forEach(body::setProperty);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    ResponseEntity<ProblemDetail> forbidden(ForbiddenException ex) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "This can't be changed.");
+        body.setProperty("code", ex.code());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(ServiceBusyException.class)

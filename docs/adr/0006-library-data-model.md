@@ -91,7 +91,8 @@ give dates in CE and may have no Arabic title on the cover.
   other.
 - **Deleting:**
   - an author, or one of the user's own places, that is still in use is refused with 409
-    (`in_use`), naming the records that use it;
+    (`in_use`), saying how many records of each kind use it (counts only, so the error never contains
+    text the user typed);
   - deleting a work deletes its editions (the web page asks for a tick to confirm).
 - **API:** under `/api/v1/` with standard methods: `GET` (lists are paged, at most 100 per page),
   `POST` to create, `PUT` to edit, `DELETE` to delete. CSRF is required on every write. The auth

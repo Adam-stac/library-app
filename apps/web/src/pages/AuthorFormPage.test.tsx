@@ -18,6 +18,8 @@ const AUTHOR = {
   nisba: null,
   birth: { hijri: 194, ce: null, approximate: false },
   death: { hijri: 256, ce: 870, approximate: false },
+  birthPlace: { id: 'p1', nameAr: 'بخارى', nameEn: 'Bukhara' },
+  deathPlace: null,
   biography: 'صاحب الصحيح.',
   version: 3,
   createdAt: '2026-10-25T10:00:00Z',
@@ -100,6 +102,8 @@ describe('AuthorFormPage', () => {
       nisba: null,
       birth: { hijri: -51, ce: null, approximate: true },
       death: { hijri: 13, ce: null, approximate: false },
+      birthPlaceId: null,
+      deathPlaceId: null,
       biography: null,
     })
   })
@@ -137,7 +141,7 @@ describe('AuthorFormPage', () => {
     expect(screen.getByLabelText('Hijri year of death')).toHaveAttribute('aria-invalid', 'true')
   })
 
-  it('edits an author, sending back the version it started from', async () => {
+  it('edits an author, sending back the version it started from and keeping its places', async () => {
     const api = fakeApi(
       {
         '/api/v1/authors/a1': (init) =>
@@ -166,6 +170,8 @@ describe('AuthorFormPage', () => {
       kunya: 'أبو عبد الله',
       birth: { hijri: 194, ce: null, approximate: false },
       death: { hijri: 256, ce: 870, approximate: false },
+      birthPlaceId: 'p1',
+      deathPlaceId: null,
       biography: 'صاحب الصحيح.',
     })
   })

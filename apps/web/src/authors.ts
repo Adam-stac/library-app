@@ -3,6 +3,9 @@ import { ceYearsOf } from './hijri'
 
 export type Year = { hijri: number | null; ce: number | null; approximate: boolean }
 
+/** How the API names a place that an author refers to. */
+export type PlaceName = { id: string; nameAr: string | null; nameEn: string | null }
+
 export type Author = {
   id: string
   nameAr: string | null
@@ -14,6 +17,8 @@ export type Author = {
   nisba: string | null
   birth: Year
   death: Year
+  birthPlace: PlaceName | null
+  deathPlace: PlaceName | null
   biography: string | null
   version: number
 }

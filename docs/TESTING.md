@@ -31,6 +31,8 @@ A feature is finished only when every relevant layer below is tested and CI is g
   account reads, edits and deletes the record by its ID, and must get the same 404 as for an ID that doesn't
   exist.
 - Each record type also has a hostile-input class (random and malformed bodies never give a 500).
+- The shared starter list of places is loaded by a migration, so it is in every test database. Tests find a shared
+  place by its English name (for example `Makkah`) and never change the list.
 
 ## Coming next
 - Mutation testing (PIT), nightly: proves the tests would catch real bugs
