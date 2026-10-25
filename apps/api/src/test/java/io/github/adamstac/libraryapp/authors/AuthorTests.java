@@ -299,16 +299,17 @@ class AuthorTests {
 
         String english = reader.get(AUTHORS + "?sort=en").body();
         assertThat(english).contains("\"total\":3").doesNotContain("Not yours");
-        assertThat(english.indexOf("Abu Hanifa")).isLessThan(english.indexOf("al-Tabari"));
-        assertThat(english.indexOf("al-Tabari")).isLessThan(english.indexOf("Ibn Kathir"));
+        // Catalogue order: a leading "al-" is ignored, so al-Tabari is filed under T
+        assertThat(english.indexOf("Abu Hanifa")).isLessThan(english.indexOf("Ibn Kathir"));
+        assertThat(english.indexOf("Ibn Kathir")).isLessThan(english.indexOf("al-Tabari"));
         assertThat(english).containsPattern("\"death\":\\{[^}]*\"hijri\":310").doesNotContain("biography");
 
         String arabic = reader.get(AUTHORS + "?sort=ar").body();
         assertThat(arabic.indexOf("ابن كثير")).isLessThan(arabic.indexOf("الطبري"));
 
         String secondPage = reader.get(AUTHORS + "?sort=en&size=1&page=1").body();
-        assertThat(secondPage).contains("al-Tabari", "\"page\":1", "\"size\":1", "\"total\":3")
-                .doesNotContain("Abu Hanifa", "Ibn Kathir");
+        assertThat(secondPage).contains("Ibn Kathir", "\"page\":1", "\"size\":1", "\"total\":3")
+                .doesNotContain("Abu Hanifa", "al-Tabari");
     }
 
     @Test

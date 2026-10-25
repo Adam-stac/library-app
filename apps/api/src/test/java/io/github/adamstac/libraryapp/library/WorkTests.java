@@ -251,13 +251,14 @@ class WorkTests {
 
         String english = reader.get(WORKS + "?sort=en").body();
         assertThat(english).contains("\"total\":3").doesNotContain("Not yours");
-        assertThat(english.indexOf("al-Mughni")).isLessThan(english.indexOf("Bulugh al-Maram"));
-        assertThat(english.indexOf("Bulugh al-Maram")).isLessThan(english.indexOf("Umdat al-Fiqh"));
+        // Catalogue order: a leading "al-" is ignored, so al-Mughni is filed under M
+        assertThat(english.indexOf("Bulugh al-Maram")).isLessThan(english.indexOf("al-Mughni"));
+        assertThat(english.indexOf("al-Mughni")).isLessThan(english.indexOf("Umdat al-Fiqh"));
         assertThat(english).contains("\"nameEn\":\"Ibn Qudamah\"", "\"nameEn\":\"Fiqh\"");
 
         String arabic = reader.get(WORKS + "?sort=ar").body();
-        // Sorted by the whole title, so "المغني" comes under alif (ا), before "عمدة الفقه" under ʿayn (ع)
-        assertThat(arabic.indexOf("المغني")).isPositive().isLessThan(arabic.indexOf("عمدة الفقه"));
+        // A leading "ال" is ignored too, so "المغني" is filed under mīm (م), after "عمدة الفقه" under ʿayn (ع)
+        assertThat(arabic.indexOf("عمدة الفقه")).isPositive().isLessThan(arabic.indexOf("المغني"));
 
         assertThat(reader.get(WORKS + "?scienceId=" + fiqh).body()).contains("\"total\":2", "al-Mughni", "Bulugh")
                 .doesNotContain("Umdat");
@@ -270,8 +271,8 @@ class WorkTests {
         assertThat(other.get(WORKS + "?authorId=" + ibnQudamah).body()).contains("\"total\":0");
 
         String secondPage = reader.get(WORKS + "?sort=en&size=1&page=1").body();
-        assertThat(secondPage).contains("Bulugh al-Maram", "\"page\":1", "\"size\":1", "\"total\":3")
-                .doesNotContain("al-Mughni", "Umdat");
+        assertThat(secondPage).contains("al-Mughni", "\"page\":1", "\"size\":1", "\"total\":3")
+                .doesNotContain("Bulugh", "Umdat");
     }
 
     @Test

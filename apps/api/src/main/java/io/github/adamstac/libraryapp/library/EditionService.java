@@ -94,8 +94,8 @@ class EditionService {
 
     /** How a list is ordered: by title (Arabic or English first), or newest first. */
     enum Sort {
-        AR("lower(coalesce(e.title, w.title_ar, w.title_en)), e.id"),
-        EN("lower(coalesce(e.title, w.title_en, w.title_ar)), e.id"),
+        AR("library_sort_key(coalesce(e.title, w.title_ar, w.title_en)), e.id"),
+        EN("library_sort_key(coalesce(e.title, w.title_en, w.title_ar)), e.id"),
         ADDED("e.created_at DESC, e.id");
 
         private final String order;

@@ -361,8 +361,8 @@ class EditionTests {
 
         String english = reader.get(EDITIONS + "?sort=en").body();
         assertThat(english).contains("\"total\":3").doesNotContain("Not yours");
-        // The cover title when there is one, otherwise the work's title
-        assertThat(english.indexOf("al-Mughni")).isLessThan(english.indexOf("Bulugh, bound with Umdah"));
+        // The cover title when there is one, otherwise the work's title; a leading "al-" is ignored
+        assertThat(english.indexOf("Bulugh, bound with Umdah")).isLessThan(english.indexOf("al-Mughni"));
         assertThat(english).contains("\"status\":\"reading\"", "\"status\":\"not_started\"");
 
         String newest = reader.get(EDITIONS + "?sort=added").body();

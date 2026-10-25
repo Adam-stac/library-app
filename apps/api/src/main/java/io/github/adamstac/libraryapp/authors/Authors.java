@@ -1,6 +1,7 @@
 package io.github.adamstac.libraryapp.authors;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -21,4 +22,13 @@ public interface Authors {
 
     /** The names of the user's authors, by ID; IDs that aren't the user's are left out. */
     Map<UUID, AuthorName> names(UUID ownerId, Collection<UUID> authorIds);
+
+    /** Search results: the first few, in name order, and how many there are in all. */
+    record Found(List<AuthorName> items, long total) {}
+
+    /**
+     * The user's authors whose names contain the search text, matched the Arabic-aware way (V16). The text is
+     * matched literally: % and _ are not wildcards.
+     */
+    Found search(UUID ownerId, String text, int limit);
 }

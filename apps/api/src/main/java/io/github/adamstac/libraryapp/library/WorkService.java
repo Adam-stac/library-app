@@ -88,7 +88,10 @@ class WorkService {
 
     // ---- Reading -----------------------------------------------------------------------------------------------
 
-    /** A page of the owner's works, sorted by the Arabic or the English title (falling back to the other). */
+    /**
+     * A page of the owner's works, sorted by the Arabic or the English title (falling back to the other), the way
+     * catalogues file them: ignoring a leading "ال" or "al-", vowel marks and the forms of alif (V16).
+     */
     Page list(UUID ownerId, Filter filter, int page, int size, boolean arabicFirst) {
         // Built only from fixed strings in this method, never from user input; the values are parameters
         String where = "w.owner_id = :owner"
@@ -97,8 +100,10 @@ class WorkService {
                         ? ""
                         : " AND EXISTS (SELECT 1 FROM work_authors wa WHERE wa.work_id = w.id AND wa.author_id = :author)");
         String order = arabicFirst
-                ? "lower(coalesce(w.title_ar, w.title_en)), lower(coalesce(w.title_en, w.title_ar)), w.id"
-                : "lower(coalesce(w.title_en, w.title_ar)), lower(coalesce(w.title_ar, w.title_en)), w.id";
+                ? "library_sort_key(coalesce(w.title_ar, w.title_en)), "
+                        + "library_sort_key(coalesce(w.title_en, w.title_ar)), w.id"
+                : "library_sort_key(coalesce(w.title_en, w.title_ar)), "
+                        + "library_sort_key(coalesce(w.title_ar, w.title_en)), w.id";
         long total = filtered(jdbc.sql("SELECT count(*) FROM works w WHERE " + where), ownerId, filter)
                 .query(Long.class)
                 .single();
