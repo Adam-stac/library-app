@@ -44,6 +44,7 @@ class SecurityBaselineTests {
         assertThat(get("/api/v1/works").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/editions").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/library-settings").statusCode()).isEqualTo(401); // signed-in accounts only
+        assertThat(get("/api/v1/bookmarks").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/benefits").statusCode()).isEqualTo(401); // not built yet: denied
         assertThat(get("/actuator/env").statusCode()).isEqualTo(401);
     }
