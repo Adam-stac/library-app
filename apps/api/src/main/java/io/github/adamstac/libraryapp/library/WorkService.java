@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -107,12 +108,45 @@ class WorkService {
                 .param("offset", (long) page * size)
                 .query(WorkService::row)
                 .list();
+        return new Page(summarise(ownerId, rows), page, size, total);
+    }
+
+    /** Short descriptions of the owner's works, by ID (for editions); IDs that aren't the owner's are left out. */
+    Map<UUID, WorkSummary> summaries(UUID ownerId, Collection<UUID> workIds) {
+        if (workIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Row> rows = jdbc.sql("SELECT " + COLUMNS + " FROM " + FROM + " WHERE w.id IN (:ids) AND w.owner_id = :owner")
+                .param("ids", List.copyOf(workIds))
+                .param("owner", ownerId)
+                .query(WorkService::row)
+                .list();
+        Map<UUID, WorkSummary> byId = new HashMap<>();
+        for (WorkSummary summary : summarise(ownerId, rows)) {
+            byId.put(summary.id(), summary);
+        }
+        return byId;
+    }
+
+    /**
+     * Whether the work is one of the owner's. Called inside the transaction that adds an edition to it: the work is
+     * then locked against deletion until that transaction ends (many callers can hold it).
+     */
+    boolean usableBy(UUID ownerId, UUID workId) {
+        return jdbc.sql("SELECT id FROM works WHERE id = :id AND owner_id = :owner FOR KEY SHARE")
+                .param("id", workId)
+                .param("owner", ownerId)
+                .query(UUID.class)
+                .optional()
+                .isPresent();
+    }
+
+    private List<WorkSummary> summarise(UUID ownerId, List<Row> rows) {
         Map<UUID, List<AuthorName>> named = authorsOf(ownerId, rows.stream().map(Row::id).toList());
-        List<WorkSummary> items = rows.stream()
+        return rows.stream()
                 .map(row -> new WorkSummary(
                         row.id(), row.titleAr(), row.titleEn(), row.science(), named.getOrDefault(row.id(), List.of())))
                 .toList();
-        return new Page(items, page, size, total);
     }
 
     private static JdbcClient.StatementSpec filtered(JdbcClient.StatementSpec statement, UUID ownerId, Filter filter) {
@@ -232,6 +266,7 @@ class WorkService {
         return get(ownerId, id);
     }
 
+    /** Deletes the work and its editions (the web page asks the user to confirm). */
     @Transactional
     void delete(UUID ownerId, UUID id) {
         int deleted = jdbc.sql("DELETE FROM works WHERE id = :id AND owner_id = :owner")

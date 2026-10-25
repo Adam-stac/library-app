@@ -53,7 +53,8 @@ class SecurityConfig {
     /** Each user's own library. Any method: reading, adding (POST), editing (PUT) and deleting (DELETE). */
     private static final String[] LIBRARY = {
         "/api/v1/authors", "/api/v1/authors/**", "/api/v1/places", "/api/v1/places/**",
-        "/api/v1/sciences", "/api/v1/sciences/**", "/api/v1/works", "/api/v1/works/**"
+        "/api/v1/sciences", "/api/v1/sciences/**", "/api/v1/works", "/api/v1/works/**",
+        "/api/v1/editions", "/api/v1/editions/**", "/api/v1/library-settings"
     };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
