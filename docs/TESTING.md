@@ -22,6 +22,16 @@ A feature is finished only when every relevant layer below is tested and CI is g
 - **Tests never call real outside services.** They use fakes, fake servers or containers.
 - **Each test cleans up after itself** and doesn't depend on other tests running first.
 
+## Library tests (authors, places, works and editions)
+- **`ApiBrowser`** (in `src/test/java/.../libraryapp`) creates a new account, signs in and keeps cookies like the
+  web app. `anotherDevice()` signs the same account in again. Each test makes its own accounts, so tests never
+  share data. Library test classes all use `properties = ApiBrowser.MANY_SIGN_INS`, so they share one Spring
+  context and one database.
+- **`CrossUserAccess.assertInvisible`** is the access-control check every library record type must pass: a second
+  account reads, edits and deletes the record by its ID, and must get the same 404 as for an ID that doesn't
+  exist.
+- Each record type also has a hostile-input class (random and malformed bodies never give a 500).
+
 ## Coming next
 - Mutation testing (PIT), nightly: proves the tests would catch real bugs
 - ZAP active scan of the API from its OpenAPI description

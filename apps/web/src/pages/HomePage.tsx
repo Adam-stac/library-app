@@ -18,7 +18,15 @@ export default function HomePage() {
               {state.account.email}
             </bdi>
           </p>
-          <ul className="mt-4 flex flex-col gap-2">
+          <p className="mt-6">
+            <Link
+              to="/authors"
+              className="inline-flex min-h-11 items-center rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+            >
+              {t('home.authors')}
+            </Link>
+          </p>
+          <ul className="mt-6 flex flex-col gap-2">
             <li>
               <Link to="/change-password" className="font-semibold underline underline-offset-4">
                 {t('home.changePassword')}

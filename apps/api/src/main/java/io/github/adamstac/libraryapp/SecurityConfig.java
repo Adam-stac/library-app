@@ -50,6 +50,9 @@ class SecurityConfig {
         "/api/v1/auth/delete-account"
     };
 
+    /** Each user's own library. Any method: reading, adding (POST), editing (PUT) and deleting (DELETE). */
+    private static final String[] LIBRARY = {"/api/v1/authors", "/api/v1/authors/**"};
+
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
     private static final String[] BEFORE_ANY_SESSION = {"/api/v1/auth/register", "/api/v1/auth/verify-email"};
 
@@ -87,6 +90,9 @@ class SecurityConfig {
                                 "/api/v1/auth/passkeys",
                                 "/api/v1/auth/sessions",
                                 "/api/v1/auth/security-events")
+                        .authenticated()
+                        // The library: signed-in accounts only, and every query is scoped to the account (ADR 0006)
+                        .requestMatchers(LIBRARY)
                         .authenticated()
                         .anyRequest()
                         .denyAll())

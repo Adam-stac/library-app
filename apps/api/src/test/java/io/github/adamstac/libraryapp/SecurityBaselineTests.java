@@ -38,7 +38,8 @@ class SecurityBaselineTests {
     @Test
     void everythingElseIsDeniedByDefault() throws Exception {
         assertThat(get("/").statusCode()).isEqualTo(401);
-        assertThat(get("/api/v1/authors").statusCode()).isEqualTo(401);
+        assertThat(get("/api/v1/authors").statusCode()).isEqualTo(401); // signed-in accounts only
+        assertThat(get("/api/v1/places").statusCode()).isEqualTo(401); // not built yet: denied
         assertThat(get("/actuator/env").statusCode()).isEqualTo(401);
     }
 
