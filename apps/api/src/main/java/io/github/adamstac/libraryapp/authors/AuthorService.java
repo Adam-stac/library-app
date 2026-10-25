@@ -6,11 +6,15 @@ import io.github.adamstac.libraryapp.NotFoundException;
 import io.github.adamstac.libraryapp.TextInput;
 import io.github.adamstac.libraryapp.authors.AuthorController.AuthorInput;
 import io.github.adamstac.libraryapp.authors.AuthorController.YearInput;
+import io.github.adamstac.libraryapp.places.Places;
+import io.github.adamstac.libraryapp.places.Places.PlaceName;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -19,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A user's authors. Every query includes the owner's ID, so one account can never see or change another's
- * authors: someone else's author is "not found", exactly like one that doesn't exist (ADR 0006).
+ * authors: someone else's author is "not found", exactly like one that doesn't exist (ADR 0006). An author's birth
+ * and death places must be places the owner may use (their own or the shared list), checked through the places
+ * module's public interface.
  */
 @Service
 class AuthorService {
@@ -48,6 +54,8 @@ class AuthorService {
             String nisba,
             Year birth,
             Year death,
+            PlaceName birthPlace,
+            PlaceName deathPlace,
             String biography,
             int version,
             OffsetDateTime createdAt,
@@ -69,18 +77,22 @@ class AuthorService {
             String nisba,
             Year birth,
             Year death,
+            UUID birthPlaceId,
+            UUID deathPlaceId,
             String biography) {}
 
     private static final String COLUMNS = """
             id, name_ar, name_en, full_name, ism, kunya, laqab, nisba,
             birth_year_hijri, birth_year_ce, birth_approximate, death_year_hijri, death_year_ce, death_approximate,
-            biography, version, created_at, updated_at
+            birth_place_id, death_place_id, biography, version, created_at, updated_at
             """;
 
     private final JdbcClient jdbc;
+    private final Places places;
 
-    AuthorService(JdbcClient jdbc) {
+    AuthorService(JdbcClient jdbc, Places places) {
         this.jdbc = jdbc;
+        this.places = places;
     }
 
     // ---- Reading -----------------------------------------------------------------------------------------------
@@ -124,7 +136,36 @@ class AuthorService {
                 .param("id", id)
                 .param("owner", ownerId)
                 .query(AuthorService::author)
-                .optional();
+                .optional()
+                .map(author -> withPlaceNames(ownerId, author));
+    }
+
+    /** Fills in the names of the author's places, which belong to the places module. */
+    private Author withPlaceNames(UUID ownerId, Author author) {
+        List<UUID> ids = new ArrayList<>();
+        for (PlaceName place : new PlaceName[] {author.birthPlace(), author.deathPlace()}) {
+            if (place != null) {
+                ids.add(place.id());
+            }
+        }
+        Map<UUID, PlaceName> names = places.names(ownerId, ids);
+        return new Author(
+                author.id(),
+                author.nameAr(),
+                author.nameEn(),
+                author.fullName(),
+                author.ism(),
+                author.kunya(),
+                author.laqab(),
+                author.nisba(),
+                author.birth(),
+                author.death(),
+                author.birthPlace() == null ? null : names.get(author.birthPlace().id()),
+                author.deathPlace() == null ? null : names.get(author.deathPlace().id()),
+                author.biography(),
+                author.version(),
+                author.createdAt(),
+                author.updatedAt());
     }
 
     // ---- Changing ----------------------------------------------------------------------------------------------
@@ -132,6 +173,7 @@ class AuthorService {
     @Transactional
     Author create(UUID ownerId, AuthorInput input) {
         Fields fields = validate(input);
+        checkPlaces(ownerId, fields);
         // One add at a time per account, so two requests at once can't both squeeze under the limit
         // (held until the transaction ends; the function returns nothing, so the row is ignored)
         jdbc.sql("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))")
@@ -149,10 +191,12 @@ class AuthorService {
         bind(jdbc.sql("""
                         INSERT INTO authors (id, owner_id, name_ar, name_en, full_name, ism, kunya, laqab, nisba,
                                              birth_year_hijri, birth_year_ce, birth_approximate,
-                                             death_year_hijri, death_year_ce, death_approximate, biography)
+                                             death_year_hijri, death_year_ce, death_approximate,
+                                             birth_place_id, death_place_id, biography)
                         VALUES (:id, :owner, :nameAr, :nameEn, :fullName, :ism, :kunya, :laqab, :nisba,
                                 :birthHijri, :birthCe, :birthApproximate,
-                                :deathHijri, :deathCe, :deathApproximate, :biography)
+                                :deathHijri, :deathCe, :deathApproximate,
+                                :birthPlaceId, :deathPlaceId, :biography)
                         """), fields)
                 .param("id", id)
                 .param("owner", ownerId)
@@ -164,6 +208,7 @@ class AuthorService {
     @Transactional
     Author update(UUID ownerId, UUID id, int expectedVersion, AuthorInput input) {
         Fields fields = validate(input);
+        checkPlaces(ownerId, fields);
         int changed = bind(jdbc.sql("""
                         UPDATE authors SET name_ar = :nameAr, name_en = :nameEn, full_name = :fullName,
                                ism = :ism, kunya = :kunya, laqab = :laqab, nisba = :nisba,
@@ -171,6 +216,7 @@ class AuthorService {
                                birth_approximate = :birthApproximate,
                                death_year_hijri = :deathHijri, death_year_ce = :deathCe,
                                death_approximate = :deathApproximate,
+                               birth_place_id = :birthPlaceId, death_place_id = :deathPlaceId,
                                biography = :biography, version = version + 1, updated_at = now()
                         WHERE id = :id AND owner_id = :owner AND version = :version
                         """), fields)
@@ -200,6 +246,20 @@ class AuthorService {
 
     // ---- Rules -------------------------------------------------------------------------------------------------
 
+    /**
+     * Each place must be one the owner may use: their own or on the shared list. Another user's place is refused
+     * exactly like one that doesn't exist. Called inside the transaction that stores the author, so the places
+     * can't be deleted before it ends (Places.usableBy).
+     */
+    private void checkPlaces(UUID ownerId, Fields fields) {
+        if (fields.birthPlaceId() != null && !places.usableBy(ownerId, fields.birthPlaceId())) {
+            throw new FieldValidationException("birthPlaceId", "unknown_place");
+        }
+        if (fields.deathPlaceId() != null && !places.usableBy(ownerId, fields.deathPlaceId())) {
+            throw new FieldValidationException("deathPlaceId", "unknown_place");
+        }
+    }
+
     private static Fields validate(AuthorInput input) {
         String nameAr = TextInput.line("nameAr", input.nameAr(), MAX_NAME);
         String nameEn = TextInput.line("nameEn", input.nameEn(), MAX_NAME);
@@ -224,6 +284,8 @@ class AuthorService {
                 TextInput.line("nisba", input.nisba(), MAX_NAME_PART),
                 birth,
                 death,
+                input.birthPlaceId(),
+                input.deathPlaceId(),
                 TextInput.paragraphs("biography", input.biography(), MAX_BIOGRAPHY));
     }
 
@@ -261,6 +323,8 @@ class AuthorService {
                 .param("deathHijri", fields.death().hijri(), Types.INTEGER)
                 .param("deathCe", fields.death().ce(), Types.INTEGER)
                 .param("deathApproximate", fields.death().approximate())
+                .param("birthPlaceId", fields.birthPlaceId(), Types.OTHER)
+                .param("deathPlaceId", fields.deathPlaceId(), Types.OTHER)
                 .param("biography", fields.biography(), Types.VARCHAR);
     }
 
@@ -276,10 +340,18 @@ class AuthorService {
                 rs.getString("nisba"),
                 year(rs, "birth"),
                 year(rs, "death"),
+                placeId(rs, "birth_place_id"),
+                placeId(rs, "death_place_id"),
                 rs.getString("biography"),
                 rs.getInt("version"),
                 rs.getObject("created_at", OffsetDateTime.class),
                 rs.getObject("updated_at", OffsetDateTime.class));
+    }
+
+    /** Only the ID for now; withPlaceNames adds the names. */
+    private static PlaceName placeId(ResultSet rs, String column) throws SQLException {
+        UUID id = rs.getObject(column, UUID.class);
+        return id == null ? null : new PlaceName(id, null, null);
     }
 
     private static Year year(ResultSet rs, String prefix) throws SQLException {

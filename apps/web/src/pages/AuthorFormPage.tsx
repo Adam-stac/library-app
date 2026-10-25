@@ -136,6 +136,9 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
       nisba: orNull(draft.nisba),
       birth: birth.year,
       death: death.year,
+      // Places can't be chosen on this page yet; an edit keeps the ones the author already has
+      birthPlaceId: editing?.birthPlace?.id ?? null,
+      deathPlaceId: editing?.deathPlace?.id ?? null,
       biography: orNull(draft.biography),
     }
     setSaving(true)

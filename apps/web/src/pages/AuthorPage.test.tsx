@@ -18,6 +18,8 @@ const AUTHOR = {
   nisba: null,
   birth: { hijri: 194, ce: null, approximate: false },
   death: { hijri: 256, ce: 870, approximate: false },
+  birthPlace: null,
+  deathPlace: null,
   biography: '<script>alert(1)</script>\n<img src=x onerror=alert(2)>',
   version: 0,
   createdAt: '2026-10-25T10:00:00Z',
