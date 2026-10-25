@@ -286,8 +286,8 @@ class EditionService {
     }
 
     /**
-     * An edit can't leave the bookmark in a volume the edition no longer has (say, 13 volumes changed to 3 while
-     * the bookmark is in volume 5). The edition is locked first, so a bookmark can't be moved at the same moment.
+     * An edit can't leave the bookmark, or a benefit, in a volume the edition no longer has (say, 13 volumes changed
+     * to 3 while the bookmark is in volume 5). The edition is locked first, so neither can be saved meanwhile.
      */
     private void refuseFewerVolumesThanTheBookmark(UUID ownerId, UUID id, Integer volumes) {
         jdbc.sql("SELECT id FROM editions WHERE id = :id AND owner_id = :owner FOR UPDATE")
@@ -309,6 +309,18 @@ class EditionService {
                 .single();
         if (beyond) {
             throw new FieldValidationException("volumes", "below_bookmark");
+        }
+        boolean citedBeyond = jdbc.sql("""
+                        SELECT EXISTS (SELECT 1 FROM benefits
+                                       WHERE edition_id = :id AND owner_id = :owner AND volume > :volumes)
+                        """)
+                .param("id", id)
+                .param("owner", ownerId)
+                .param("volumes", volumes)
+                .query(Boolean.class)
+                .single();
+        if (citedBeyond) {
+            throw new FieldValidationException("volumes", "below_benefit");
         }
     }
 

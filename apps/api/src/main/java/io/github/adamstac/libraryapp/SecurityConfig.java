@@ -54,7 +54,8 @@ class SecurityConfig {
     private static final String[] LIBRARY = {
         "/api/v1/authors", "/api/v1/authors/**", "/api/v1/places", "/api/v1/places/**",
         "/api/v1/sciences", "/api/v1/sciences/**", "/api/v1/works", "/api/v1/works/**",
-        "/api/v1/editions", "/api/v1/editions/**", "/api/v1/library-settings", "/api/v1/bookmarks"
+        "/api/v1/editions", "/api/v1/editions/**", "/api/v1/library-settings", "/api/v1/bookmarks",
+        "/api/v1/benefits", "/api/v1/benefits/**"
     };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
