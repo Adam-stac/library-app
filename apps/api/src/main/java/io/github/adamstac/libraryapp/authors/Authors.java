@@ -31,4 +31,7 @@ public interface Authors {
      * matched literally: % and _ are not wildcards.
      */
     Found search(UUID ownerId, String text, int limit);
+
+    /** How many authors the user has. */
+    long count(UUID ownerId);
 }

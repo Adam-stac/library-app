@@ -129,6 +129,14 @@ class AuthorService implements Authors {
     }
 
     @Override
+    public long count(UUID ownerId) {
+        return jdbc.sql("SELECT count(*) FROM authors WHERE owner_id = :owner")
+                .param("owner", ownerId)
+                .query(Long.class)
+                .single();
+    }
+
+    @Override
     public Found search(UUID ownerId, String text, int limit) {
         // ESCAPE: library_like_pattern turns % and _ in the text into ordinary characters
         String matching = "owner_id = :owner AND search_key LIKE library_like_pattern(:text) ESCAPE '\\'";
