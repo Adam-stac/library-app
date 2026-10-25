@@ -125,17 +125,40 @@ class PlaceService implements Places {
                 .collect(Collectors.toMap(PlaceName::id, name -> name));
     }
 
+    @Override
+    public Found search(UUID ownerId, String text, int limit) {
+        // ESCAPE: library_like_pattern turns % and _ in the text into ordinary characters
+        String matching = VISIBLE + " AND search_key LIKE library_like_pattern(:text) ESCAPE '\\'";
+        long total = jdbc.sql("SELECT count(*) FROM places WHERE " + matching)
+                .param("owner", ownerId)
+                .param("text", text)
+                .query(Long.class)
+                .single();
+        List<PlaceName> items = jdbc.sql("SELECT id, name_ar, name_en FROM places WHERE " + matching
+                        + " ORDER BY library_sort_key(coalesce(name_ar, name_en)), id LIMIT :limit")
+                .param("owner", ownerId)
+                .param("text", text)
+                .param("limit", limit)
+                .query((rs, rowNum) -> new PlaceName(
+                        rs.getObject("id", UUID.class), rs.getString("name_ar"), rs.getString("name_en")))
+                .list();
+        return new Found(items, total);
+    }
+
     // ---- Reading -----------------------------------------------------------------------------------------------
 
-    /** A page of places, sorted by the Arabic or the English name (falling back to the other). */
+    /**
+     * A page of places, sorted by the Arabic or the English name (falling back to the other),
+     * ignoring a leading "ال" or "al-", vowel marks and the forms of alif (V16).
+     */
     Page list(UUID ownerId, Scope scope, int page, int size, boolean arabicFirst) {
         long total = jdbc.sql("SELECT count(*) FROM places WHERE " + scope.condition)
                 .param("owner", ownerId)
                 .query(Long.class)
                 .single();
         String order = arabicFirst
-                ? "lower(coalesce(name_ar, name_en)), lower(coalesce(name_en, name_ar)), id"
-                : "lower(coalesce(name_en, name_ar)), lower(coalesce(name_ar, name_en)), id";
+                ? "library_sort_key(coalesce(name_ar, name_en)), library_sort_key(coalesce(name_en, name_ar)), id"
+                : "library_sort_key(coalesce(name_en, name_ar)), library_sort_key(coalesce(name_ar, name_en)), id";
         List<PlaceSummary> items = jdbc.sql("""
                         SELECT id, name_ar, name_en, country_ar, country_en, owner_id IS NULL AS shared
                         FROM places WHERE %s

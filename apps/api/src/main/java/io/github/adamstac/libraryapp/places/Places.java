@@ -1,6 +1,7 @@
 package io.github.adamstac.libraryapp.places;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,4 +23,13 @@ public interface Places {
 
     /** The names of the places the user may use, by ID; IDs the user may not use are left out. */
     Map<UUID, PlaceName> names(UUID ownerId, Collection<UUID> placeIds);
+
+    /** Search results: the first few, in name order, and how many there are in all. */
+    record Found(List<PlaceName> items, long total) {}
+
+    /**
+     * The places the user may use (their own and the shared list) whose names contain the search text, matched
+     * the Arabic-aware way (V16). The text is matched literally: % and _ are not wildcards.
+     */
+    Found search(UUID ownerId, String text, int limit);
 }

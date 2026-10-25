@@ -51,8 +51,8 @@ class ScienceService {
 
     ScienceList list(UUID ownerId, boolean arabicFirst) {
         String order = arabicFirst
-                ? "lower(coalesce(name_ar, name_en)), lower(coalesce(name_en, name_ar)), id"
-                : "lower(coalesce(name_en, name_ar)), lower(coalesce(name_ar, name_en)), id";
+                ? "library_sort_key(coalesce(name_ar, name_en)), library_sort_key(coalesce(name_en, name_ar)), id"
+                : "library_sort_key(coalesce(name_en, name_ar)), library_sort_key(coalesce(name_ar, name_en)), id";
         List<Science> items = jdbc.sql("SELECT " + COLUMNS + " FROM sciences WHERE owner_id = :owner ORDER BY " + order)
                 .param("owner", ownerId) // the order is one of two fixed strings above, never user input
                 .query(ScienceService::science)
