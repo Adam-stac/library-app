@@ -8,6 +8,8 @@ https://github.com/aliftype/amiri/releases, then from apps/web:
     pip install fonttools uharfbuzz brotli
     python3 scripts/make-mark.py path/to/Amiri-Bold.ttf > mark.txt
 It prints the viewBox, then the path data for src/components/Brand.tsx, then the path for public/favicon.svg.
+Files in public/ are served as they are, so they carry no comments (src/publicFiles.test.ts checks): the credit
+for Amiri lives here and in ADR 0008.
 """
 import io
 import sys
