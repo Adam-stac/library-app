@@ -66,6 +66,35 @@ export type Edition = EditionSummary & {
   version: number
 }
 
+/** A book in one of the home page's short lists. */
+export type ShelfBook = {
+  id: string
+  title: string | null
+  volumes: number | null
+  purchasedOn: string | null
+  startedOn: string | null
+  work: WorkSummary
+}
+
+/** One of the most recently moved bookmarks, with its book. */
+export type PlacedBookmark = {
+  editionId: string
+  work: WorkSummary
+  title: string | null
+  volumes: number | null
+  bookmark: Bookmark
+}
+
+/** GET /api/v1/home: the whole library at a glance (ADR 0007). */
+export type HomeSummary = {
+  counts: { books: number; works: number; authors: number; benefits: number; reading: number }
+  thisYear: { year: number; started: number; finished: number; spent: { currency: string; amount: string }[] }
+  bySciences: { science: Named | null; books: number; percent: number }[]
+  notStarted: ShelfBook[]
+  quiet: ShelfBook[]
+  recentBookmarks: PlacedBookmark[]
+}
+
 export type EditionPage = { items: EditionSummary[]; page: number; size: number; total: number }
 
 /** True when the text has Arabic letters, so a name typed into a search box is filed as the Arabic name. */
