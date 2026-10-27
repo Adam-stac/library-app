@@ -76,8 +76,8 @@ class TwoFactorTests {
 
         HttpResponse<String> setup = browser.post("/api/v1/auth/2fa/totp/setup", password(PASSWORD));
         assertThat(setup.statusCode()).isEqualTo(200);
-        assertThat(setup.body()).contains("otpauth://totp/My%20Library%3Areader%40example.com?secret=")
-                .contains("issuer=My%20Library");
+        assertThat(setup.body()).contains("otpauth://totp/Khizana%3Areader%40example.com?secret=")
+                .contains("issuer=Khizana");
         byte[] secret = Base32.decode(secretFrom(setup));
         assertThat(secret).hasSize(20);
         byte[] stored = jdbc.sql("SELECT secret_encrypted FROM totp_credentials").query(byte[].class).single();

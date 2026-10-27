@@ -5,9 +5,7 @@ import { postJson } from '../api'
 import { useAuth } from '../auth/context'
 import { type ActiveSession, deviceName, eventText, fetchActivity, type SecurityEvent } from '../security'
 
-const button =
-  'min-h-11 rounded-full px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-const secondary = `${button} border border-stone-900 hover:bg-stone-100`
+const secondary = 'btn'
 
 /** Event types that mean something may be wrong: shown with a marker so they stand out. */
 const WARNINGS = new Set(['sign_in_failed', 'account_locked', 'second_step_failed'])
@@ -72,41 +70,41 @@ export default function SecurityPage() {
 
   return (
     <section className="max-w-2xl">
-      <h1 className="text-3xl font-semibold">{t('security.title')}</h1>
-      <p className="mt-3 text-stone-700">{t('security.intro')}</p>
+      <h1 className="page-title">{t('security.title')}</h1>
+      <p className="lede">{t('security.intro')}</p>
 
       {notice && (
-        <p role="status" className="mt-6 rounded-lg border border-stone-300 bg-white px-4 py-3">
+        <p role="status" className="notice mt-6">
           {notice}
         </p>
       )}
       {error && (
-        <p role="alert" className="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <p role="alert" className="mt-6 rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
           {error === 'not_found'
             ? t('security.sessionGone')
             : t(`errors.${error}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}
 
-      <h2 id="sessions-title" className="mt-8 text-xl font-semibold">
+      <h2 id="sessions-title" className="section-title mt-12">
         {t('security.sessionsTitle')}
       </h2>
       {sessions && (
         <>
           <ul aria-labelledby="sessions-title" className="mt-3 flex flex-col gap-3">
             {sessions.map((session) => (
-              <li key={session.handle} className="rounded-lg border border-stone-200 bg-white p-4">
+              <li key={session.handle} className="rounded-xl border border-line bg-surface p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold">
                       <bdi>{deviceName(session.device, t)}</bdi>
                       {session.current && (
-                        <span className="ms-2 rounded-full bg-stone-900 px-2 py-0.5 text-xs font-semibold text-white">
+                        <span className="ms-2 rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">
                           {t('security.thisDevice')}
                         </span>
                       )}
                     </p>
-                    <p className="text-sm text-stone-700">
+                    <p className="text-sm text-muted">
                       {t('security.signedIn', { when: when(session.signedInAt) })}
                       {' · '}
                       {t('security.lastActive', { when: when(session.lastActiveAt) })}
@@ -155,28 +153,28 @@ export default function SecurityPage() {
               </button>
             </p>
           ) : (
-            <p className="mt-3 text-stone-700">{t('security.onlyThisDevice')}</p>
+            <p className="mt-3 text-muted">{t('security.onlyThisDevice')}</p>
           )}
         </>
       )}
 
-      <h2 id="activity-title" className="mt-10 text-xl font-semibold">
+      <h2 id="activity-title" className="section-title mt-12">
         {t('security.activityTitle')}
       </h2>
-      <p className="mt-2 text-stone-700">{t('security.activityIntro')}</p>
+      <p className="mt-2 text-muted">{t('security.activityIntro')}</p>
       {events && events.length > 0 && (
-        <ol aria-labelledby="activity-title" className="mt-3 divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
+        <ol aria-labelledby="activity-title" className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
           {events.map((event, index) => (
             <li key={`${event.occurredAt}-${index}`} className="px-4 py-3">
               <p className="font-semibold">
                 {WARNINGS.has(event.type) && (
-                  <span aria-hidden="true" className="me-2 text-red-700">
+                  <span aria-hidden="true" className="me-2 text-danger">
                     !
                   </span>
                 )}
                 {eventText(event, t)}
               </p>
-              <p className="text-sm text-stone-700">
+              <p className="text-sm text-muted">
                 <time dateTime={event.occurredAt}>{when(event.occurredAt)}</time>
                 {' · '}
                 <bdi>{deviceName(event.device, t)}</bdi>
@@ -191,11 +189,11 @@ export default function SecurityPage() {
           ))}
         </ol>
       )}
-      {events && events.length === 0 && <p className="mt-3 text-stone-700">{t('security.noActivity')}</p>}
+      {events && events.length === 0 && <p className="mt-3 text-muted">{t('security.noActivity')}</p>}
 
-      <p className="mt-8 rounded-lg border-s-4 border-stone-400 bg-white px-4 py-3 text-stone-700">
+      <p className="mt-8 rounded-lg border-s-4 border-line-strong bg-surface px-4 py-3 text-muted">
         {t('security.notYou')}{' '}
-        <Link to="/change-password" className="font-semibold underline underline-offset-4">
+        <Link to="/change-password" className="link">
           {t('home.changePassword')}
         </Link>
       </p>

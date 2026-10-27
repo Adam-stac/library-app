@@ -49,7 +49,7 @@ class PasskeyService {
 
     static final int MAX_PASSKEYS = 10;
     static final long TIMEOUT_MILLIS = 300_000;
-    private static final String SITE_NAME = "My Library";
+    private static final String SITE_NAME = "Khizana";
 
     private static final Logger log = LoggerFactory.getLogger(PasskeyService.class);
     private static final SecureRandom RANDOM = new SecureRandom();

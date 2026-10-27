@@ -85,6 +85,31 @@ export function lifeYears(author: Pick<Author, 'birth' | 'death'>, t: TFunction,
   return null
 }
 
+/**
+ * The short year an index shows beside a name, as classical books cite scholars: the year of death ("d. 256 AH",
+ * "ت ٢٥٦هـ"), or of birth if that's all there is. The Hijri year only; the CE year only if there's no Hijri year.
+ */
+export function indexYear(author: Pick<Author, 'birth' | 'death'>, t: TFunction, language: string): string | null {
+  const short = (year: Year): string | null => {
+    let text: string
+    if (year.hijri !== null) {
+      text =
+        year.hijri < 0
+          ? t('years.beforeHijra', { year: formatNumber(-year.hijri, language) })
+          : t('years.hijri', { year: formatNumber(year.hijri, language) })
+    } else if (year.ce !== null) {
+      text = ceText(year.ce, year.ce, t, language)
+    } else {
+      return null
+    }
+    return year.approximate ? t('years.approximate', { year: text }) : text
+  }
+  const death = short(author.death)
+  if (death) return t('years.diedShort', { year: death })
+  const birth = short(author.birth)
+  return birth ? t('years.bornShort', { year: birth }) : null
+}
+
 /** True when a CE year on show was worked out, not typed. */
 export function hasWorkedOutCe(author: Pick<Author, 'birth' | 'death'>): boolean {
   return [author.birth, author.death].some((year) => year.hijri !== null && year.ce === null)

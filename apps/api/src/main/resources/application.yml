@@ -56,7 +56,7 @@ management:
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000} # used to build links in emails
   mail:
-    from: ${MAIL_FROM:My Library <no-reply@library.local>}
+    from: ${MAIL_FROM:Khizana <no-reply@library.local>}
   hibp:
     base-url: ${HIBP_BASE_URL:https://api.pwnedpasswords.com}
     timeout-ms: 3000

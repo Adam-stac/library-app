@@ -6,10 +6,8 @@ import { useAuth } from '../auth/context'
 import FormField from '../components/FormField'
 import { addPasskey, type Passkey, passkeysSupported } from '../passkeys'
 
-const button =
-  'min-h-11 rounded-full px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-const primary = `${button} bg-stone-900 text-white hover:bg-stone-700`
-const secondary = `${button} border border-stone-900 hover:bg-stone-100`
+const primary = 'btn btn-primary'
+const secondary = 'btn'
 
 /** Adding and removing passkeys. Signed-in accounts only; every change needs the password again. */
 export default function PasskeysPage() {
@@ -50,32 +48,32 @@ export default function PasskeysPage() {
 
   return (
     <section className="max-w-xl">
-      <h1 className="text-3xl font-semibold">{t('passkeys.title')}</h1>
-      <p className="mt-3 text-stone-700">{t('passkeys.intro')}</p>
+      <h1 className="page-title">{t('passkeys.title')}</h1>
+      <p className="lede">{t('passkeys.intro')}</p>
 
       {notice && (
-        <p role="status" className="mt-6 rounded-lg border border-stone-300 bg-white px-4 py-3">
+        <p role="status" className="notice mt-6">
           {notice}
         </p>
       )}
 
       {!canUsePasskeys && (
-        <p className="mt-6 rounded-lg border border-stone-300 bg-white px-4 py-3">{t('passkeys.unsupported')}</p>
+        <p className="notice mt-6">{t('passkeys.unsupported')}</p>
       )}
 
       {passkeys && (
         <>
-          <h2 className="mt-8 text-lg font-semibold">{t('passkeys.yours')}</h2>
+          <h2 className="section-title mt-10">{t('passkeys.yours')}</h2>
           {passkeys.length === 0 ? (
-            <p className="mt-2 text-stone-700">{t('passkeys.none')}</p>
+            <p className="mt-2 text-muted">{t('passkeys.none')}</p>
           ) : (
             <ul className="mt-3 flex flex-col gap-3">
               {passkeys.map((passkey) => (
-                <li key={passkey.id} className="rounded-lg border border-stone-200 bg-white p-4">
+                <li key={passkey.id} className="rounded-xl border border-line bg-surface p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-semibold break-words">{passkey.label}</p>
-                      <p className="text-sm text-stone-700">
+                      <p className="text-sm text-muted">
                         {t('passkeys.added', { date: date(passkey.createdAt) })}
                         {' · '}
                         {passkey.lastUsedAt ? t('passkeys.lastUsed', { date: date(passkey.lastUsedAt) }) : t('passkeys.neverUsed')}
@@ -137,8 +135,8 @@ export default function PasskeysPage() {
       )}
 
       {adding && (
-        <div className="mt-8 rounded-lg border border-stone-200 bg-white p-6">
-          <h2 className="text-lg font-semibold">{t('passkeys.addTitle')}</h2>
+        <div className="card mt-8 p-6">
+          <h2 className="section-title">{t('passkeys.addTitle')}</h2>
           <PasswordForm
             withLabel
             intro={t('passkeys.addBody')}
@@ -208,9 +206,9 @@ function PasswordForm({
 
   return (
     <form noValidate onSubmit={onSubmit} className="mt-4 flex flex-col gap-5">
-      <p className="text-stone-700">{intro}</p>
+      <p className="text-muted">{intro}</p>
       {formError && (
-        <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
           {t(`errors.${formError}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}

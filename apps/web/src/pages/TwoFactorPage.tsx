@@ -16,10 +16,8 @@ type View =
   | { name: 'newCodes' }
   | { name: 'turnOff' }
 
-const button =
-  'min-h-11 rounded-full px-6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60'
-const primary = `${button} bg-stone-900 text-white hover:bg-stone-700`
-const secondary = `${button} border border-stone-900 hover:bg-stone-100`
+const primary = 'btn btn-primary'
+const secondary = 'btn'
 
 /** Turning two-step verification on and off, and managing recovery codes. Signed-in accounts only. */
 export default function TwoFactorPage() {
@@ -67,7 +65,7 @@ export default function TwoFactorPage() {
   }
 
   const heading = (text: string) => (
-    <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold focus:outline-none">
+    <h1 ref={headingRef} tabIndex={-1} className="page-title focus:outline-none">
       {text}
     </h1>
   )
@@ -76,7 +74,7 @@ export default function TwoFactorPage() {
     return (
       <section className="max-w-md">
         {heading(t('twoFactor.turnOnTitle'))}
-        <p className="mt-3 text-stone-700">{t('twoFactor.passwordFirst')}</p>
+        <p className="lede">{t('twoFactor.passwordFirst')}</p>
         <PasswordForm
           submitLabel={t('twoFactor.continue')}
           onCancel={() => setView({ name: 'status' })}
@@ -98,12 +96,12 @@ export default function TwoFactorPage() {
         {heading(t('twoFactor.turnOnTitle'))}
         <ol className="mt-6 flex flex-col gap-8">
           <li>
-            <h2 className="text-lg font-semibold">{t('twoFactor.step1')}</h2>
-            <p className="mt-2 text-stone-700">{t('twoFactor.step1Body')}</p>
+            <h2 className="section-title">{t('twoFactor.step1')}</h2>
+            <p className="mt-2 text-muted">{t('twoFactor.step1Body')}</p>
             <div className="mt-4">
               <QrCode text={view.setup.otpauthUri} label={t('twoFactor.qrLabel')} />
             </div>
-            <p className="mt-4 text-sm text-stone-700">{t('twoFactor.manualKey')}</p>
+            <p className="mt-4 text-sm text-muted">{t('twoFactor.manualKey')}</p>
             <p
               dir="ltr"
               data-testid="totp-secret"
@@ -113,7 +111,7 @@ export default function TwoFactorPage() {
             </p>
           </li>
           <li>
-            <h2 className="text-lg font-semibold">{t('twoFactor.step2')}</h2>
+            <h2 className="section-title">{t('twoFactor.step2')}</h2>
             <CodeForm
               label={t('twoFactor.codeFromApp')}
               submitLabel={t('twoFactor.turnOn')}
@@ -145,7 +143,7 @@ export default function TwoFactorPage() {
     return (
       <section className="max-w-md">
         {heading(t('twoFactor.newCodesTitle'))}
-        <p className="mt-3 text-stone-700">{t('twoFactor.newCodesBody')}</p>
+        <p className="lede">{t('twoFactor.newCodesBody')}</p>
         <PasswordForm
           submitLabel={t('twoFactor.createCodes')}
           onCancel={() => setView({ name: 'status' })}
@@ -169,7 +167,7 @@ export default function TwoFactorPage() {
     return (
       <section className="max-w-md">
         {heading(t('twoFactor.turnOffTitle'))}
-        <p className="mt-3 text-stone-700">{t('twoFactor.turnOffBody')}</p>
+        <p className="lede">{t('twoFactor.turnOffBody')}</p>
         <PasswordForm
           withCode
           submitLabel={t('twoFactor.turnOff')}
@@ -189,21 +187,21 @@ export default function TwoFactorPage() {
   return (
     <section className="max-w-xl">
       {heading(t('twoFactor.title'))}
-      <p className="mt-3 text-stone-700">{t('twoFactor.intro')}</p>
+      <p className="lede">{t('twoFactor.intro')}</p>
       {view.notice && (
-        <p role="status" className="mt-6 rounded-lg border border-stone-300 bg-white px-4 py-3">
+        <p role="status" className="notice mt-6">
           {view.notice}
         </p>
       )}
       {status && (
-        <div className="mt-8 rounded-lg border border-stone-200 bg-white p-6">
+        <div className="card mt-8 p-6">
           <p className="text-lg">
             {t('twoFactor.statusLabel')}{' '}
             <strong className="font-semibold">{status.enabled ? t('twoFactor.on') : t('twoFactor.off')}</strong>
           </p>
           {status.enabled ? (
             <>
-              <p className="mt-2 text-stone-700">
+              <p className="mt-2 text-muted">
                 {t('twoFactor.codesLeft', { count: status.recoveryCodesLeft })}
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
@@ -217,7 +215,7 @@ export default function TwoFactorPage() {
             </>
           ) : (
             <>
-              <p className="mt-2 text-stone-700">{t('twoFactor.offBody')}</p>
+              <p className="mt-2 text-muted">{t('twoFactor.offBody')}</p>
               <div className="mt-6">
                 <button type="button" className={primary} onClick={() => setView({ name: 'start' })}>
                   {t('twoFactor.turnOn')}
@@ -251,7 +249,7 @@ function FormError({ code }: { code: string | null }): ReactNode {
   const { t } = useTranslation()
   if (!code) return null
   return (
-    <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+    <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
       {t(`errors.${code}`, { defaultValue: t('errors.unexpected') })}
     </p>
   )
@@ -423,11 +421,11 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
 
   return (
     <>
-      <p className="mt-3 text-stone-700">{t('twoFactor.codesBody')}</p>
+      <p className="mt-3 text-muted">{t('twoFactor.codesBody')}</p>
       <ul
         dir="ltr"
         aria-label={t('twoFactor.codesTitle')}
-        className="mt-6 grid grid-cols-1 gap-2 rounded-lg border border-stone-300 bg-white p-6 font-mono text-lg sm:grid-cols-2"
+        className="mt-6 grid grid-cols-1 gap-2 rounded-lg border border-line bg-surface p-6 font-mono text-lg sm:grid-cols-2"
       >
         {codes.map((code) => (
           <li key={code}>{code}</li>
@@ -444,7 +442,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
           {t('twoFactor.saved')}
         </button>
       </div>
-      <p aria-live="polite" className="mt-3 text-sm text-stone-700">
+      <p aria-live="polite" className="mt-3 text-sm text-muted">
         {copied ? t('twoFactor.copied') : ''}
       </p>
     </>

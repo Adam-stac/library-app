@@ -34,6 +34,11 @@ A feature is finished only when every relevant layer below is tested and CI is g
 - The shared starter list of places is loaded by a migration, so it is in every test database. Tests find a shared
   place by its English name (for example `Makkah`) and never change the list.
 
+## No dead ends
+- **`src/noDeadEnds.test.ts`** (web) reads every page and component and fails on a link to an address with no page,
+  a button that does nothing, a "coming soon" text, or a text missing from Arabic or English (ADR 0008). It runs
+  with the other web tests, so CI fails before a placeholder can be merged.
+
 ## Coming next
 - Mutation testing (PIT), nightly: proves the tests would catch real bugs
 - ZAP active scan of the API from its OpenAPI description

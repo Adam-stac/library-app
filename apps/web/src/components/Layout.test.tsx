@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import { useEffect } from 'react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -35,7 +36,10 @@ describe('Layout account controls', () => {
   })
 
   it('offers sign-in when signed out', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => Promise.resolve(json(401))))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => Promise.resolve(json(401))),
+    )
     renderLayout()
 
     expect(await screen.findByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in')
@@ -44,12 +48,15 @@ describe('Layout account controls', () => {
 
   it('shows who is signed in, and signing out ends the session with the CSRF token', async () => {
     const fetchMock = vi.fn((path: string) =>
-      Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+      Promise.resolve(
+        path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+      ),
     )
     vi.stubGlobal('fetch', fetchMock)
     const user = renderLayout()
 
-    expect(await screen.findByText('reader@example.com')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^Your account,\s*reader@example\.com$/ })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Your account/ }))
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
     expect(await screen.findByRole('link', { name: 'Sign in' })).toBeInTheDocument()
@@ -72,20 +79,85 @@ describe('Layout account controls', () => {
     )
     const user = renderLayout()
 
-    await user.click(await screen.findByRole('button', { name: 'Sign out' }))
+    await user.click(await screen.findByRole('button', { name: /Your account/ }))
+    await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't sign you out")
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
   })
 
+  it('keeps the page in place when the check of who is signed in finishes, so it is not built again', async () => {
+    // A page built twice loses what it read once, such as the one-time token in a confirmation link
+    let builds = 0
+    function Page() {
+      useEffect(() => {
+        builds++
+      }, [])
+      return <p>page</p>
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+      ),
+    )
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <Layout>
+            <Page />
+          </Layout>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('button', { name: /Your account/ })).toBeInTheDocument()
+    expect(builds).toBe(1)
+  })
+
+  it('the account menu opens and closes, with the settings and signing out in it', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(
+          path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+        ),
+      ),
+    )
+    const user = renderLayout()
+
+    const account = await screen.findByRole('button', { name: /Your account/ })
+    expect(account).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('button', { name: 'Sign out' })).not.toBeInTheDocument()
+
+    await user.click(account)
+    expect(account).toHaveAttribute('aria-expanded', 'true')
+    const menu = document.getElementById(account.getAttribute('aria-controls')!)!
+    expect(within(menu).getByText('reader@example.com')).toBeInTheDocument()
+    expect(within(menu).getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
+    expect(within(menu).getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+
+    // Escape closes it and puts focus back on the button
+    await user.keyboard('{Escape}')
+    expect(account).toHaveAttribute('aria-expanded', 'false')
+    expect(account).toHaveFocus()
+
+    // So does a click anywhere else
+    await user.click(account)
+    await user.click(screen.getByText('content'))
+    expect(account).toHaveAttribute('aria-expanded', 'false')
+  })
+
   it('switching language while signed in saves it to the account, for emails', async () => {
     const fetchMock = vi.fn((path: string) =>
-      Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+      Promise.resolve(
+        path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+      ),
     )
     vi.stubGlobal('fetch', fetchMock)
     const user = renderLayout()
 
-    await screen.findByText('reader@example.com')
+    await screen.findByRole('button', { name: /Your account/ })
     await user.click(screen.getByRole('button', { name: 'العربية' }))
 
     await vi.waitFor(() => expect(fetchMock.mock.calls.map(([path]) => path)).toContain('/api/v1/auth/preferences'))
@@ -109,5 +181,26 @@ describe('Layout account controls', () => {
     expect(i18n.language).toBe('ar')
     expect(fetchMock.mock.calls.map(([path]) => path)).not.toContain('/api/v1/auth/preferences')
     await i18n.changeLanguage('en')
+  })
+
+  it('signed in, links only to the sections that exist, marking the one you are on', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(
+          path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+        ),
+      ),
+    )
+    renderLayout()
+
+    const sections = await screen.findByRole('navigation', { name: 'Library' })
+    const links = within(sections).getAllByRole('link')
+    expect(links.map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+      ['Home', '/'],
+      ['Authors', '/authors'],
+      ['Settings', '/settings'],
+    ])
+    expect(within(sections).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
   })
 })

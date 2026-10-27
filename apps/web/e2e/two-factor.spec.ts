@@ -11,6 +11,7 @@ async function expectAccessible(page: Page, what: string) {
 
 /** Signs out and waits until the server has ended the session, so the next step can't race it. */
 async function signOut(page: Page) {
+  await page.getByRole('button', { name: /^Your account/ }).click() // the account menu
   await page.getByRole('button', { name: 'Sign out' }).click()
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Sign in' })).toBeVisible()
 }
@@ -38,9 +39,10 @@ test.describe('Two-step verification', () => {
     await page.goto(await verificationLinkFor(request, address))
     await expect(page.getByRole('heading', { name: 'Your email is confirmed' })).toBeVisible()
     await enterPassword(page, address)
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // Turn it on
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await page.getByRole('link', { name: 'Two-step verification' }).click()
     await expectAccessible(page, 'status page')
     await page.getByRole('button', { name: 'Turn on' }).click()
@@ -65,14 +67,14 @@ test.describe('Two-step verification', () => {
     await expectAccessible(page, 'second step')
     await page.getByLabel('Code').fill(totp(secret, 1))
     await page.getByRole('button', { name: 'Verify' }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     // Or with a recovery code, which then works only once
     await signOut(page)
     await enterPassword(page, address)
     await page.getByLabel('Code').fill(recoveryCodes[0])
     await page.getByRole('button', { name: 'Verify' }).click()
-    await expect(page.getByText("You're signed in as")).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
     await signOut(page)
     await enterPassword(page, address)

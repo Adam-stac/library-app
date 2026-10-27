@@ -10,10 +10,12 @@ import ChangePasswordPage from './pages/ChangePasswordPage'
 import ConfirmEmailChangePage from './pages/ConfirmEmailChangePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
+import NotFoundPage from './pages/NotFoundPage'
 import PasskeysPage from './pages/PasskeysPage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SecurityPage from './pages/SecurityPage'
+import SettingsPage from './pages/SettingsPage'
 import SignInPage from './pages/SignInPage'
 import TwoFactorPage from './pages/TwoFactorPage'
 import VerifyEmailPage from './pages/VerifyEmailPage'
@@ -32,6 +34,7 @@ export default function App() {
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/two-step-verification" element={<TwoFactorPage />} />
           <Route path="/passkeys" element={<PasskeysPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/security" element={<SecurityPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
@@ -40,7 +43,7 @@ export default function App() {
           <Route path="/authors/new" element={<AuthorFormPage mode="add" />} />
           <Route path="/authors/:id" element={<AuthorPage />} />
           <Route path="/authors/:id/edit" element={<AuthorFormPage mode="edit" />} />
-          <Route path="*" element={<HomePage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
     </AuthProvider>

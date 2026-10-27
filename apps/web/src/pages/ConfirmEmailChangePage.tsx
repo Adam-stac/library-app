@@ -48,10 +48,10 @@ export default function ConfirmEmailChangePage() {
 
   return (
     <section role="status" className="max-w-md">
-      <h1 className="text-3xl font-semibold">{content.title}</h1>
-      <p className="mt-4 text-lg text-stone-700">{content.body}</p>
+      <h1 className="page-title">{content.title}</h1>
+      <p className="lede mt-3">{content.body}</p>
       <p className="mt-8">
-        <Link to={content.link} className="font-semibold underline underline-offset-4">
+        <Link to={content.link} className="link">
           {content.linkText}
         </Link>
       </p>

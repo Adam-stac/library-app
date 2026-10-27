@@ -15,6 +15,8 @@ type Props = {
   mono?: boolean
   /** Passwords and codes are always left-to-right; names follow what's typed. */
   dir?: 'ltr' | 'auto'
+  /** Words for the library, such as names: typed in the font they will be shown in */
+  book?: boolean
 }
 
 /** A labelled text input with an optional hint and its error, wired up for screen readers. */
@@ -31,13 +33,14 @@ export default function FormField({
   maxLength = 1024,
   mono = false,
   dir = 'ltr',
+  book = false,
 }: Props) {
   const { t } = useTranslation()
   const describedBy = [hint ? `${id}-hint` : undefined, error ? `${id}-error` : undefined].filter(Boolean).join(' ')
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="font-semibold">
+      <label htmlFor={id} className="label">
         {label}
       </label>
       <input
@@ -53,15 +56,15 @@ export default function FormField({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className={`min-h-11 rounded-lg border border-stone-400 bg-white px-3 aria-invalid:border-red-700 ${mono ? 'font-mono tracking-widest' : ''}`}
+        className={`field ${mono ? 'font-mono tracking-widest' : ''} ${book ? 'font-book' : ''}`}
       />
       {hint && (
-        <p id={`${id}-hint`} className="text-sm text-stone-700">
+        <p id={`${id}-hint`} className="text-sm text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-error`} className="text-sm text-red-800">
+        <p id={`${id}-error`} className="text-sm text-danger">
           {t(`errors.${error}`, { defaultValue: t('errors.unexpected') })}
         </p>
       )}

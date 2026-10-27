@@ -1,0 +1,78 @@
+# 0008. Design system, the خِزانة mark, and no dead ends
+
+- **Status:** Accepted
+- **Date:** 2026-10-25
+
+## Context
+
+The backend is complete (slices 9 to 16b). The interface is built next, one area at a time (roadmap, Phase B).
+The app is named **Khizāna (خِزانة)**, the room or cabinet where a scholar kept their books. The owner asked for a
+look that is minimal, modern and calm, unlike the cream, clay and serif style common in generated web apps, and
+for one firm rule: nothing on screen may be a placeholder. Every button and link must work, end to end.
+
+## Decision
+
+- **Tokens, not one-off colours.** Colours are named for their job (`paper`, `surface`, `ink`, `muted`, `line`,
+  `accent`, `danger`…) in `src/index.css`, with a light and a dark set that follow the device's setting. The greys
+  carry a trace of the accent's green (no cream). One accent: deep green (`#1D5C4E`, `#7CC4AD` in dark mode).
+  Every text colour is at least 6:1 against its background in both sets, and input borders at least 3:1 (WCAG 2.2
+  AA asks for 4.5:1 and 3:1).
+- **A few shared classes** (`page-title`, `section-title`, `lede`, `label`, `btn`, `btn-primary`, `btn-ghost`,
+  `btn-danger`, `link`, `back-link`, `field`, `card`, `notice`, `font-book`) instead of long lists of utilities
+  repeated on every page, so a change of style is made once.
+- **Two voices in the type, all bundled with the app** (the Content-Security-Policy only allows fonts from our
+  own site; all under the SIL Open Font License):
+  - the interface speaks in Geist (Latin) and Readex Pro (Arabic): clear and modern;
+  - **words from the library itself** (authors' names, titles, biographies, benefits) are set in **Lateef**, a
+    naskh drawn by SIL, wherever they appear, including while they are typed. Lateef is small for its size, so its
+    `@font-face` scales it up (`size-adjust: 160%`) to sit level with the interface text, and it loads only for
+    Arabic letters (Latin letters in the same text fall back to Geist). Two weights, about 60 kB each, fetched only
+    on pages that show Arabic library text.
+- **Lists read like a book's index.** Authors are listed by name in Lateef, with the year of death at the end of
+  the line as classical books cite scholars ("ت ٢٥٦هـ", "d. 256 AH"), and grouped under the letter each name is
+  filed under. The letter comes from `src/indexLetter.ts`, which repeats the database's catalogue order
+  (`library_sort_key`, ADR 0006) exactly, so the groups match the order the API sends.
+- **Icons from Lucide** (ISC License), copied in as inline SVG (`components/Icon.tsx`): a few icons, no extra
+  dependency. Every icon sits beside a text label and is hidden from screen readers; arrows turn round on
+  right-to-left pages.
+- **The mark is a shape, not text.** خِزانة is drawn from Amiri Bold (a classical naskh, SIL Open Font License) by
+  `apps/web/scripts/make-mark.py` and shown as an inline SVG: the same on every device, coloured by the theme, and
+  without a 100 kB font download for one word. The favicon is its first letter, خ.
+- **The frame.** Signed in: a sidebar on wide screens (a top bar with the sections in a row on phones) linking only
+  to the areas that exist, the page you are on marked in the accent; each area is added when its pages are built.
+  At its foot, the language and an **account menu** (the account's initial and email address; opening on the
+  settings and signing out). **Frosted glass only where the page passes under something**: the phone's top bar and
+  menus, tinted enough to keep text readable over anything, and solid when the device asks for less transparency.
+  No background image: the identity is the mark and the type. Lists take the width beside the sidebar; forms and
+  reading pages are narrower. Signed out: the mark, signing in and the language along the top, and the page in one
+  centred column.
+- **No dead ends, checked on every build** (`src/noDeadEnds.test.ts`):
+  - every link and `navigate()` leads to an address that `App.tsx` has a page for; never `#`, `""` or
+    `javascript:`;
+  - every `<button>` says its type, and either submits a form or has an `onClick` that does something;
+  - no text says "coming soon";
+  - every text exists in both Arabic and English.
+  An address with no page shows "Page not found", rather than quietly showing the home page.
+
+## Alternatives considered
+
+- **A component library** (for example a ready-made design kit): heavier, harder to make right-to-left, and it
+  would look like every other app built with it.
+- **Amiri as a web font for the mark:** about 100 kB for one word, and the mark would shift while it loads.
+- **Amiri, Scheherazade New or Noto Naskh Arabic for library text:** compared side by side on a vowelled ḥadīth
+  and a book title. The owner chose Lateef. Commercial book faces (Traditional Arabic, Lotus, Badr) can't be
+  bundled.
+- **An icon package** (such as `lucide-react`): one more dependency to keep up to date, for about fifteen icons.
+- **Checking dead ends only in the end-to-end tests:** slower, and easy to miss a page; the source check is
+  instant. The end-to-end tests still prove each page's actions reach the API.
+
+## Consequences
+
+- New pages use the tokens and classes; a colour written directly (for example `bg-stone-900`) stands out in
+  review.
+- The check reads source text, so links built in unusual ways (a variable holding an address) aren't seen; links
+  are written as literals or simple templates so that they are.
+- The index letter must change with `library_sort_key`: if the database's rules change, `indexLetter.ts` and its
+  tests change in the same pull request.
+- The name changed in the emails, the authenticator app entry (now "Khizana") and the passkey prompts. Codes
+  already set up keep working; only the label is new.

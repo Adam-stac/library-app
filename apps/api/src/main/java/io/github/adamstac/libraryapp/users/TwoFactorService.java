@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 class TwoFactorService {
 
-    static final String ISSUER = "My Library";
+    static final String ISSUER = "Khizana";
 
     private static final Logger log = LoggerFactory.getLogger(TwoFactorService.class);
     private static final SecureRandom RANDOM = new SecureRandom();

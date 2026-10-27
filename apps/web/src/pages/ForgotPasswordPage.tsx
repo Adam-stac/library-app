@@ -47,12 +47,12 @@ export default function ForgotPasswordPage() {
   if (sentTo) {
     return (
       <section className="max-w-md">
-        <h1 ref={doneHeadingRef} tabIndex={-1} className="text-3xl font-semibold focus:outline-none">
+        <h1 ref={doneHeadingRef} tabIndex={-1} className="page-title focus:outline-none">
           {t('forgot.checkInboxTitle')}
         </h1>
-        <p className="mt-4 text-lg text-stone-700">{t('forgot.checkInboxBody', { email: sentTo })}</p>
+        <p className="lede mt-3">{t('forgot.checkInboxBody', { email: sentTo })}</p>
         <p className="mt-8">
-          <Link to="/sign-in" className="font-semibold underline underline-offset-4">
+          <Link to="/sign-in" className="link">
             {t('forgot.backToSignIn')}
           </Link>
         </p>
@@ -62,18 +62,18 @@ export default function ForgotPasswordPage() {
 
   return (
     <section className="max-w-md">
-      <h1 className="text-3xl font-semibold">{t('forgot.title')}</h1>
-      <p className="mt-3 text-stone-700">{t('forgot.intro')}</p>
+      <h1 className="page-title">{t('forgot.title')}</h1>
+      <p className="lede">{t('forgot.intro')}</p>
 
       <form noValidate onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
         {formError && (
-          <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+          <p role="alert" className="rounded-lg border border-danger-line bg-danger-soft px-4 py-3 text-danger">
             {errorText(formError)}
           </p>
         )}
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="font-semibold">
+          <label htmlFor="email" className="label">
             {t('forgot.email')}
           </label>
           <input
@@ -89,10 +89,10 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             aria-invalid={fieldError ? true : undefined}
             aria-describedby={fieldError ? 'email-error' : undefined}
-            className="min-h-11 rounded-lg border border-stone-400 bg-white px-3 aria-invalid:border-red-700"
+            className="field"
           />
           {fieldError && (
-            <p id="email-error" className="text-sm text-red-800">
+            <p id="email-error" className="text-sm text-danger">
               {errorText(fieldError)}
             </p>
           )}
@@ -102,14 +102,14 @@ export default function ForgotPasswordPage() {
           type="submit"
           disabled={submitting}
           aria-busy={submitting || undefined}
-          className="min-h-11 rounded-full bg-stone-900 px-6 font-semibold text-white hover:bg-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 disabled:opacity-60"
+          className="btn btn-primary"
         >
           {submitting ? t('forgot.submitting') : t('forgot.submit')}
         </button>
       </form>
 
       <p className="mt-8">
-        <Link to="/sign-in" className="font-semibold underline underline-offset-4">
+        <Link to="/sign-in" className="link">
           {t('forgot.backToSignIn')}
         </Link>
       </p>

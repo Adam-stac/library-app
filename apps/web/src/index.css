@@ -1,6 +1,242 @@
 @import 'tailwindcss';
 
-@theme {
-  /* IBM Plex Sans Arabic covers Arabic and Latin text, bundled with the app (no external font requests) */
-  --font-sans: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+/*
+ * Khizāna's design system: calm and minimal. Neutral greys with a trace of the accent's green (no cream), one
+ * accent (deep green), hairline borders, and quick quiet hover states. Light and dark follow the device's setting.
+ * Every colour pair used for text is at least 6:1 in both (WCAG 2.2 AA needs 4.5:1), and input borders are at least
+ * 3:1 against the page and the input.
+ *
+ * Type. Every font is bundled with the app (the Content-Security-Policy allows fonts from this site only), and all
+ * are under the SIL Open Font License:
+ *   - the interface: Geist for Latin letters, and Readex Pro for Arabic (the browser uses it for any character Geist
+ *     lacks);
+ *   - words from the library itself (authors' names, titles, biographies, benefits): Lateef, a naskh drawn by SIL.
+ *     Lateef is small for its size, so it is scaled up here (size-adjust) to sit level with the interface text: a
+ *     name in Lateef and a date in Readex Pro on one line look the same size. Lateef has Arabic letters only, so
+ *     Latin letters in the same text fall back to Geist. Use the `font-book` class;
+ *   - the خِزانة mark is a shape drawn from Amiri (components/Brand.tsx), not a font.
+ */
+
+@font-face {
+  font-family: 'Lateef Book';
+  font-style: normal;
+  font-weight: 100 499;
+  font-display: swap;
+  src: url('@fontsource/lateef/files/lateef-arabic-400-normal.woff2') format('woff2');
+  size-adjust: 160%;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E, U+25CC;
+}
+
+@font-face {
+  font-family: 'Lateef Book';
+  font-style: normal;
+  font-weight: 500 700; /* medium and bold text both use Lateef's semibold */
+  font-display: swap;
+  src: url('@fontsource/lateef/files/lateef-arabic-600-normal.woff2') format('woff2');
+  size-adjust: 160%;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E, U+25CC;
+}
+
+:root {
+  --paper: #f6f7f6; /* the page */
+  --surface: #ffffff; /* cards, inputs and menus */
+  --hover: #eceeec; /* a row or button under the pointer */
+  --ink: #121714; /* text */
+  --muted: #4f5853; /* secondary text */
+  --line: #e1e5e2; /* hairlines */
+  --line-strong: #858e89; /* input borders */
+  --accent: #1d5c4e; /* deep green */
+  --accent-hover: #164a3e;
+  --on-accent: #ffffff;
+  --accent-soft: #e2edea; /* the page you are on, notices */
+  --danger: #a52a1f;
+  --danger-hover: #8c2219;
+  --on-danger: #ffffff;
+  --danger-soft: #fbeeec;
+  --danger-line: #e8b9b3;
+  --shadow: 0 12px 32px -12px rgb(18 23 20 / 0.22);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b0e0d;
+    --surface: #141917;
+    --hover: #1c2321;
+    --ink: #e8ece9;
+    --muted: #a0a9a4;
+    --line: #252d2a;
+    --line-strong: #6d7873;
+    --accent: #7cc4ad;
+    --accent-hover: #97d3c0;
+    --on-accent: #0a1813;
+    --accent-soft: #163029;
+    --danger: #f0938a;
+    --danger-hover: #f5aba4;
+    --on-danger: #2a0d0a;
+    --danger-soft: #2c1513;
+    --danger-line: #6b302a;
+    --shadow: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-sans: 'Geist Variable', 'Readex Pro Variable', system-ui, sans-serif;
+  --font-book: 'Lateef Book', 'Geist Variable', 'Readex Pro Variable', system-ui, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-hover: var(--hover);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-on-danger: var(--on-danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-line: var(--danger-line);
+  --shadow-menu: var(--shadow);
+}
+
+@layer base {
+  html {
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    accent-color: var(--accent); /* checkboxes and radio buttons */
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  /* Numbers line up in columns and lists */
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Page structure. Tighter letter spacing for large Latin text only: spacing Arabic letters apart breaks them. */
+  .page-title {
+    @apply text-[1.75rem] leading-tight font-semibold text-balance sm:text-[2rem];
+  }
+  .page-title:lang(en),
+  .section-title:lang(en) {
+    letter-spacing: -0.015em;
+  }
+  .section-title {
+    @apply text-[1.0625rem] leading-snug font-semibold;
+  }
+  .lede {
+    @apply mt-2 max-w-prose text-pretty text-muted;
+  }
+
+  /* Form labels: quieter than headings, so the fields lead */
+  .label {
+    @apply text-sm font-medium;
+  }
+
+  /* Buttons and button-like links. Every one is at least 40px tall, an easy target on a phone. */
+  .btn {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4
+      text-sm font-medium whitespace-nowrap transition-colors duration-150 select-none hover:border-line-strong
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply border-accent bg-accent text-on-accent hover:border-accent-hover hover:bg-accent-hover;
+  }
+  .btn-danger {
+    @apply border-danger bg-danger text-on-danger hover:border-danger-hover hover:bg-danger-hover;
+  }
+  /* A button with no frame, for quiet actions */
+  .btn-ghost {
+    @apply border-transparent bg-transparent text-muted hover:border-transparent hover:bg-hover hover:text-ink;
+  }
+
+  /* A link inside text */
+  .link {
+    @apply font-medium text-accent underline decoration-1 underline-offset-4 hover:decoration-2;
+  }
+  /* A link back up a level, above a page's title */
+  .back-link {
+    @apply inline-flex min-h-10 items-center gap-1.5 rounded-lg text-sm font-medium text-muted transition-colors
+      duration-150 hover:text-ink;
+  }
+
+  /* Text inputs and text areas */
+  .field {
+    @apply min-h-10 rounded-lg border border-line-strong bg-surface px-3 text-ink transition-colors duration-150
+      hover:border-ink aria-invalid:border-danger;
+  }
+
+  /*
+   * Frosted glass, only for things the page passes under: the phone's top bar, and menus. Tinted heavily enough
+   * that text on it stays at least 4.5:1 even over the darkest thing in the app (a primary button) and usually
+   * above 6:1, since the blur spreads what is behind into the page colour. Solid where the browser can't blur, or
+   * when the device asks for less transparency.
+   */
+  .glass-bar {
+    background-color: color-mix(in srgb, var(--paper) 85%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+  }
+  .glass-panel {
+    background-color: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    backdrop-filter: blur(20px) saturate(1.4);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-bar {
+      background-color: var(--paper);
+    }
+    .glass-panel {
+      background-color: var(--surface);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass-bar {
+      background-color: var(--paper);
+    }
+    .glass-panel {
+      background-color: var(--surface);
+    }
+  }
+
+  /* A raised panel */
+  .card {
+    @apply rounded-xl border border-line bg-surface;
+  }
+
+  /* A message about what just happened, such as "Author added." */
+  .notice {
+    @apply flex items-start gap-2.5 rounded-lg bg-accent-soft px-4 py-3 text-sm text-ink;
+  }
+
+  /* Words from the library itself, in Lateef (see the top of this file) */
+  .font-book {
+    font-family: var(--font-book);
+  }
 }
