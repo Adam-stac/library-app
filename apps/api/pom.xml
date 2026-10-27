@@ -35,7 +35,7 @@
     <!-- Tomcat 11.0.25 fixes CVE-2026-65182, -65905, -68525 (access control and authentication bypass). -->
     <tomcat.version>11.0.25</tomcat.version>
     <!-- Passkey (WebAuthn) verification. Same version as Spring Security 7.1.1 uses, so it runs on the same Jackson. -->
-    <webauthn4j.version>0.31.9.RELEASE</webauthn4j.version>
+    <webauthn4j.version>0.31.11.RELEASE</webauthn4j.version>
   </properties>
 	<dependencies>
 		<dependency>
