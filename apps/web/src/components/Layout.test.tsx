@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
+import { useEffect } from 'react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -83,6 +84,35 @@ describe('Layout account controls', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't sign you out")
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument()
+  })
+
+  it('keeps the page in place when the check of who is signed in finishes, so it is not built again', async () => {
+    // A page built twice loses what it read once, such as the one-time token in a confirmation link
+    let builds = 0
+    function Page() {
+      useEffect(() => {
+        builds++
+      }, [])
+      return <p>page</p>
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+      ),
+    )
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <Layout>
+            <Page />
+          </Layout>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+
+    expect(await screen.findByRole('button', { name: /Your account/ })).toBeInTheDocument()
+    expect(builds).toBe(1)
   })
 
   it('the account menu opens and closes, with the settings and signing out in it', async () => {

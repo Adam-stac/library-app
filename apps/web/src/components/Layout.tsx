@@ -51,9 +51,11 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const { state } = useAuth()
 
-  if (state.status === 'signedIn') {
-    return (
-      <div className="min-h-screen lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
+  const signedIn = state.status === 'signedIn'
+
+  return (
+    <div className={signedIn ? 'min-h-screen lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]' : 'min-h-screen'}>
+      {signedIn ? (
         <aside className="glass-bar sticky top-0 z-10 border-b border-line lg:h-screen lg:border-e lg:border-b-0 lg:bg-paper lg:backdrop-filter-none">
           <div className="grid grid-cols-[1fr_auto] items-center gap-x-1 gap-y-2 px-4 pt-3 pb-2 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-0 lg:px-3 lg:pt-6 lg:pb-3">
             <div className="px-1 lg:px-2">
@@ -76,30 +78,32 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </aside>
-        <main className="min-w-0 px-4 pt-8 pb-16 sm:px-8 lg:px-14 lg:pt-14">
-          <div className="max-w-5xl">{children}</div>
-        </main>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen">
-      <header>
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
-          <Brand />
-          <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
-            {state.status === 'signedOut' && (
-              <Link to="/sign-in" className="btn btn-ghost">
-                {t('nav.signIn')}
-              </Link>
-            )}
-            <LanguageButton />
-          </nav>
-        </div>
-      </header>
-      {/* Each page sets its own width (most are narrow forms) and is centred */}
-      <main className="px-4 pt-10 pb-20 sm:px-8 sm:pt-16 [&>*]:mx-auto">{children}</main>
+      ) : (
+        <header>
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
+            <Brand />
+            <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
+              {state.status === 'signedOut' && (
+                <Link to="/sign-in" className="btn btn-ghost">
+                  {t('nav.signIn')}
+                </Link>
+              )}
+              <LanguageButton />
+            </nav>
+          </div>
+        </header>
+      )}
+      {/*
+       * The page stays in the same place in both frames. If it moved, React would build it again when the check of
+       * who is signed in finishes, and a page that reads a one-time token from the address (confirming a change of
+       * email address) would lose it.
+       */}
+      <main
+        className={signedIn ? 'min-w-0 px-4 pt-8 pb-16 sm:px-8 lg:px-14 lg:pt-14' : 'px-4 pt-10 pb-20 sm:px-8 sm:pt-16'}
+      >
+        {/* Signed out, each page sets its own width (most are narrow forms) and is centred */}
+        <div className={signedIn ? 'max-w-5xl' : '[&>*]:mx-auto'}>{children}</div>
+      </main>
     </div>
   )
 }
