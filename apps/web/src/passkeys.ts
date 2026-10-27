@@ -18,7 +18,7 @@ function browserError(error: unknown): ApiResult<never> {
   let reason = 'passkey_failed'
   if (name === 'NotAllowedError' || name === 'AbortError' || code === 'ERROR_CEREMONY_ABORTED') reason = 'passkey_cancelled'
   if (code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED' || name === 'InvalidStateError') reason = 'passkey_already_registered'
-  return { ok: false, status: 0, code: reason, fieldErrors: {} }
+  return { ok: false, status: 0, code: reason, fieldErrors: {}, details: {} }
 }
 
 /** Asks the browser to sign in with any of this site's passkeys, then lets the API check the answer. */

@@ -15,7 +15,24 @@
     "home": "Home",
     "authors": "Authors",
     "settings": "Settings",
-    "yourAccount": "Your account"
+    "yourAccount": "Your account",
+    "places": "Places",
+    "sciences": "Sciences"
+  },
+  "common": {
+    "save": "Save",
+    "saved": "Changes saved.",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteYes": "Yes, delete",
+    "loadFailed": "We couldn't load this. Please try again.",
+    "stale": "This was changed on another device after you opened it. Load the latest version, then make your changes again.",
+    "loadLatest": "Load the latest version",
+    "pages": "Pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {{page}} of {{pages}}"
   },
   "home": {
     "title": "Welcome",
@@ -321,8 +338,87 @@
         "ce": "CE year of death",
         "ceEra": "Death year: CE or BCE",
         "approximate": "The year of death is approximate"
-      }
+      },
+      "places": "Places"
+    },
+    "birthPlace": "Place of birth",
+    "deathPlace": "Place of death"
+  },
+  "places": {
+    "title": "Places",
+    "intro": "Where the authors of your books were born and died, and where books were printed.",
+    "add": "Add a place",
+    "addTitle": "Add a place",
+    "editTitle": "Edit {{name}}",
+    "all": "All places",
+    "show": "Show",
+    "scope": {
+      "all": "All",
+      "mine": "Added by you",
+      "shared": "Shared list"
+    },
+    "none": {
+      "all": "There are no places yet.",
+      "mine": "You haven't added any places yet. The shared list has the best-known ones.",
+      "shared": "The shared list is empty."
+    },
+    "count_one": "{{number}} place",
+    "count_other": "{{number}} places",
+    "added": "Place added.",
+    "deleted": "{{name}} was deleted.",
+    "deleteConfirm": "Delete {{name}}? This can't be undone.",
+    "notFound": "This place isn't in your library. It may have been deleted.",
+    "sharedNote": "This place is on the shared list everyone starts with, so it can't be changed.",
+    "country": "Country",
+    "position": "Position",
+    "openMap": "(opens a map in a new tab)",
+    "north": "N",
+    "south": "S",
+    "east": "E",
+    "west": "W",
+    "form": {
+      "nameAr": "Name in Arabic",
+      "nameEn": "Name in English",
+      "namesHint": "The classical name first, such as القسطنطينية or Constantinople. Fill in at least one.",
+      "otherNames": "Other names",
+      "otherNamesHint": "One per line, such as the modern name (إسطنبول). Up to 10.",
+      "countryAr": "Country in Arabic",
+      "countryEn": "Country in English",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "positionHint": "Optional: in decimal degrees, such as 21.4225 and 39.8262. South and west are negative."
     }
+  },
+  "sciences": {
+    "title": "Sciences",
+    "intro": "The sciences (funūn) your books are filed under. Rename, add or delete them as you like.",
+    "add": "Add a science",
+    "addButton": "Add",
+    "added": "{{name}} was added.",
+    "rename": "Rename",
+    "renameNamed": "Rename {{name}}",
+    "deleted": "{{name}} was deleted.",
+    "deleteConfirm": "Delete {{name}}? This can't be undone.",
+    "none": "You have no sciences. Add the first above.",
+    "count_one": "{{number}} science",
+    "count_other": "{{number}} sciences",
+    "form": {
+      "nameAr": "Name in Arabic",
+      "nameEn": "Name in English"
+    }
+  },
+  "picker": {
+    "found_one": "{{number}} result",
+    "found_other": "{{number}} results",
+    "remove": "Remove {{name}}",
+    "placeHint": "Type a name to search your places and the shared list.",
+    "addPlace": "Add “{{name}}” as a new place"
+  },
+  "usedBy": {
+    "authors_one": "{{number}} author",
+    "authors_other": "{{number}} authors",
+    "works_one": "{{number}} book",
+    "works_other": "{{number}} books"
   },
   "years": {
     "hijri": "{{year}} AH",
@@ -376,6 +472,13 @@
     "version_required": "Please reload the page and try again.",
     "limit_reached": "Your library has reached its limit for this. Delete something to add more.",
     "in_use": "This is still used elsewhere in your library, so it can't be deleted. Remove it from those records first.",
-    "conflict": "That change couldn't be saved. Reload the page and try again."
+    "conflict": "That change couldn't be saved. Reload the page and try again.",
+    "in_use_by": "This is still used by {{uses}}, so it can't be deleted. Remove it from those first.",
+    "read_only": "This is on the shared list, so it can't be changed.",
+    "already_used": "You already have one with this name.",
+    "too_many": "There are too many. Remove some and try again.",
+    "coordinates_incomplete": "Fill in both the latitude and the longitude, or neither.",
+    "invalid_coordinate": "Check this: latitude is from -90 to 90, longitude from -180 to 180, such as 21.4225.",
+    "unknown_place": "That place isn't in your library any more. Choose another."
   }
 }

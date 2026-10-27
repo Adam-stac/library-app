@@ -1,10 +1,14 @@
 /** Same-origin JSON calls to our API. Errors come back as codes, which the pages translate. */
 export type ApiResult<T = unknown> =
   | { ok: true; status: number; data: T | null }
-  | { ok: false; status: number; code: string; fieldErrors: Record<string, string> }
+  | { ok: false; status: number; code: string; fieldErrors: Record<string, string>; details: ProblemDetails }
+
+/** Extra facts some errors carry, such as what still uses a record that can't be deleted (409 in_use). */
+export type ProblemDetails = { usedBy?: Record<string, number> }
 
 type ProblemBody = {
   code?: string
+  usedBy?: Record<string, number>
   errors?: { field: string; code: string }[]
   properties?: { code?: string; errors?: { field: string; code: string }[] }
 }
@@ -45,7 +49,7 @@ async function send<T>(path: string, init: RequestInit): Promise<ApiResult<T>> {
   try {
     response = await fetch(path, { ...init, credentials: 'same-origin' })
   } catch {
-    return { ok: false, status: 0, code: 'network_error', fieldErrors: {} }
+    return { ok: false, status: 0, code: 'network_error', fieldErrors: {}, details: {} }
   }
   if (response.ok) {
     let data: T | null = null
@@ -75,7 +79,18 @@ async function send<T>(path: string, init: RequestInit): Promise<ApiResult<T>> {
     status: response.status,
     code: problem.code ?? problem.properties?.code ?? CODE_BY_STATUS[response.status] ?? 'unexpected',
     fieldErrors,
+    details: usedByOf(problem.usedBy),
   }
+}
+
+/** Only counts by kind, such as {"authors": 3}: anything else in the body is ignored. */
+function usedByOf(value: unknown): ProblemDetails {
+  if (typeof value !== 'object' || value === null) return {}
+  const usedBy: Record<string, number> = {}
+  for (const [kind, count] of Object.entries(value)) {
+    if (/^[a-z]+$/.test(kind) && Number.isInteger(count) && (count as number) > 0) usedBy[kind] = count as number
+  }
+  return Object.keys(usedBy).length > 0 ? { usedBy } : {}
 }
 
 export async function getJson<T>(path: string): Promise<ApiResult<T>> {
@@ -96,10 +111,11 @@ export async function postJson<T = unknown>(
 
 /**
  * Saves an edit to a library record. `version` is the version the edit started from: the API refuses the edit
- * (409 stale_version) if the record was changed in the meantime, for example on another device.
+ * (409 stale_version) if the record was changed in the meantime, for example on another device. `null` for the
+ * few things where the newest change simply wins (a bookmark, the library settings).
  */
-export async function putJson<T = unknown>(path: string, body: unknown, version: number): Promise<ApiResult<T>> {
-  return change<T>('PUT', path, body, true, `"${version}"`)
+export async function putJson<T = unknown>(path: string, body: unknown, version: number | null): Promise<ApiResult<T>> {
+  return change<T>('PUT', path, body, true, version === null ? undefined : `"${version}"`)
 }
 
 export async function deleteJson(path: string): Promise<ApiResult> {

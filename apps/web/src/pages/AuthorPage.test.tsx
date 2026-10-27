@@ -124,9 +124,7 @@ describe('AuthorPage', () => {
     fakeApi(
       {
         '/api/v1/authors/a1': (init) =>
-          init.method === 'DELETE'
-            ? json(409, { code: 'in_use', usedBy: { works: 2 } })
-            : json(200, AUTHOR),
+          init.method === 'DELETE' ? json(409, { code: 'in_use', usedBy: { works: 2 } }) : json(200, AUTHOR),
       },
       'reader@example.com',
     )
@@ -135,11 +133,9 @@ describe('AuthorPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Delete' }))
     await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
 
-    expect(
-      await screen.findByText(
-        "This is still used elsewhere in your library, so it can't be deleted. Remove it from those records first.",
-      ),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "This is still used by 2 books, so it can't be deleted. Remove it from those first.",
+    )
     expect(screen.getByRole('heading', { name: 'al-Bukhari', level: 1 })).toBeInTheDocument()
   })
 })
