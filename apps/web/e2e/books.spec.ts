@@ -70,6 +70,15 @@ test.describe('Books', () => {
     await bookmark.getByRole('button', { name: 'Put the bookmark here' }).click()
     await expect(bookmark.getByText('Volume 2, page 50')).toBeVisible()
 
+    // The home page shows the library at a glance, and where you are
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Home' }).click()
+    await expect(page.getByText(/Your library holds 1 book and 1 author\./)).toContainText('You are reading 1 of them.')
+    const where = page.getByRole('region', { name: 'Where you are' })
+    await expect(where).toContainText('Volume 2, page 50')
+    await expect(page.getByRole('region', { name: 'Your library by science' })).toContainText('Ḥadīth')
+    await expectAccessible(page)
+    await where.getByRole('link').click()
+
     // Edit the copy
     await page.getByRole('link', { name: 'Edit' }).click()
     await page.getByLabel('Shelf').fill('Study, case 2')
