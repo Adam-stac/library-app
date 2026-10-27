@@ -18,7 +18,9 @@
     "yourAccount": "Your account",
     "places": "Places",
     "sciences": "Sciences",
-    "books": "Books"
+    "books": "Books",
+    "benefits": "Benefits",
+    "search": "Search"
   },
   "common": {
     "save": "Save",
@@ -59,7 +61,9 @@
     "notStarted": "Bought, not yet started",
     "notStartedHint": "The oldest purchases first.",
     "quiet": "Gone quiet",
-    "quietHint": "Started, but the bookmark hasn't moved for three months."
+    "quietHint": "Started, but the bookmark hasn't moved for three months.",
+    "benefits": "Latest benefits",
+    "allBenefits": "All {{number}} benefits"
   },
   "settings": {
     "title": "Settings",
@@ -378,6 +382,49 @@
       "readingHint": "Leave both empty if you have not started it."
     }
   },
+  "benefits": {
+    "title": "Benefits",
+    "intro": "What you learn from your books (fawāʾid), newest first.",
+    "add": "Add a benefit",
+    "addTitle": "Add a benefit",
+    "editTitle": "Edit a benefit",
+    "one": "A benefit",
+    "all": "All benefits",
+    "from": "From",
+    "fromThisBook": "Benefits from this book",
+    "allFromBook": "All {{number}} benefits from this book",
+    "none": "You haven't saved any benefits yet.",
+    "noneFromBook": "No benefits from this book yet.",
+    "count_one": "{{number}} benefit",
+    "count_other": "{{number}} benefits",
+    "added": "Benefit saved.",
+    "deleted": "Benefit deleted.",
+    "deleteConfirm": "Delete this benefit? This can't be undone.",
+    "notFound": "This benefit isn't in your library. It may have been deleted.",
+    "fromHasib": "From Ḥāsib",
+    "volumeOnly": "Volume {{volume}}",
+    "editNamed": "Edit the benefit of {{date}}",
+    "fromDate": "the benefit of {{date}}",
+    "form": {
+      "text": "The benefit",
+      "textHint": "Plain text, up to 5,000 characters. Line breaks are kept.",
+      "source": "Where it is from",
+      "sourceHint": "Optional: the book, and the volume and page.",
+      "book": "Book",
+      "bookHint": "Type a title to search your books."
+    }
+  },
+  "search": {
+    "title": "Search",
+    "intro": "Your books, authors, places and benefits. Vowel marks and spelling variants such as أ and ا are ignored.",
+    "label": "Search your library",
+    "button": "Search",
+    "works": "Works",
+    "nothing": "Nothing matches “{{query}}”.",
+    "found_one": "{{number}} match for “{{query}}”",
+    "found_other": "{{number}} matches for “{{query}}”",
+    "showingOf": "{{shown}} of {{total}}"
+  },
   "authors": {
     "title": "Authors",
     "intro": "The authors of the books in your library.",
@@ -611,6 +658,8 @@
     "unknown_author": "One of those authors isn't in your library any more. Take it out and try again.",
     "unknown_science": "That science isn't in your list any more. Choose another.",
     "work_required": "Choose a work you have, or fill in a new one.",
-    "work_or_work_id": "Choose a work you have, or fill in a new one, not both."
+    "work_or_work_id": "Choose a work you have, or fill in a new one, not both.",
+    "edition_required": "Choose the book before giving a volume or page.",
+    "unknown_edition": "That book isn't in your library any more. Choose another."
   }
 }

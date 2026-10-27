@@ -6,6 +6,9 @@ import AccountPage from './pages/AccountPage'
 import AuthorFormPage from './pages/AuthorFormPage'
 import AuthorPage from './pages/AuthorPage'
 import AuthorsPage from './pages/AuthorsPage'
+import BenefitFormPage from './pages/BenefitFormPage'
+import BenefitPage from './pages/BenefitPage'
+import BenefitsPage from './pages/BenefitsPage'
 import BookFormPage from './pages/BookFormPage'
 import BookPage from './pages/BookPage'
 import BooksPage from './pages/BooksPage'
@@ -21,6 +24,7 @@ import PasskeysPage from './pages/PasskeysPage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SciencesPage from './pages/SciencesPage'
+import SearchPage from './pages/SearchPage'
 import SecurityPage from './pages/SecurityPage'
 import SettingsPage from './pages/SettingsPage'
 import SignInPage from './pages/SignInPage'
@@ -54,6 +58,11 @@ export default function App() {
           <Route path="/books/new" element={<BookFormPage mode="add" />} />
           <Route path="/books/:id" element={<BookPage />} />
           <Route path="/books/:id/edit" element={<BookFormPage mode="edit" />} />
+          <Route path="/benefits" element={<BenefitsPage />} />
+          <Route path="/benefits/new" element={<BenefitFormPage mode="add" />} />
+          <Route path="/benefits/:id" element={<BenefitPage />} />
+          <Route path="/benefits/:id/edit" element={<BenefitFormPage mode="edit" />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/places" element={<PlacesPage />} />
           <Route path="/places/new" element={<PlaceFormPage mode="add" />} />
           <Route path="/places/:id" element={<PlacePage />} />

@@ -134,3 +134,23 @@ export function editionInputOf(edition: Edition) {
     finishedOn: edition.finishedOn,
   }
 }
+
+/** Where in the book a benefit is from: "Volume 3, page 212", "Volume 3", "Page 45"; null when neither is known. */
+export function citationText(
+  volume: number | null,
+  page: number | null,
+  t: TFunction,
+  language: string,
+): string | null {
+  if (page !== null) return bookmarkText({ volume, page }, t, language)
+  return volume !== null ? t('benefits.volumeOnly', { volume: formatNumber(volume, language) }) : null
+}
+
+/** When something was added, as a calendar date where the reader is: "3 March 2026". */
+export function formatInstant(instant: string, language: string): string {
+  return new Intl.DateTimeFormat(language === 'ar' ? 'ar-u-nu-arab' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(instant))
+}

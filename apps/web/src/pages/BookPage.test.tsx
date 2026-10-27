@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AuthProvider from '../auth/AuthProvider'
 import { today } from '../books'
 import i18n from '../i18n'
-import { EDITION } from '../test/books'
+import { BENEFIT, EDITION } from '../test/books'
 import { callTo, clearCsrfCookie, fakeApi, json } from '../test/fakeApi'
 import BookPage from './BookPage'
 
@@ -148,6 +148,26 @@ describe('BookPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Books list' })).toBeInTheDocument()
     expect(api.mock.calls.some(([path]) => path === '/api/v1/works/w1')).toBe(false)
+  })
+
+  it('shows the benefits from this book, and the way to add one', async () => {
+    fakeApi(
+      {
+        [BOOK]: () => json(200, EDITION),
+        '/api/v1/benefits?page=0&size=5&editionId=e1': () =>
+          json(200, { items: [BENEFIT], page: 0, size: 5, total: 7 }),
+      },
+      'r@example.com',
+    )
+    renderPage()
+
+    const benefits = within(await screen.findByRole('region', { name: 'Benefits from this book' }))
+    expect(await benefits.findByText(/إنما الأعمال بالنيات/)).toBeInTheDocument()
+    expect(benefits.getByRole('link', { name: 'Add a benefit' })).toHaveAttribute('href', '/benefits/new?book=e1')
+    expect(benefits.getByRole('link', { name: 'All 7 benefits from this book' })).toHaveAttribute(
+      'href',
+      '/benefits?book=e1',
+    )
   })
 
   it('says so when the book is not in your library', async () => {

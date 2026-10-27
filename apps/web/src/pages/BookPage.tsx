@@ -6,12 +6,14 @@ import { type ApiResult, deleteJson, getJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import { formatNumber } from '../authors'
 import { bookmarkText, editionInputOf, formatDate, formatPrice, languageName, statusText, today } from '../books'
+import BenefitCard from '../components/BenefitCard'
 import ConfirmDelete from '../components/ConfirmDelete'
 import Details from '../components/Details'
 import Icon from '../components/Icon'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
 import {
+  type BenefitPage,
   type Bookmark,
   bookTitle,
   type Edition,
@@ -158,6 +160,8 @@ export default function BookPage() {
           </p>
         </section>
       )}
+
+      <BookBenefits bookId={book.id} />
 
       <p className="mt-12">
         <Link to={`/books?work=${encodeURIComponent(book.work.id)}`} className="link text-sm">
@@ -353,6 +357,50 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
               {errorMessage(t, language, errors[key])}
             </p>
           ),
+      )}
+    </section>
+  )
+}
+
+const BOOK_BENEFITS = 5
+
+/** The newest benefits saved from this book, and the way to add one or see them all. */
+function BookBenefits({ bookId }: { bookId: string }) {
+  const { t, i18n } = useTranslation()
+  const [loaded, { reload }] = useLoad<BenefitPage>(
+    `/api/v1/benefits?page=0&size=${BOOK_BENEFITS}&editionId=${encodeURIComponent(bookId)}`,
+  )
+  const benefits = loaded.status === 'ok' ? loaded.data : null
+
+  return (
+    <section aria-labelledby="book-benefits" className="mt-12">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <h2 id="book-benefits" className="section-title">
+          {t('benefits.fromThisBook')}
+        </h2>
+        <Link to={`/benefits/new?book=${encodeURIComponent(bookId)}`} className="btn">
+          <Icon name="plus" className="size-4" />
+          {t('benefits.add')}
+        </Link>
+      </div>
+      {benefits && benefits.total === 0 && <p className="mt-3 text-muted">{t('benefits.noneFromBook')}</p>}
+      {benefits && benefits.total > 0 && (
+        <>
+          <ul className="mt-3 divide-y divide-line border-y border-line">
+            {benefits.items.map((benefit) => (
+              <li key={benefit.id}>
+                <BenefitCard benefit={benefit} withoutBook onDeleted={reload} />
+              </li>
+            ))}
+          </ul>
+          {benefits.total > benefits.items.length && (
+            <p className="mt-4">
+              <Link to={`/benefits?book=${encodeURIComponent(bookId)}`} className="link text-sm">
+                {t('benefits.allFromBook', { number: formatNumber(benefits.total, i18n.language) })}
+              </Link>
+            </p>
+          )}
+        </>
       )}
     </section>
   )

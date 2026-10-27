@@ -42,7 +42,18 @@ const SUMMARY = {
       bookmark: { volume: 3, page: 212, movedAt: '2026-10-20T10:00:00Z' },
     },
   ],
-  recentBenefits: [],
+  recentBenefits: [
+    {
+      id: 'b1',
+      text: 'إنما الأعمال بالنيات.',
+      edition: null,
+      volume: null,
+      page: null,
+      source: 'hasib',
+      version: 0,
+      createdAt: '2026-10-20T10:00:00Z',
+    },
+  ],
 }
 
 function renderPage() {
@@ -94,6 +105,10 @@ describe('HomePage', () => {
     expect(notStarted.getByText('Riyad al-Salihin').closest('a')).toHaveAttribute('href', '/books/e3')
     expect(notStarted.getByText('12 March 2024')).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Gone quiet' })).not.toBeInTheDocument()
+    const benefits = within(screen.getByRole('region', { name: 'Latest benefits' }))
+    expect(benefits.getByText('إنما الأعمال بالنيات.')).toBeInTheDocument()
+    expect(benefits.getByText('From Ḥāsib')).toBeInTheDocument()
+    expect(benefits.getByRole('link', { name: 'All 4 benefits' })).toHaveAttribute('href', '/benefits')
   })
 
   it('signed in with an empty library: the way to add the first book', async () => {

@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { useAuth } from '../auth/context'
 import { formatNumber } from '../authors'
 import { bookmarkText, formatDate, formatPrice } from '../books'
+import BenefitCard from '../components/BenefitCard'
 import { Mark } from '../components/Brand'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
@@ -12,8 +13,8 @@ import { useLoad } from '../useLoad'
 
 /**
  * The home page. Signed in: the library at a glance (GET /api/v1/home): where you are in the books you're reading,
- * how the library divides between the sciences, this year's reading and spending, and books bought but not yet
- * started, or gone quiet. Signed out: what the app is, and the way in.
+ * the latest benefits, how the library divides between the sciences, this year's reading and spending, and books
+ * bought but not yet started, or gone quiet. Signed out: what the app is, and the way in.
  */
 export default function HomePage() {
   const { state } = useAuth()
@@ -124,6 +125,23 @@ function Library() {
                   </li>
                 ))}
               </ul>
+            </Part>
+          )}
+
+          {home.recentBenefits.length > 0 && (
+            <Part id="benefits" title={t('home.benefits')}>
+              <ul className="divide-y divide-line border-y border-line">
+                {home.recentBenefits.map((benefit) => (
+                  <li key={benefit.id}>
+                    <BenefitCard benefit={benefit} />
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3">
+                <Link to="/benefits" className="link text-sm">
+                  {t('home.allBenefits', { number: n(counts.benefits) })}
+                </Link>
+              </p>
             </Part>
           )}
 
