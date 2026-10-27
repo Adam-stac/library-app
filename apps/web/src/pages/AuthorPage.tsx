@@ -4,7 +4,10 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-route
 import { deleteJson, getJson } from '../api'
 import { useAuth } from '../auth/context'
 import { type Author, displayName, formatYear, hasWorkedOutCe, otherName } from '../authors'
+import ConfirmDelete from '../components/ConfirmDelete'
+import Details from '../components/Details'
 import Icon from '../components/Icon'
+import { type Named, nameOf } from '../library'
 
 /** One author: names, years and biography, with Edit and Delete. */
 export default function AuthorPage() {
@@ -15,9 +18,6 @@ export default function AuthorPage() {
   const navigate = useNavigate()
   const language = i18n.language === 'ar' ? 'ar' : 'en'
   const [loaded, setLoaded] = useState<{ id: string; author: Author | null; error: string | null } | null>(null)
-  const [confirming, setConfirming] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
   const notice = (location.state as { notice?: string } | null)?.notice
 
   useEffect(() => {
@@ -45,20 +45,6 @@ export default function AuthorPage() {
   const shown = loaded?.id === id ? loaded : null
   const author = shown?.author
 
-  async function onDelete(current: Author) {
-    setDeleting(true)
-    setDeleteError(null)
-    const result = await deleteJson(`/api/v1/authors/${encodeURIComponent(current.id)}`)
-    setDeleting(false)
-    if (result.ok || result.status === 404) {
-      navigate('/authors', { state: { notice: t('authors.deleted', { name: displayName(current, language) }) } })
-    } else if (result.status === 401) {
-      void refresh()
-    } else {
-      setDeleteError(result.code)
-    }
-  }
-
   return (
     <article className="max-w-3xl">
       <Link to="/authors" className="back-link">
@@ -85,43 +71,23 @@ export default function AuthorPage() {
                 </p>
               )}
             </div>
-            <div className="flex gap-2 sm:pt-2">
+            <div className="flex flex-wrap gap-2 sm:pt-2 has-[>div]:basis-full">
               <Link to={`/authors/${encodeURIComponent(author.id)}/edit`} className="btn">
                 <Icon name="pencil" className="size-4" />
                 {t('authors.edit')}
               </Link>
-              {!confirming && (
-                <button type="button" className="btn btn-ghost" onClick={() => setConfirming(true)}>
-                  <Icon name="trash" className="size-4" />
-                  {t('authors.delete')}
-                </button>
-              )}
+              <ConfirmDelete
+                label={t('authors.delete')}
+                question={t('authors.deleteConfirm', { name: displayName(author, language) })}
+                onDelete={() => deleteJson(`/api/v1/authors/${encodeURIComponent(author.id)}`)}
+                onDeleted={() =>
+                  navigate('/authors', {
+                    state: { notice: t('authors.deleted', { name: displayName(author, language) }) },
+                  })
+                }
+              />
             </div>
           </header>
-
-          {confirming && (
-            <div className="mt-6 rounded-xl border border-danger-line bg-danger-soft p-5">
-              <p>{t('authors.deleteConfirm', { name: displayName(author, language) })}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  disabled={deleting}
-                  onClick={() => void onDelete(author)}
-                >
-                  {t('authors.deleteYes')}
-                </button>
-                <button type="button" className="btn" onClick={() => setConfirming(false)}>
-                  {t('authors.cancel')}
-                </button>
-              </div>
-              {deleteError && (
-                <p role="alert" className="mt-3 text-danger">
-                  {t(`errors.${deleteError}`, { defaultValue: t('errors.unexpected') })}
-                </p>
-              )}
-            </div>
-          )}
 
           {notice && (
             <p role="status" className="notice mt-6">
@@ -130,7 +96,7 @@ export default function AuthorPage() {
             </p>
           )}
 
-          <Details author={author} />
+          <AuthorDetails author={author} />
 
           {author.biography && (
             <section aria-labelledby="biography" className="mt-12">
@@ -151,38 +117,32 @@ export default function AuthorPage() {
   )
 }
 
-function Details({ author }: { author: Author }) {
+function AuthorDetails({ author }: { author: Author }) {
   const { t, i18n } = useTranslation()
   const language = i18n.language === 'ar' ? 'ar' : 'en'
-  const birth = formatYear(author.birth, t, language)
-  const death = formatYear(author.death, t, language)
-  const names: [string, string | null][] = [
-    ['authors.form.fullName', author.fullName],
-    ['authors.form.ism', author.ism],
-    ['authors.form.kunya', author.kunya],
-    ['authors.form.laqab', author.laqab],
-    ['authors.form.nisba', author.nisba],
-  ]
-  // Names are words from the library, so they are set in its font; years are the app's
-  const rows: { label: string; value: string; name: boolean }[] = [
-    ...(birth ? [{ label: 'authors.born', value: birth, name: false }] : []),
-    ...(death ? [{ label: 'authors.died', value: death, name: false }] : []),
-    ...names.flatMap(([label, value]) => (value === null ? [] : [{ label, value, name: true }])),
-  ]
-  if (rows.length === 0) return null
+  const place = (named: Named | null) =>
+    named && (
+      <Link to={`/places/${encodeURIComponent(named.id)}`} className="link font-book text-[1.0625rem] font-normal">
+        <bdi>{nameOf(named, language)}</bdi>
+      </Link>
+    )
 
   return (
     <>
-      <dl className="mt-10 border-t border-line">
-        {rows.map(({ label, value, name }) => (
-          <div key={label} className="grid gap-1 border-b border-line py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6">
-            <dt className="text-sm text-muted sm:pt-0.5">{t(label)}</dt>
-            <dd className={`break-words ${name ? 'font-book text-[1.0625rem]' : ''}`}>
-              <bdi>{value}</bdi>
-            </dd>
-          </div>
-        ))}
-      </dl>
+      {/* Names are words from the library, so they are set in its font; years are the app's */}
+      <Details
+        rows={[
+          { label: t('authors.born'), value: formatYear(author.birth, t, language) },
+          { label: t('authors.birthPlace'), value: place(author.birthPlace) },
+          { label: t('authors.died'), value: formatYear(author.death, t, language) },
+          { label: t('authors.deathPlace'), value: place(author.deathPlace) },
+          { label: t('authors.form.fullName'), value: author.fullName, book: true },
+          { label: t('authors.form.ism'), value: author.ism, book: true },
+          { label: t('authors.form.kunya'), value: author.kunya, book: true },
+          { label: t('authors.form.laqab'), value: author.laqab, book: true },
+          { label: t('authors.form.nisba'), value: author.nisba, book: true },
+        ]}
+      />
       {hasWorkedOutCe(author) && <p className="mt-3 text-sm text-muted">{t('authors.workedOut')}</p>}
     </>
   )

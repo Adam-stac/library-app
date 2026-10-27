@@ -98,7 +98,9 @@ describe('Layout account controls', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn((path: string) =>
-        Promise.resolve(path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204)),
+        Promise.resolve(
+          path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+        ),
       ),
     )
     render(
@@ -199,6 +201,8 @@ describe('Layout account controls', () => {
     expect(links.map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Home', '/'],
       ['Authors', '/authors'],
+      ['Places', '/places'],
+      ['Sciences', '/sciences'],
       ['Settings', '/settings'],
     ])
     expect(within(sections).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')

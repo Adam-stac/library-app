@@ -6,8 +6,10 @@ import { useAuth } from '../auth/context'
 import { type Author, displayName } from '../authors'
 import FormField from '../components/FormField'
 import Icon from '../components/Icon'
+import PlacePicker from '../components/PlacePicker'
 import TextAreaField from '../components/TextAreaField'
 import YearFields from '../components/YearFields'
+import { type Named, orNull } from '../library'
 import { draftOf, EMPTY_YEAR, type YearDraft, yearOf } from '../yearDraft'
 
 const primary = 'btn btn-primary'
@@ -23,7 +25,7 @@ type TextFields = {
   biography: string
 }
 
-type Draft = TextFields & { birth: YearDraft; death: YearDraft }
+type Draft = TextFields & { birth: YearDraft; death: YearDraft; birthPlace: Named | null; deathPlace: Named | null }
 
 const EMPTY: Draft = {
   nameAr: '',
@@ -36,6 +38,8 @@ const EMPTY: Draft = {
   biography: '',
   birth: EMPTY_YEAR,
   death: EMPTY_YEAR,
+  birthPlace: null,
+  deathPlace: null,
 }
 
 function draftFrom(author: Author): Draft {
@@ -50,10 +54,10 @@ function draftFrom(author: Author): Draft {
     biography: author.biography ?? '',
     birth: draftOf(author.birth),
     death: draftOf(author.death),
+    birthPlace: author.birthPlace,
+    deathPlace: author.deathPlace,
   }
 }
-
-const orNull = (text: string) => (text.trim() === '' ? null : text)
 
 /** Adding an author, or editing one (`/authors/:id/edit`). The API has the final say on every rule. */
 export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
@@ -135,9 +139,8 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
       nisba: orNull(draft.nisba),
       birth: birth.year,
       death: death.year,
-      // Places can't be chosen on this page yet; an edit keeps the ones the author already has
-      birthPlaceId: editing?.birthPlace?.id ?? null,
-      deathPlaceId: editing?.deathPlace?.id ?? null,
+      birthPlaceId: draft.birthPlace?.id ?? null,
+      deathPlaceId: draft.deathPlace?.id ?? null,
       biography: orNull(draft.biography),
     }
     setSaving(true)
@@ -274,6 +277,26 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           onChange={(death) => setDraft({ ...draft, death })}
           errors={{ hijri: errors['death.hijri'], ce: errors['death.ce'] }}
         />
+
+        <fieldset className="rounded-xl border border-line bg-surface p-5">
+          <legend className="section-title float-start mb-5 w-full">{t('authors.form.places')}</legend>
+          <div className="clear-both grid gap-5 sm:grid-cols-2">
+            <PlacePicker
+              id="birthPlace"
+              label={t('authors.birthPlace')}
+              value={draft.birthPlace}
+              onChange={(birthPlace) => setDraft({ ...draft, birthPlace })}
+              error={errors.birthPlaceId}
+            />
+            <PlacePicker
+              id="deathPlace"
+              label={t('authors.deathPlace')}
+              value={draft.deathPlace}
+              onChange={(deathPlace) => setDraft({ ...draft, deathPlace })}
+              error={errors.deathPlaceId}
+            />
+          </div>
+        </fieldset>
 
         <TextAreaField
           id="biography"

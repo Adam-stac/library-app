@@ -10,10 +10,21 @@ type Props = {
   maxLength: number
   /** Words for the library, such as a biography: typed in the font they will be shown in */
   book?: boolean
+  rows?: number
 }
 
 /** A labelled box for several lines of text, such as a biography. Follows the direction of what's typed. */
-export default function TextAreaField({ id, label, value, onChange, error, hint, maxLength, book = false }: Props) {
+export default function TextAreaField({
+  id,
+  label,
+  value,
+  onChange,
+  error,
+  hint,
+  maxLength,
+  book = false,
+  rows = 8,
+}: Props) {
   const { t } = useTranslation()
   const describedBy = [hint ? `${id}-hint` : undefined, error ? `${id}-error` : undefined].filter(Boolean).join(' ')
 
@@ -26,7 +37,7 @@ export default function TextAreaField({ id, label, value, onChange, error, hint,
         id={id}
         name={id}
         dir="auto"
-        rows={8}
+        rows={rows}
         maxLength={maxLength}
         value={value}
         onChange={(e) => onChange(e.target.value)}

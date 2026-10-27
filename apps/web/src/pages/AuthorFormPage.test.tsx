@@ -125,8 +125,7 @@ describe('AuthorFormPage', () => {
   it("shows the API's errors next to the right fields", async () => {
     fakeApi(
       {
-        '/api/v1/authors': () =>
-          json(400, { status: 400, errors: [{ field: 'death.hijri', code: 'before_birth' }] }),
+        '/api/v1/authors': () => json(400, { status: 400, errors: [{ field: 'death.hijri', code: 'before_birth' }] }),
       },
       'reader@example.com',
     )
@@ -174,6 +173,44 @@ describe('AuthorFormPage', () => {
       deathPlaceId: null,
       biography: 'صاحب الصحيح.',
     })
+  })
+
+  it('chooses places of birth and death: one found by searching, one added from what was typed', async () => {
+    const empty = { items: [], total: 0 }
+    const api = fakeApi(
+      {
+        '/api/v1/authors/a1': (init) => (init.method === 'PUT' ? json(200, AUTHOR) : json(200, AUTHOR)),
+        '/api/v1/search?q=%D8%B3%D9%85%D8%B1&limit=8': () =>
+          json(200, {
+            authors: empty,
+            works: empty,
+            editions: empty,
+            benefits: empty,
+            places: { items: [{ id: 'p5', nameAr: 'سمرقند', nameEn: 'Samarkand' }], total: 1 },
+          }),
+        '/api/v1/search?q=%D8%AE%D8%B1%D8%AA%D9%86%D9%83&limit=8': () =>
+          json(200, { authors: empty, works: empty, editions: empty, benefits: empty, places: empty }),
+        '/api/v1/places': () => json(201, { id: 'p6', nameAr: 'خرتنك', nameEn: null }),
+      },
+      'reader@example.com',
+    )
+    const user = renderPage('/authors/a1/edit')
+
+    // The place of birth already chosen can be taken out
+    await user.click(await screen.findByRole('button', { name: 'Remove Bukhara' }))
+    await user.type(screen.getByRole('combobox', { name: 'Place of birth' }), 'سمر')
+    await user.click(await screen.findByRole('option', { name: /سمرقند/ }))
+    expect(screen.getByRole('button', { name: 'Remove Samarkand' })).toBeInTheDocument()
+
+    await user.type(screen.getByRole('combobox', { name: 'Place of death' }), 'خرتنك')
+    await user.click(await screen.findByRole('option', { name: 'Add “خرتنك” as a new place' }))
+    expect(screen.getByRole('button', { name: 'Remove خرتنك' })).toBeInTheDocument()
+    expect(JSON.parse(callTo(api, '/api/v1/places').body as string)).toEqual({ nameAr: 'خرتنك' })
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    await screen.findByText('Changes saved.')
+    const put = api.mock.calls.find(([, init]) => init?.method === 'PUT')![1] as RequestInit
+    expect(JSON.parse(put.body as string)).toMatchObject({ birthPlaceId: 'p5', deathPlaceId: 'p6' })
   })
 
   it('explains when the author was changed on another device, and loads the latest version', async () => {
