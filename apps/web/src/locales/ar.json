@@ -17,7 +17,8 @@
     "settings": "الإعدادات",
     "yourAccount": "حسابك",
     "places": "الأماكن",
-    "sciences": "الفنون"
+    "sciences": "الفنون",
+    "books": "الكتب"
   },
   "common": {
     "save": "حفظ",
@@ -281,6 +282,100 @@
     "goHome": "العودة إلى الصفحة الرئيسية",
     "signIn": "تسجيل الدخول"
   },
+  "books": {
+    "title": "الكتب",
+    "intro": "كل نسخة على رفوفك، بعملها ومؤلفيها.",
+    "add": "أضف كتابًا",
+    "addTitle": "إضافة كتاب",
+    "editTitle": "تعديل {{title}}",
+    "all": "كل الكتب",
+    "allCopies": "كل نسخ هذا الكتاب",
+    "copiesOf": "نسخ",
+    "order": "الترتيب",
+    "orders": {
+      "title": "بالعنوان",
+      "added": "الأحدث أولًا"
+    },
+    "none": "لم تُضف أي كتاب بعد.",
+    "count_zero": "لا كتب",
+    "count_one": "كتاب واحد",
+    "count_two": "كتابان",
+    "count_few": "{{number}} كتب",
+    "count_many": "{{number}} كتابًا",
+    "count_other": "{{number}} كتاب",
+    "volumesCount_zero": "لا مجلدات",
+    "volumesCount_one": "مجلد واحد",
+    "volumesCount_two": "مجلدان",
+    "volumesCount_few": "{{number}} مجلدات",
+    "volumesCount_many": "{{number}} مجلدًا",
+    "volumesCount_other": "{{number}} مجلد",
+    "added": "أُضيف الكتاب.",
+    "deleted": "حُذف {{title}}.",
+    "deleteConfirm": "أتريد حذف {{title}}؟ تُحذف علامته أيضًا، وتبقى فوائده. لا يمكن التراجع عن ذلك.",
+    "notFound": "هذا الكتاب ليس في مكتبتك. ربما حُذف.",
+    "status": {
+      "not_started": "لم تبدأه",
+      "reading": "تقرؤه",
+      "finished": "ختمته"
+    },
+    "reading": "القراءة",
+    "startToday": "بدأت قراءته اليوم",
+    "finishToday": "ختمته اليوم",
+    "bookmarkAt": "الصفحة {{page}}",
+    "bookmarkAtVolume": "الجزء {{volume}}، الصفحة {{page}}",
+    "bookmark": {
+      "title": "العلامة",
+      "none": "لا علامة بعد.",
+      "volume": "الجزء",
+      "page": "الصفحة",
+      "put": "ضع العلامة هنا",
+      "move": "انقلها هنا",
+      "remove": "أزلها",
+      "moved": "نُقلت العلامة."
+    },
+    "fields": {
+      "science": "الفن",
+      "language": "اللغة",
+      "muhaqqiq": "التحقيق",
+      "translator": "الترجمة",
+      "publisher": "الناشر",
+      "publicationPlace": "مكان النشر",
+      "published": "سنة النشر",
+      "editionNumber": "الطبعة",
+      "volumes": "عدد الأجزاء",
+      "shelf": "الرف",
+      "isbn": "ردمك (ISBN)",
+      "legalDeposit": "رقم الإيداع",
+      "purchasedOn": "تاريخ الشراء",
+      "price": "الثمن",
+      "startedOn": "بدأت",
+      "finishedOn": "ختمت",
+      "notes": "ملاحظات",
+      "coverTitle": "العنوان على الغلاف"
+    },
+    "form": {
+      "work": "الكتاب",
+      "workEditHint": "التعديل هنا يسري على كل نسخ هذا الكتاب.",
+      "existingWork": "نسخة أخرى من كتاب عندك؟",
+      "existingWorkHint": "ابحث في كتبك، أو اترك هذا فارغًا واملأ بيانات الكتاب أدناه.",
+      "titleAr": "العنوان بالعربية",
+      "titleEn": "العنوان بالإنجليزية",
+      "authors": "المؤلفون",
+      "noScience": "بلا فن",
+      "copy": "هذه النسخة",
+      "coverTitleHint": "فقط إن خالف عنوان الكتاب، كشرح طُبع معه.",
+      "shelfHint": "أين تحفظه، مثل «المكتب، الخزانة ٢».",
+      "noLanguage": "غير محددة",
+      "imprint": "بيانات الطبع",
+      "publishedHijri": "سنة النشر (هجري)",
+      "publishedCe": "سنة النشر (ميلادي)",
+      "purchase": "الشراء",
+      "priceAmount": "الثمن المدفوع",
+      "priceCurrency": "العملة",
+      "noCurrency": "بلا",
+      "readingHint": "اتركهما فارغين إن لم تبدأ قراءته."
+    }
+  },
   "authors": {
     "title": "المؤلفون",
     "intro": "مؤلفو الكتب التي في مكتبتك.",
@@ -354,7 +449,8 @@
       "places": "الأماكن"
     },
     "birthPlace": "مكان الولادة",
-    "deathPlace": "مكان الوفاة"
+    "deathPlace": "مكان الوفاة",
+    "books": "كتبه في مكتبتك"
   },
   "places": {
     "title": "الأماكن",
@@ -436,7 +532,12 @@
     "found_other": "{{number}} نتيجة",
     "remove": "أزل {{name}}",
     "placeHint": "اكتب اسمًا للبحث في أماكنك وفي القائمة المشتركة.",
-    "addPlace": "أضف «{{name}}» مكانًا جديدًا"
+    "addPlace": "أضف «{{name}}» مكانًا جديدًا",
+    "moveUp": "قدّم {{name}}",
+    "moveDown": "أخّر {{name}}",
+    "addAnotherAuthor": "أضف مؤلفًا آخر",
+    "authorHint": "اكتب اسمًا للبحث في مؤلفيك.",
+    "addAuthor": "أضف «{{name}}» مؤلفًا جديدًا"
   },
   "usedBy": {
     "authors_zero": "لا مؤلفين",
@@ -511,6 +612,27 @@
     "too_many": "العدد أكثر من المسموح. احذف بعضها ثم حاول مجددًا.",
     "coordinates_incomplete": "املأ خط العرض وخط الطول معًا، أو اتركهما فارغين.",
     "invalid_coordinate": "تحقّق من هذا: خط العرض من -90 إلى 90، وخط الطول من -180 إلى 180، مثل 21.4225.",
-    "unknown_place": "هذا المكان لم يعد في مكتبتك. اختر غيره."
+    "unknown_place": "هذا المكان لم يعد في مكتبتك. اختر غيره.",
+    "title_required": "املأ العنوان بالعربية أو بالإنجليزية.",
+    "invalid_number": "تحقّق من هذا الرقم: يجب أن يكون عددًا صحيحًا في نطاق معقول.",
+    "in_the_future": "لا يمكن أن يكون هذا التاريخ في المستقبل.",
+    "invalid_date": "تحقّق من التاريخ: يجب أن يكون بعد سنة ١٩٠٠.",
+    "start_required": "الكتاب الذي ختمته يحتاج تاريخ بدء قراءته.",
+    "before_start": "لا يمكن أن يكون تاريخ الختم قبل تاريخ البدء.",
+    "invalid_amount": "تحقّق من الثمن: مبلغ موجب مثل 95.50، بلا كسور أكثر مما للعملة.",
+    "invalid_currency": "اختر عملة من القائمة.",
+    "currency_required": "اختر عملة الثمن.",
+    "amount_required": "املأ الثمن، أو امسح العملة.",
+    "invalid_isbn": "تحقّق من ردمك: ١٠ أو ١٣ رقمًا برقم تحقق صحيح، كما طُبع على الكتاب.",
+    "invalid_legal_deposit": "تحقّق من الرقم: أرقام و«/» و«-» فقط، مثل ٢٠٠٥/١٢٣٤٥.",
+    "invalid_language": "اختر لغة من القائمة.",
+    "below_bookmark": "العلامة في جزء بعد هذا العدد. انقلها أولًا.",
+    "below_benefit": "فائدة تشير إلى جزء بعد هذا العدد. عدّلها أولًا.",
+    "volume_required": "هذا الكتاب أجزاء: حدّد الجزء.",
+    "unknown_work": "هذا الكتاب لم يعد في مكتبتك. اختر غيره.",
+    "unknown_author": "أحد هؤلاء المؤلفين لم يعد في مكتبتك. أزله ثم حاول مجددًا.",
+    "unknown_science": "هذا الفن لم يعد في قائمتك. اختر غيره.",
+    "work_required": "اختر كتابًا عندك، أو املأ بيانات كتاب جديد.",
+    "work_or_work_id": "اختر كتابًا عندك، أو املأ بيانات كتاب جديد، لا الاثنين."
   }
 }

@@ -17,7 +17,8 @@
     "settings": "Settings",
     "yourAccount": "Your account",
     "places": "Places",
-    "sciences": "Sciences"
+    "sciences": "Sciences",
+    "books": "Books"
   },
   "common": {
     "save": "Save",
@@ -273,6 +274,92 @@
     "goHome": "Back to the home page",
     "signIn": "Sign in"
   },
+  "books": {
+    "title": "Books",
+    "intro": "Every copy on your shelves, with its work and authors.",
+    "add": "Add a book",
+    "addTitle": "Add a book",
+    "editTitle": "Edit {{title}}",
+    "all": "All books",
+    "allCopies": "All copies of this work",
+    "copiesOf": "Copies of",
+    "order": "Order",
+    "orders": {
+      "title": "By title",
+      "added": "Newest first"
+    },
+    "none": "You haven't added any books yet.",
+    "count_one": "{{number}} book",
+    "count_other": "{{number}} books",
+    "volumesCount_one": "{{number}} volume",
+    "volumesCount_other": "{{number}} volumes",
+    "added": "Book added.",
+    "deleted": "{{title}} was deleted.",
+    "deleteConfirm": "Delete {{title}}? Its bookmark goes too. Benefits from it are kept. This can't be undone.",
+    "notFound": "This book isn't in your library. It may have been deleted.",
+    "status": {
+      "not_started": "Not started",
+      "reading": "Reading",
+      "finished": "Finished"
+    },
+    "reading": "Reading",
+    "startToday": "Start reading today",
+    "finishToday": "Finished today",
+    "bookmarkAt": "Page {{page}}",
+    "bookmarkAtVolume": "Volume {{volume}}, page {{page}}",
+    "bookmark": {
+      "title": "Bookmark",
+      "none": "No bookmark yet.",
+      "volume": "Volume",
+      "page": "Page",
+      "put": "Put the bookmark here",
+      "move": "Move it here",
+      "remove": "Remove",
+      "moved": "Bookmark moved."
+    },
+    "fields": {
+      "science": "Science",
+      "language": "Language",
+      "muhaqqiq": "Edited by (muḥaqqiq)",
+      "translator": "Translator",
+      "publisher": "Publisher",
+      "publicationPlace": "Place of publication",
+      "published": "Published",
+      "editionNumber": "Edition",
+      "volumes": "Volumes",
+      "shelf": "Shelf",
+      "isbn": "ISBN",
+      "legalDeposit": "Legal deposit number",
+      "purchasedOn": "Bought on",
+      "price": "Price",
+      "startedOn": "Started",
+      "finishedOn": "Finished",
+      "notes": "Notes",
+      "coverTitle": "Title on the cover"
+    },
+    "form": {
+      "work": "The work",
+      "workEditHint": "Changes here apply to every copy of this work.",
+      "existingWork": "Another copy of a work you already have?",
+      "existingWorkHint": "Search your works, or leave this empty and fill in the work below.",
+      "titleAr": "Title in Arabic",
+      "titleEn": "Title in English",
+      "authors": "Authors",
+      "noScience": "No science",
+      "copy": "This copy",
+      "coverTitleHint": "Only if it differs from the work's title, such as a commentary printed with it.",
+      "shelfHint": "Where it is kept, such as \"Study, case 2\".",
+      "noLanguage": "Not given",
+      "imprint": "Imprint",
+      "publishedHijri": "Year published (Hijri)",
+      "publishedCe": "Year published (CE)",
+      "purchase": "Purchase",
+      "priceAmount": "Price paid",
+      "priceCurrency": "Currency",
+      "noCurrency": "None",
+      "readingHint": "Leave both empty if you have not started it."
+    }
+  },
   "authors": {
     "title": "Authors",
     "intro": "The authors of the books in your library.",
@@ -342,7 +429,8 @@
       "places": "Places"
     },
     "birthPlace": "Place of birth",
-    "deathPlace": "Place of death"
+    "deathPlace": "Place of death",
+    "books": "Books by this author"
   },
   "places": {
     "title": "Places",
@@ -412,7 +500,12 @@
     "found_other": "{{number}} results",
     "remove": "Remove {{name}}",
     "placeHint": "Type a name to search your places and the shared list.",
-    "addPlace": "Add “{{name}}” as a new place"
+    "addPlace": "Add “{{name}}” as a new place",
+    "moveUp": "Move {{name}} up",
+    "moveDown": "Move {{name}} down",
+    "addAnotherAuthor": "Add another author",
+    "authorHint": "Type a name to search your authors.",
+    "addAuthor": "Add “{{name}}” as a new author"
   },
   "usedBy": {
     "authors_one": "{{number}} author",
@@ -479,6 +572,27 @@
     "too_many": "There are too many. Remove some and try again.",
     "coordinates_incomplete": "Fill in both the latitude and the longitude, or neither.",
     "invalid_coordinate": "Check this: latitude is from -90 to 90, longitude from -180 to 180, such as 21.4225.",
-    "unknown_place": "That place isn't in your library any more. Choose another."
+    "unknown_place": "That place isn't in your library any more. Choose another.",
+    "title_required": "Fill in the title in Arabic or in English.",
+    "invalid_number": "Check this number: it must be a whole number in a possible range.",
+    "in_the_future": "This date can't be in the future.",
+    "invalid_date": "Check this date: it must be after 1900.",
+    "start_required": "A book you finished needs the date you started it.",
+    "before_start": "The day you finished can't be before the day you started.",
+    "invalid_amount": "Check the price: a positive amount, such as 95.50, with no more decimal places than the currency has.",
+    "invalid_currency": "Choose a currency from the list.",
+    "currency_required": "Choose the currency of the price.",
+    "amount_required": "Fill in the price, or clear the currency.",
+    "invalid_isbn": "Check this ISBN: 10 or 13 digits with a correct check digit, as printed on the book.",
+    "invalid_legal_deposit": "Check this number: digits, \"/\" and \"-\" only, such as 2005/12345.",
+    "invalid_language": "Choose a language from the list.",
+    "below_bookmark": "The bookmark is in a later volume. Move it first.",
+    "below_benefit": "A benefit cites a later volume. Change it first.",
+    "volume_required": "This book is a set: say which volume.",
+    "unknown_work": "That work isn't in your library any more. Choose another.",
+    "unknown_author": "One of those authors isn't in your library any more. Take it out and try again.",
+    "unknown_science": "That science isn't in your list any more. Choose another.",
+    "work_required": "Choose a work you have, or fill in a new one.",
+    "work_or_work_id": "Choose a work you have, or fill in a new one, not both."
   }
 }

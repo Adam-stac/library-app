@@ -7,7 +7,9 @@ import { type Author, displayName, formatYear, hasWorkedOutCe, otherName } from 
 import ConfirmDelete from '../components/ConfirmDelete'
 import Details from '../components/Details'
 import Icon from '../components/Icon'
-import { type Named, nameOf } from '../library'
+import IndexList from '../components/IndexList'
+import { type Named, nameOf, type WorkPage, workTitle } from '../library'
+import { useLoad } from '../useLoad'
 
 /** One author: names, years and biography, with Edit and Delete. */
 export default function AuthorPage() {
@@ -98,6 +100,8 @@ export default function AuthorPage() {
 
           <AuthorDetails author={author} />
 
+          <AuthorBooks authorId={author.id} />
+
           {author.biography && (
             <section aria-labelledby="biography" className="mt-12">
               <h2 id="biography" className="section-title">
@@ -145,5 +149,32 @@ function AuthorDetails({ author }: { author: Author }) {
       />
       {hasWorkedOutCe(author) && <p className="mt-3 text-sm text-muted">{t('authors.workedOut')}</p>}
     </>
+  )
+}
+
+/** The works in the library that name this author, each leading to its copies on the shelf. */
+function AuthorBooks({ authorId }: { authorId: string }) {
+  const { t, i18n } = useTranslation()
+  const language = i18n.language === 'ar' ? 'ar' : 'en'
+  const [works] = useLoad<WorkPage>(
+    `/api/v1/works?page=0&size=100&sort=${language}&authorId=${encodeURIComponent(authorId)}`,
+  )
+  if (works.status !== 'ok' || works.data.total === 0) return null
+
+  return (
+    <section aria-labelledby="author-books" className="mt-12">
+      <h2 id="author-books" className="section-title mb-2">
+        {t('authors.books')}
+      </h2>
+      <IndexList
+        rows={works.data.items.map((work) => ({
+          id: work.id,
+          to: `/books?work=${encodeURIComponent(work.id)}`,
+          name: workTitle(work, language),
+          other: language === 'ar' ? (work.titleAr ? work.titleEn : null) : work.titleEn ? work.titleAr : null,
+          end: work.science && <bdi className="font-book">{nameOf(work.science, language)}</bdi>,
+        }))}
+      />
+    </section>
   )
 }

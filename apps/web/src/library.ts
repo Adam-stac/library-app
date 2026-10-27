@@ -32,6 +32,8 @@ export type WorkSummary = {
 
 export type Work = WorkSummary & { version: number }
 
+export type WorkPage = { items: WorkSummary[]; page: number; size: number; total: number }
+
 export type Bookmark = { volume: number | null; page: number; movedAt: string }
 
 export type Status = 'not_started' | 'reading' | 'finished'

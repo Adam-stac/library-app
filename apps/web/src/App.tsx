@@ -6,6 +6,9 @@ import AccountPage from './pages/AccountPage'
 import AuthorFormPage from './pages/AuthorFormPage'
 import AuthorPage from './pages/AuthorPage'
 import AuthorsPage from './pages/AuthorsPage'
+import BookFormPage from './pages/BookFormPage'
+import BookPage from './pages/BookPage'
+import BooksPage from './pages/BooksPage'
 import ChangePasswordPage from './pages/ChangePasswordPage'
 import ConfirmEmailChangePage from './pages/ConfirmEmailChangePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
@@ -47,6 +50,10 @@ export default function App() {
           <Route path="/authors/new" element={<AuthorFormPage mode="add" />} />
           <Route path="/authors/:id" element={<AuthorPage />} />
           <Route path="/authors/:id/edit" element={<AuthorFormPage mode="edit" />} />
+          <Route path="/books" element={<BooksPage />} />
+          <Route path="/books/new" element={<BookFormPage mode="add" />} />
+          <Route path="/books/:id" element={<BookPage />} />
+          <Route path="/books/:id/edit" element={<BookFormPage mode="edit" />} />
           <Route path="/places" element={<PlacesPage />} />
           <Route path="/places/new" element={<PlaceFormPage mode="add" />} />
           <Route path="/places/:id" element={<PlacePage />} />

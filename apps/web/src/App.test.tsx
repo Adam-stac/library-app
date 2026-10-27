@@ -18,7 +18,10 @@ describe('App', () => {
     localStorage.clear()
     await i18n.changeLanguage('ar')
     // Not signed in
-    vi.stubGlobal('fetch', vi.fn().mockImplementation(() => Promise.resolve(new Response(null, { status: 401 }))))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(() => Promise.resolve(new Response(null, { status: 401 }))),
+    )
   })
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -66,7 +69,7 @@ describe('App', () => {
 
   it('says so when an address has no page, rather than showing the home page', async () => {
     const user = userEvent.setup()
-    renderApp('/books/somewhere')
+    renderApp('/no-such-page')
 
     expect(screen.getByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
     await user.click(screen.getByRole('link', { name: 'اذهب إلى الصفحة الرئيسية' }))

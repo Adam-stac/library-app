@@ -200,6 +200,7 @@ describe('Layout account controls', () => {
     const links = within(sections).getAllByRole('link')
     expect(links.map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Home', '/'],
+      ['Books', '/books'],
       ['Authors', '/authors'],
       ['Places', '/places'],
       ['Sciences', '/sciences'],

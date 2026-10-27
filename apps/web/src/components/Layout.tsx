@@ -28,6 +28,7 @@ function LanguageButton({ className = '' }: { className?: string }) {
 
 const SECTIONS: { to: string; key: string; icon: IconName; end?: boolean }[] = [
   { to: '/', key: 'home', icon: 'home', end: true },
+  { to: '/books', key: 'books', icon: 'bookOpen' },
   { to: '/authors', key: 'authors', icon: 'feather' },
   { to: '/places', key: 'places', icon: 'mapPin' },
   { to: '/sciences', key: 'sciences', icon: 'layers' },
