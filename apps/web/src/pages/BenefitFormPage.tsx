@@ -38,8 +38,10 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [startingBook] = useLoad<Edition>(bookId ? `/api/v1/editions/${encodeURIComponent(bookId)}` : null)
   const editing = mode === 'edit' && benefit.status === 'ok' ? benefit.data : null
 
-  // What has been typed, kept against what it started from (see PlaceFormPage)
-  const base = editing ? `${editing.id}:${editing.version}` : `new:${startingBook.status === 'ok' ? 'book' : ''}`
+  // What has been typed, kept against what it started from (see PlaceFormPage). A new benefit started from a book
+  // keeps what was typed when the book arrives: the book only fills in the book, unless one has been chosen since.
+  const startingEdition = startingBook.status === 'ok' ? startingBook.data : null
+  const base = editing ? `${editing.id}:${editing.version}` : 'new'
   const initial: Draft = editing
     ? {
         text: editing.text,
@@ -47,10 +49,16 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
         volume: editing.volume === null ? '' : String(editing.volume),
         page: editing.page === null ? '' : String(editing.page),
       }
-    : { text: '', edition: startingBook.status === 'ok' ? startingBook.data : null, volume: '', page: '' }
-  const [typed, setTyped] = useState<{ base: string; draft: Draft } | null>(null)
-  const draft = typed?.base === base ? typed.draft : initial
-  const setDraft = (next: Draft) => setTyped({ base, draft: next })
+    : { text: '', edition: startingEdition, volume: '', page: '' }
+  const [typed, setTyped] = useState<{ base: string; draft: Draft; bookChosen: boolean } | null>(null)
+  const draft =
+    typed?.base === base
+      ? editing || typed.bookChosen
+        ? typed.draft
+        : { ...typed.draft, edition: startingEdition }
+      : initial
+  const setDraft = (next: Draft, bookChosen = typed?.base === base && typed.bookChosen) =>
+    setTyped({ base, draft: next, bookChosen })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -169,7 +177,7 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   <Picked
                     label={bookTitle(draft.edition, language)}
                     secondary={authorsOf(draft.edition.work, language) || null}
-                    onRemove={() => setDraft({ ...draft, edition: null, volume: '', page: '' })}
+                    onRemove={() => setDraft({ ...draft, edition: null, volume: '', page: '' }, true)}
                   />
                 </p>
                 {errors.editionId && (
@@ -187,7 +195,7 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   primary: bookTitle(found, language),
                   secondary: authorsOf(found.work, language) || null,
                 })}
-                onPick={(edition) => setDraft({ ...draft, edition })}
+                onPick={(edition) => setDraft({ ...draft, edition }, true)}
               />
             )}
             {draft.edition && (
