@@ -64,7 +64,7 @@ export default function AuthorPage() {
         <>
           <header className="mt-6 flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
             <div className="min-w-0">
-              <h1 className="font-book text-[2.25rem] leading-tight font-semibold break-words sm:text-[2.75rem]">
+              <h1 className="font-book text-display leading-tight font-semibold break-words sm:text-display-lg">
                 <bdi>{displayName(author, language)}</bdi>
               </h1>
               {otherName(author, language) && (
@@ -108,7 +108,7 @@ export default function AuthorPage() {
                 {t('authors.biography')}
               </h2>
               <p
-                className="font-book mt-3 max-w-[65ch] text-lg leading-[1.85] break-words whitespace-pre-line"
+                className="font-book mt-3 max-w-[65ch] text-lg leading-reading break-words whitespace-pre-line"
                 dir="auto"
               >
                 {author.biography}
@@ -126,7 +126,7 @@ function AuthorDetails({ author }: { author: Author }) {
   const language = i18n.language === 'ar' ? 'ar' : 'en'
   const place = (named: Named | null) =>
     named && (
-      <Link to={`/places/${encodeURIComponent(named.id)}`} className="link font-book text-[1.0625rem] font-normal">
+      <Link to={`/places/${encodeURIComponent(named.id)}`} className="link font-book text-reading font-normal">
         <bdi>{nameOf(named, language)}</bdi>
       </Link>
     )

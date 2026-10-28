@@ -27,7 +27,7 @@ export default function PageHeader({ title, lede, actions, back, book = false }:
         <div className="min-w-0">
           <h1
             className={
-              book ? 'font-book text-[2.25rem] leading-tight font-semibold break-words sm:text-[2.75rem]' : 'page-title'
+              book ? 'font-book text-display leading-tight font-semibold break-words sm:text-display-lg' : 'page-title'
             }
           >
             {title}

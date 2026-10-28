@@ -69,7 +69,7 @@ export default function SearchPage() {
             maxLength={100}
             value={text}
             onChange={(event) => setTyped({ query, text: event.target.value })}
-            className="field font-book w-full ps-9 text-[1.0625rem]"
+            className="field font-book w-full ps-9 text-reading"
           />
         </div>
         <button type="submit" className="btn btn-primary">
@@ -208,7 +208,7 @@ function Hit({
         className="group -mx-3 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-hover"
       >
         <bdi
-          className={`font-book break-words group-hover:text-accent ${long ? 'line-clamp-3 w-full text-[1.0625rem] leading-relaxed' : 'text-lg'}`}
+          className={`font-book break-words group-hover:text-accent ${long ? 'line-clamp-3 w-full text-reading leading-relaxed' : 'text-lg'}`}
           dir="auto"
         >
           {primary}

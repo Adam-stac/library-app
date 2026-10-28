@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate } from 'react-router'
 import { useAuth } from '../auth/context'
 import Icon, { type IconName } from '../components/Icon'
+import { chooseTheme, savedTheme, type Theme } from '../theme'
 
-/** Every account setting, in one place. Signed-in accounts only. */
+/** Every setting, in one place: the account's, and how the app looks on this device. Signed-in accounts only. */
 const SETTINGS: { to: string; key: string; icon: IconName }[] = [
   { to: '/library-settings', key: 'library', icon: 'bookOpen' },
   { to: '/account', key: 'account', icon: 'user' },
@@ -42,6 +44,55 @@ export default function SettingsPage() {
           </li>
         ))}
       </ul>
+      <ThemeChoice />
     </div>
+  )
+}
+
+const THEME_OPTIONS: { value: Theme; icon: IconName }[] = [
+  { value: 'system', icon: 'monitor' },
+  { value: 'light', icon: 'sun' },
+  { value: 'dark', icon: 'moon' },
+]
+
+/** Automatic (as the device is set), light or dark. Changes at once, and is kept on this device only (theme.ts). */
+function ThemeChoice() {
+  const { t } = useTranslation()
+  const [theme, setTheme] = useState<Theme>(savedTheme)
+
+  return (
+    <section aria-labelledby="appearance" className="mt-12">
+      <h2 id="appearance" className="section-title">
+        {t('settings.appearance')}
+      </h2>
+      <p id="appearance-about" className="mt-1 text-sm text-muted">
+        {t('settings.appearanceAbout')}
+      </p>
+      <fieldset aria-describedby="appearance-about" className="mt-4">
+        <legend className="sr-only">{t('settings.theme.legend')}</legend>
+        <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1">
+          {THEME_OPTIONS.map(({ value, icon }) => (
+            <label
+              key={value}
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium text-muted transition-colors duration-150 select-none hover:bg-hover hover:text-ink has-checked:bg-accent-soft has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+            >
+              <input
+                type="radio"
+                name="theme"
+                value={value}
+                checked={theme === value}
+                onChange={() => {
+                  chooseTheme(value)
+                  setTheme(value)
+                }}
+                className="sr-only"
+              />
+              <Icon name={icon} className="size-4 shrink-0" />
+              {t(`settings.theme.${value}`)}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    </section>
   )
 }

@@ -2,14 +2,17 @@
 
 /*
  * Khizāna's design system: calm and minimal. Neutral greys with a trace of the accent's green (no cream), one
- * accent (deep green), hairline borders, and quick quiet hover states. Light and dark follow the device's setting.
- * Every colour pair used for text is at least 6:1 in both (WCAG 2.2 AA needs 4.5:1), and input borders are at least
- * 3:1 against the page and the input.
+ * accent (deep green), hairline borders, and quick quiet hover states. Light and dark follow the device's setting, or
+ * the reader's choice in Settings.
+ * Every colour pair used for text is at least 4.5:1 in both, most above 6:1, and input borders are at least 3:1
+ * against the page and the input (WCAG 2.2 AA; colours.test.ts checks every pair).
  *
  * Type. Every font is bundled with the app (the Content-Security-Policy allows fonts from this site only), and all
  * are under the SIL Open Font License:
  *   - the interface: Geist for Latin letters, and Readex Pro for Arabic (the browser uses it for any character Geist
  *     lacks);
+ *   - headings and large figures: Geist for Latin, and Alexandria for Arabic, a modern geometric face with confident
+ *     numerals (٢١٢). Use the `font-display` class. Only Alexandria's Arabic letters are bundled;
  *   - words from the library itself (authors' names, titles, biographies, benefits): Lateef, a naskh drawn by SIL.
  *     Lateef is small for its size, so it is scaled up here (size-adjust) to sit level with the interface text: a
  *     name in Lateef and a date in Readex Pro on one line look the same size. Lateef has Arabic letters only, so
@@ -37,6 +40,34 @@
   unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E, U+25CC;
 }
 
+@font-face {
+  font-family: 'Alexandria Display';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('@fontsource-variable/alexandria/files/alexandria-arabic-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
+}
+
+/*
+ * While Geist is still arriving, Latin text is drawn in Arial resized to take the same space (Arial ships with
+ * Windows and macOS), so nothing moves when Geist arrives. Worked out with Capsize (@capsizecss/core
+ * createFontStack, from Geist's own metrics and Arial's). Latin letters only: Arabic must still fall through to
+ * Readex Pro. The fonts also start downloading at once (vite.config.ts preloads them), so on most connections they
+ * are already here when the page first draws.
+ */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial'), local('ArialMT');
+  ascent-override: 95.9379%;
+  descent-override: 28.1609%;
+  line-gap-override: 0%;
+  size-adjust: 104.7553%;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-200B,
+    U+2010-205F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD, U+0100-02BA, U+1E00-1E9F;
+}
+
 :root {
   --paper: #f6f7f6; /* the page */
   --surface: #ffffff; /* cards, inputs and menus */
@@ -55,11 +86,43 @@
   --danger-soft: #fbeeec;
   --danger-line: #e8b9b3;
   --shadow: 0 12px 32px -12px rgb(18 23 20 / 0.22);
+
+  /* The redesign (ADR 0008, Phase B2): fields, pills, glass, the deep reading card, and the green scale */
+  --field: #f4f7f5; /* inside a text field */
+  --track: #e4ebe7; /* the empty part of a progress bar */
+  --chip: #0f1512; /* a dark pill, for the main action */
+  --on-chip: #ffffff;
+  --glass: rgb(255 255 255 / 0.62); /* the frosted card a page sits on */
+  --glass-edge: rgb(255 255 255 / 0.75);
+  --lift: 0 1px 2px rgb(15 21 18 / 0.04), 0 10px 28px -14px rgb(15 21 18 / 0.14); /* a card resting on the page */
+  --float: 0 30px 80px -40px rgb(15 40 32 / 0.28); /* the frosted card */
+  --focal:
+    radial-gradient(520px 320px at 10% 110%, rgb(124 196 173 / 0.35), rgb(124 196 173 / 0) 70%),
+    linear-gradient(155deg, #0e1f1a 0%, #133229 55%, #1a4d40 100%); /* the one card a page leads with */
+  --focal-shadow: 0 30px 60px -28px rgb(14 40 33 / 0.55);
+  --focal-ink: #f2f6f4;
+  --focal-muted: #b4cfc5;
+  /* Most to least: the share of each science, deep green to nearly white */
+  --scale-1: #123e33;
+  --scale-2: #1d5c4e;
+  --scale-3: #3a8670;
+  --scale-4: #6daf98;
+  --scale-5: #a9d3c3;
+  --scale-6: #dce5e1;
+  /* A faint wash of colour behind the app, strongest at the top */
+  --wash:
+    radial-gradient(1100px 620px at 92% -8%, #d3e7de, rgb(211 231 222 / 0) 62%),
+    radial-gradient(900px 700px at -5% 40%, #e3e1f3, rgb(227 225 243 / 0) 58%),
+    radial-gradient(800px 500px at 60% 110%, #f1e6d6, rgb(241 230 214 / 0) 60%), #edf1ef;
   color-scheme: light;
 }
 
+/*
+ * Dark: when the device asks for it, unless the reader chose light in Settings, or whenever the reader chose dark
+ * (theme.ts). The two blocks must stay the same; a test checks.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --paper: #0b0e0d;
     --surface: #141917;
     --hover: #1c2321;
@@ -77,13 +140,109 @@
     --danger-soft: #2c1513;
     --danger-line: #6b302a;
     --shadow: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+    --field: #1a201d;
+    --track: #26302c;
+    --chip: #e9eeeb;
+    --on-chip: #0a0d0c;
+    --glass: rgb(19 24 22 / 0.66);
+    --glass-edge: rgb(255 255 255 / 0.06);
+    --lift: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 12px 30px -16px rgb(0 0 0 / 0.7);
+    --float: 0 40px 90px -40px rgb(0 0 0 / 0.8);
+    --focal:
+      radial-gradient(520px 320px at 10% 110%, rgb(124 196 173 / 0.28), rgb(124 196 173 / 0) 70%),
+      linear-gradient(155deg, #0c211b 0%, #12352c 55%, #1c5546 100%);
+    --focal-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.85);
+    --focal-ink: #f2f6f4;
+    --focal-muted: #b4cfc5;
+    --scale-1: #b3e3d3;
+    --scale-2: #7cc4ad;
+    --scale-3: #4f9c85;
+    --scale-4: #327566;
+    --scale-5: #21503f;
+    --scale-6: #2c3531;
+    --wash:
+      radial-gradient(1100px 620px at 92% -8%, #10302a, rgb(16 48 42 / 0) 62%),
+      radial-gradient(900px 700px at -5% 40%, #1a1832, rgb(26 24 50 / 0) 58%), #090c0b;
     color-scheme: dark;
   }
 }
 
+:root[data-theme='dark'] {
+  --paper: #0b0e0d;
+  --surface: #141917;
+  --hover: #1c2321;
+  --ink: #e8ece9;
+  --muted: #a0a9a4;
+  --line: #252d2a;
+  --line-strong: #6d7873;
+  --accent: #7cc4ad;
+  --accent-hover: #97d3c0;
+  --on-accent: #0a1813;
+  --accent-soft: #163029;
+  --danger: #f0938a;
+  --danger-hover: #f5aba4;
+  --on-danger: #2a0d0a;
+  --danger-soft: #2c1513;
+  --danger-line: #6b302a;
+  --shadow: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --field: #1a201d;
+  --track: #26302c;
+  --chip: #e9eeeb;
+  --on-chip: #0a0d0c;
+  --glass: rgb(19 24 22 / 0.66);
+  --glass-edge: rgb(255 255 255 / 0.06);
+  --lift: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 12px 30px -16px rgb(0 0 0 / 0.7);
+  --float: 0 40px 90px -40px rgb(0 0 0 / 0.8);
+  --focal:
+    radial-gradient(520px 320px at 10% 110%, rgb(124 196 173 / 0.28), rgb(124 196 173 / 0) 70%),
+    linear-gradient(155deg, #0c211b 0%, #12352c 55%, #1c5546 100%);
+  --focal-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.85);
+  --focal-ink: #f2f6f4;
+  --focal-muted: #b4cfc5;
+  --scale-1: #b3e3d3;
+  --scale-2: #7cc4ad;
+  --scale-3: #4f9c85;
+  --scale-4: #327566;
+  --scale-5: #21503f;
+  --scale-6: #2c3531;
+  --wash:
+    radial-gradient(1100px 620px at 92% -8%, #10302a, rgb(16 48 42 / 0) 62%),
+    radial-gradient(900px 700px at -5% 40%, #1a1832, rgb(26 24 50 / 0) 58%), #090c0b;
+  color-scheme: dark;
+}
+
+/*
+ * The type scale. Every size in the app is a step on it, named by its job, never a one-off value (a test checks).
+ * Tailwind's own steps are kept (xs .75rem, sm .875rem, base 1rem, lg 1.125rem, xl 1.25rem, 2xl 1.5rem, 5xl 3rem)
+ * and these fill the gaps:
+ */
+@theme {
+  --text-ui: 0.9375rem; /* the sidebar, and the line under a benefit */
+  --text-reading: 1.0625rem; /* words from the library in lists and fields, and section titles */
+  --text-letter: 1.625rem; /* the letter a run of names is filed under */
+  --text-title: 1.75rem; /* a page's title */
+  --text-title-lg: 2rem; /* a page's title, on a wider screen */
+  --text-display: 2.25rem; /* a book's or an author's name heading its page, and the landing page's headline */
+  --text-display-lg: 2.75rem; /* the same, on a wider screen */
+  --text-hero: 2.875rem; /* the greeting on the home page */
+  --text-stat: 3.5rem; /* a figure in a row of figures, such as books finished this year */
+  --text-figure: 7rem; /* the one figure a card leads with, such as the page you are on */
+  --leading-display: 1.15;
+  --leading-reading: 1.85; /* long passages in Lateef, such as a benefit */
+  --leading-figure: 0.95;
+
+  /* Corners: soft, and rounder the larger the thing */
+  --radius-field: 0.875rem;
+  --radius-panel: 1.5rem;
+  --radius-card: 1.75rem;
+  --radius-frame: 2rem;
+}
+
 @theme inline {
-  --font-sans: 'Geist Variable', 'Readex Pro Variable', system-ui, sans-serif;
-  --font-book: 'Lateef Book', 'Geist Variable', 'Readex Pro Variable', system-ui, sans-serif;
+  --font-sans: 'Geist Variable', 'Geist Fallback', 'Readex Pro Variable', system-ui, sans-serif;
+  --font-book: 'Lateef Book', 'Geist Variable', 'Geist Fallback', 'Readex Pro Variable', system-ui, sans-serif;
+  --font-display:
+    'Geist Variable', 'Geist Fallback', 'Alexandria Display', 'Readex Pro Variable', system-ui, sans-serif;
 
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -102,6 +261,24 @@
   --color-danger-soft: var(--danger-soft);
   --color-danger-line: var(--danger-line);
   --shadow-menu: var(--shadow);
+
+  --color-field: var(--field);
+  --color-track: var(--track);
+  --color-chip: var(--chip);
+  --color-on-chip: var(--on-chip);
+  --color-glass: var(--glass);
+  --color-glass-edge: var(--glass-edge);
+  --color-focal-ink: var(--focal-ink);
+  --color-focal-muted: var(--focal-muted);
+  --color-scale-1: var(--scale-1);
+  --color-scale-2: var(--scale-2);
+  --color-scale-3: var(--scale-3);
+  --color-scale-4: var(--scale-4);
+  --color-scale-5: var(--scale-5);
+  --color-scale-6: var(--scale-6);
+  --shadow-lift: var(--lift);
+  --shadow-float: var(--float);
+  --shadow-focal: var(--focal-shadow);
 }
 
 @layer base {
@@ -141,14 +318,14 @@
 @layer components {
   /* Page structure. Tighter letter spacing for large Latin text only: spacing Arabic letters apart breaks them. */
   .page-title {
-    @apply text-[1.75rem] leading-tight font-semibold text-balance sm:text-[2rem];
+    @apply font-display text-title leading-tight font-semibold text-balance sm:text-title-lg;
   }
   .page-title:lang(en),
   .section-title:lang(en) {
     letter-spacing: -0.015em;
   }
   .section-title {
-    @apply text-[1.0625rem] leading-snug font-semibold;
+    @apply font-display text-reading leading-snug font-semibold;
   }
   .lede {
     @apply mt-2 max-w-prose text-pretty text-muted;
@@ -233,6 +410,16 @@
   /* A message about what just happened, such as "Author added." */
   .notice {
     @apply flex items-start gap-2.5 rounded-lg bg-accent-soft px-4 py-3 text-sm text-ink;
+  }
+
+  /* The card a page leads with: deep green, light text (the redesign's focal point) */
+  .bg-focal {
+    background-image: var(--focal);
+    color: var(--focal-ink);
+  }
+  /* The faint wash of colour behind the app */
+  .bg-wash {
+    background: var(--wash);
   }
 
   /* Words from the library itself, in Lateef (see the top of this file) */

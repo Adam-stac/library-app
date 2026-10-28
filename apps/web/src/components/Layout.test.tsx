@@ -117,6 +117,22 @@ describe('Layout account controls', () => {
     expect(builds).toBe(1)
   })
 
+  it('shows nothing until it knows who is signed in, so the page never jumps from one frame to the other', async () => {
+    let answer: (response: Response) => void = () => {}
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise<Response>((resolve) => (answer = resolve))),
+    )
+    renderLayout()
+
+    const frame = screen.getByText('content').closest('main')?.parentElement
+    expect(frame).toHaveClass('invisible')
+
+    answer(json(200, { email: 'reader@example.com', language: 'en' }))
+    expect(await screen.findByRole('button', { name: /Your account/ })).toBeInTheDocument()
+    expect(frame).not.toHaveClass('invisible')
+  })
+
   it('the account menu opens and closes, with the settings and signing out in it', async () => {
     vi.stubGlobal(
       'fetch',

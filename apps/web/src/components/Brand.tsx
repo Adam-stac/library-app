@@ -27,7 +27,7 @@ export default function Brand() {
     <Link to="/" aria-label={t('app.name')} className="inline-flex min-h-10 items-center gap-2.5 rounded-lg">
       <Mark className="h-10" />
       {i18n.language !== 'ar' && (
-        <span aria-hidden="true" className="text-[1.0625rem] font-semibold tracking-tight">
+        <span aria-hidden="true" className="text-reading font-semibold tracking-tight">
           {t('app.name')}
         </span>
       )}

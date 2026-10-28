@@ -23,7 +23,7 @@ export default function Details({ rows, className = 'mt-10' }: { rows: DetailRow
           className="grid gap-1 border-b border-line py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6"
         >
           <dt className="text-sm text-muted sm:pt-0.5">{row.label}</dt>
-          <dd className={`break-words ${row.book ? 'font-book text-[1.0625rem]' : ''}`}>
+          <dd className={`break-words ${row.book ? 'font-book text-reading' : ''}`}>
             {typeof row.value === 'string' ? <bdi>{row.value}</bdi> : row.value}
           </dd>
         </div>

@@ -50,7 +50,7 @@ function Welcome() {
     <div className="w-full max-w-5xl">
       <section className="grid items-center gap-12 pt-2 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
         <div>
-          <h1 className="text-[2.25rem] leading-[1.15] font-semibold text-balance sm:text-5xl">{t('landing.title')}</h1>
+          <h1 className="text-display leading-display font-semibold text-balance sm:text-5xl">{t('landing.title')}</h1>
           <p className="lede mt-4 text-lg">{t('landing.lede')}</p>
           <p className="mt-9 flex flex-wrap gap-3">
             <Link to="/register" className="btn btn-primary px-5">
@@ -72,7 +72,7 @@ function Welcome() {
                 key={author.id}
                 className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-line py-3 last:border-b-0"
               >
-                <span aria-hidden="true" className="font-book text-[1.375rem] leading-none text-accent">
+                <span aria-hidden="true" className="font-book text-letter leading-none text-accent">
                   {indexLetter(displayName(author, language))}
                 </span>
                 <span className="min-w-0">
@@ -219,7 +219,7 @@ function Library() {
                     key={share.science?.id ?? 'none'}
                     className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5"
                   >
-                    <bdi className={share.science ? 'font-book text-[1.0625rem]' : 'text-muted'}>
+                    <bdi className={share.science ? 'font-book text-reading' : 'text-muted'}>
                       {share.science ? nameOf(share.science, language) : t('home.noScience')}
                     </bdi>
                     <span className="text-sm text-muted">
@@ -310,7 +310,7 @@ function ShelfList({ books, note }: { books: ShelfBook[]; note: (book: ShelfBook
             to={`/books/${encodeURIComponent(book.id)}`}
             className="group -mx-3 flex items-baseline gap-x-4 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-hover"
           >
-            <bdi className="font-book min-w-0 flex-1 text-[1.0625rem] group-hover:text-accent">
+            <bdi className="font-book min-w-0 flex-1 text-reading group-hover:text-accent">
               {bookTitle(book, language)}
             </bdi>
             {note(book) && <span className="shrink-0 text-sm text-muted">{note(book)}</span>}

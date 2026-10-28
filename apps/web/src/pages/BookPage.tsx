@@ -89,7 +89,7 @@ export default function BookPage() {
                 {book.work.authors.map((author, index) => (
                   <span key={author.id}>
                     {index > 0 && (language === 'ar' ? '، ' : ', ')}
-                    <Link to={`/authors/${encodeURIComponent(author.id)}`} className="link font-book text-[1.0625rem]">
+                    <Link to={`/authors/${encodeURIComponent(author.id)}`} className="link font-book text-reading">
                       <bdi>{nameOf(author, language)}</bdi>
                     </Link>
                   </span>
@@ -214,7 +214,7 @@ function Reading({ book, onSaved, onStale }: { book: Edition; onSaved: (book: Ed
       <h2 id="reading" className="section-title">
         {t('books.reading')}
       </h2>
-      <p className="text-[1.0625rem]">{statusText(book.status, t)}</p>
+      <p className="text-reading">{statusText(book.status, t)}</p>
       <dl className="flex flex-col gap-1 text-sm text-muted">
         {book.startedOn && (
           <div className="flex gap-2">
@@ -334,7 +334,7 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
         <Icon name="bookmark" className="size-4 text-accent" />
         {t('books.bookmark.title')}
       </h2>
-      <p className="text-[1.0625rem]" aria-live="polite">
+      <p className="text-reading" aria-live="polite">
         {book.bookmark ? bookmarkText(book.bookmark, t, language) : t('books.bookmark.none')}
         {moved && <span className="sr-only"> {t('books.bookmark.moved')}</span>}
       </p>

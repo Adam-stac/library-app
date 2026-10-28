@@ -183,7 +183,7 @@ export default function SearchPicker<T extends { id: string }>({
                   index === active ? 'bg-hover' : 'hover:bg-hover'
                 }`}
               >
-                <bdi className="font-book text-[1.0625rem]">{option.primary}</bdi>
+                <bdi className="font-book text-reading">{option.primary}</bdi>
                 {option.secondary && <bdi className="font-book text-sm text-muted">{option.secondary}</bdi>}
               </li>
             )
@@ -236,7 +236,7 @@ export function Picked({
   const { t } = useTranslation()
   return (
     <span className="inline-flex max-w-full items-center gap-2 rounded-lg border border-line bg-surface py-1 ps-3 pe-1">
-      <bdi className="font-book min-w-0 truncate text-[1.0625rem]">{label}</bdi>
+      <bdi className="font-book min-w-0 truncate text-reading">{label}</bdi>
       {secondary && <bdi className="font-book hidden truncate text-sm text-muted sm:inline">{secondary}</bdi>}
       <button
         type="button"

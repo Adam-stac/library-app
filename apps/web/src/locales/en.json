@@ -90,7 +90,15 @@
     "passkeys": "Passkeys",
     "passkeysAbout": "Sign in with your fingerprint, face or device PIN.",
     "library": "Library settings",
-    "libraryAbout": "The currency new prices start in."
+    "libraryAbout": "The currency new prices start in.",
+    "appearance": "Appearance",
+    "appearanceAbout": "Automatic follows your device's light or dark setting. Kept on this device only.",
+    "theme": {
+      "legend": "Theme",
+      "system": "Automatic",
+      "light": "Light",
+      "dark": "Dark"
+    }
   },
   "librarySettings": {
     "title": "Library settings",
