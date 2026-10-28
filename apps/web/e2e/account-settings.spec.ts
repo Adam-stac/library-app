@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-import { emailedLink, emailText, PASSWORD, verificationLinkFor, WCAG_AA } from './mailpit'
+import { emailedLink, emailText, PASSWORD, verificationLinkFor } from './mailpit'
+import { expectAccessible } from './accessibility'
 
 // Runs against the full stack (Docker Compose), including Mailpit.
 test.describe('Account settings', () => {
@@ -30,8 +30,7 @@ test.describe('Account settings', () => {
     await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
     await page.getByRole('link', { name: 'Account settings' }).click()
     await expect(page.getByRole('heading', { name: 'Account settings', level: 1 })).toBeVisible()
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
-    expect(results.violations).toEqual([])
+    await expectAccessible(page)
     await page.getByLabel('New email address').fill(newAddress)
     await page.getByLabel('Current password').first().fill(PASSWORD)
     await page.getByRole('button', { name: 'Send the link' }).click()

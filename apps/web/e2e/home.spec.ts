@@ -1,7 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
-
-const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+import { expectAccessible } from './accessibility'
+import { layoutShift, watchLayoutShift } from './layoutShift'
 
 test.describe('Home page', () => {
   test('opens in Arabic, right-to-left, with no browser errors', async ({ page }) => {
@@ -18,6 +17,13 @@ test.describe('Home page', () => {
     await expect(page.getByRole('heading', { name: 'فهرس مكتبتك' })).toBeVisible()
     // Catches anything the Content-Security-Policy blocks, and any JavaScript crash
     expect(errors).toEqual([])
+  })
+
+  test('nothing moves while the page and its fonts load', async ({ page }) => {
+    await watchLayoutShift(page)
+    await page.goto('/')
+    await expect(page.getByRole('heading', { name: 'فهرس مكتبتك' })).toBeVisible()
+    expect(await layoutShift(page)).toBeLessThan(0.1) // Google counts up to 0.1 as good
   })
 
   test('switches to English, left-to-right, and remembers it after reload', async ({ page }) => {
@@ -52,9 +58,7 @@ test.describe('Home page', () => {
       await page.goto('/')
       await expect(page.locator('html')).toHaveAttribute('lang', language)
 
-      const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
-
-      expect(results.violations).toEqual([])
+      await expectAccessible(page)
     })
   }
 })

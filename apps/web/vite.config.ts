@@ -4,17 +4,18 @@ import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 
 /**
- * The fonts nearly every page draws with, downloaded as soon as the page starts loading rather than once the
- * stylesheet asks for them, so they are usually here before the app first draws and text doesn't jump when they
- * arrive: the interface's Arabic and Latin letters, Alexandria for Arabic headings, and Lateef for words from the
- * library (both weights).
+ * The fonts every page draws with, downloaded as soon as the page starts loading rather than once the stylesheet
+ * asks for them, so they are usually here before the app first draws and text doesn't jump when they arrive: the
+ * interface's Arabic and Latin letters, and Alexandria for Arabic headings (about 85 kB together).
+ *
+ * Lateef (about 130 kB for both weights) is not preloaded: on a slow connection it held the first page back by half
+ * a second, measured. Layouts are built so that its arrival moves nothing (see PageHeader), and the layout-shift
+ * check in the end-to-end tests holds them to that.
  */
 const PRELOADED_FONTS = [
   /^readex-pro-arabic-wght-normal-.+\.woff2$/,
   /^geist-latin-wght-normal-.+\.woff2$/,
   /^alexandria-arabic-wght-normal-.+\.woff2$/,
-  /^lateef-arabic-400-normal-.+\.woff2$/,
-  /^lateef-arabic-600-normal-.+\.woff2$/,
 ]
 
 function preloadFonts(): Plugin {
@@ -58,5 +59,8 @@ export default defineConfig({
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'], // e2e/ is for Playwright, not Vitest
     setupFiles: ['./src/test/setup.ts'],
+    // Page tests type into forms and wait for searches. On a busy machine (many test files in parallel, as on a
+    // laptop with many cores) the default 5 seconds can run out mid-typing; 15 still catches a real hang.
+    testTimeout: 15_000,
   },
 })

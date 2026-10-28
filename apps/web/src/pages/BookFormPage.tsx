@@ -138,15 +138,26 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
 
   const editing = mode === 'edit' && edition.status === 'ok' && work.status === 'ok' ? edition.data : null
   const editingWork = editing && work.status === 'ok' ? work.data : null
-  // What has been typed, kept against the versions it started from (see PlaceFormPage)
+  // What has been typed, kept against the versions it started from (see PlaceFormPage). Adding a book, your default
+  // currency fills in the price's currency whenever it arrives, even after you've started typing, unless you've
+  // chosen a currency yourself.
+  const defaultCurrency = settings.status === 'ok' ? (settings.data.defaultCurrency ?? '') : ''
   const base = editing && editingWork ? `${editing.id}:${editing.version}:${editingWork.version}` : 'new'
   const initial =
-    editing && editingWork
-      ? draftFrom(editing, editingWork)
-      : { ...EMPTY, priceCurrency: settings.status === 'ok' ? (settings.data.defaultCurrency ?? '') : '' }
-  const [typed, setTyped] = useState<{ base: string; draft: Draft } | null>(null)
-  const draft = typed?.base === base ? typed.draft : initial
-  const setDraft = (next: Draft) => setTyped({ base, draft: next })
+    editing && editingWork ? draftFrom(editing, editingWork) : { ...EMPTY, priceCurrency: defaultCurrency }
+  const [typed, setTyped] = useState<{ base: string; draft: Draft; currencyChosen: boolean } | null>(null)
+  const draft =
+    typed?.base === base
+      ? editing || typed.currencyChosen
+        ? typed.draft
+        : { ...typed.draft, priceCurrency: defaultCurrency }
+      : initial
+  const setDraft = (next: Draft) =>
+    setTyped({
+      base,
+      draft: next,
+      currencyChosen: (typed?.base === base && typed.currencyChosen) || next.priceCurrency !== draft.priceCurrency,
+    })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)

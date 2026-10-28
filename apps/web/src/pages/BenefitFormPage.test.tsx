@@ -66,6 +66,30 @@ describe('BenefitFormPage', () => {
     })
   })
 
+  it('keeps what was typed when the book it was started from arrives a moment later', async () => {
+    let bookArrives: (response: Response) => void = () => {}
+    const api = fakeApi(
+      {
+        '/api/v1/editions/e1': () => new Promise<Response>((resolve) => (bookArrives = resolve)),
+        '/api/v1/benefits': () => json(201, BENEFIT),
+      },
+      'r@example.com',
+    )
+    const user = renderPage('/benefits/new?book=e1')
+
+    await user.type(await screen.findByLabelText('The benefit'), 'إنما الأعمال بالنيات.')
+    bookArrives(json(200, EDITION))
+    expect(await screen.findByRole('button', { name: 'Remove Sahih al-Bukhari' })).toBeInTheDocument()
+    expect(screen.getByLabelText('The benefit')).toHaveValue('إنما الأعمال بالنيات.')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByRole('heading', { name: 'Book page' })).toBeInTheDocument()
+    expect(JSON.parse(callTo(api, '/api/v1/benefits').body as string)).toMatchObject({
+      text: 'إنما الأعمال بالنيات.',
+      editionId: 'e1',
+    })
+  })
+
   it('saves a benefit with no book, and checks the text first', async () => {
     const api = fakeApi(
       { '/api/v1/benefits': () => json(201, { ...BENEFIT, edition: null, volume: null, page: null }) },
