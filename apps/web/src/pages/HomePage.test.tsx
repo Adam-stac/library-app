@@ -79,7 +79,12 @@ describe('HomePage', () => {
     fakeApi({})
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Welcome', level: 1 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'The index of your library', level: 1 })).toBeInTheDocument()
+    // An example of the index, with nothing in it to click
+    const example = screen.getByRole('figure', { name: 'An example: authors, as Khizāna lists them' })
+    expect(example).toHaveTextContent('al-Bukhārī')
+    expect(example).toHaveTextContent('d. 256 AH')
+    expect(example.querySelector('a')).toBeNull()
     expect(screen.getByRole('link', { name: 'Create an account' })).toHaveAttribute('href', '/register')
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in')
   })

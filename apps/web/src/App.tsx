@@ -16,6 +16,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage'
 import ConfirmEmailChangePage from './pages/ConfirmEmailChangePage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import HomePage from './pages/HomePage'
+import LibrarySettingsPage from './pages/LibrarySettingsPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PlaceFormPage from './pages/PlaceFormPage'
 import PlacePage from './pages/PlacePage'
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/two-step-verification" element={<TwoFactorPage />} />
           <Route path="/passkeys" element={<PasskeysPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/library-settings" element={<LibrarySettingsPage />} />
           <Route path="/security" element={<SecurityPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />

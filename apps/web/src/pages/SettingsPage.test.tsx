@@ -33,6 +33,7 @@ describe('SettingsPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Settings' })).toBeInTheDocument()
     expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
+      '/library-settings',
       '/account',
       '/security',
       '/change-password',

@@ -2,12 +2,12 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useAuth } from '../auth/context'
-import { formatNumber } from '../authors'
+import { type AuthorSummary, displayName, formatNumber, indexYear, otherName } from '../authors'
 import { bookmarkText, formatDate, formatPrice } from '../books'
 import BenefitCard from '../components/BenefitCard'
-import { Mark } from '../components/Brand'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import { indexLetter, sortKey } from '../indexLetter'
 import { authorsOf, bookTitle, type HomeSummary, nameOf, type ShelfBook } from '../library'
 import { useLoad } from '../useLoad'
 
@@ -23,23 +23,87 @@ export default function HomePage() {
   return null
 }
 
+/** Three classical authors, to show how the app lists a library. An example, so nothing in it is a link. */
+const SPECIMEN: AuthorSummary[] = [
+  { id: 'bukhari', nameAr: 'البخاري', nameEn: 'al-Bukhārī', birth: year(194), death: year(256) },
+  { id: 'tabari', nameAr: 'الطبري', nameEn: 'al-Ṭabarī', birth: year(224), death: year(310) },
+  { id: 'nawawi', nameAr: 'النووي', nameEn: 'al-Nawawī', birth: year(631), death: year(676) },
+]
+
+function year(hijri: number) {
+  return { hijri, ce: null, approximate: false }
+}
+
+/**
+ * The landing page, for anyone not signed in: what the app is, an example of how it lists a library, what you can
+ * do with it, and the way in.
+ */
 function Welcome() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const language = i18n.language === 'ar' ? 'ar' : 'en'
+  // In catalogue order for the page's language, as a real list would be
+  const specimen = [...SPECIMEN].sort((a, b) =>
+    sortKey(displayName(a, language)).localeCompare(sortKey(displayName(b, language)), language),
+  )
 
   return (
-    <section className="flex max-w-lg flex-col items-center pt-4 text-center sm:pt-10">
-      <Mark className="h-24 sm:h-28" />
-      <h1 className="page-title mt-10">{t('home.title')}</h1>
-      <p className="lede text-[1.0625rem]">{t('app.tagline')}</p>
-      <p className="mt-9 flex flex-wrap justify-center gap-3">
-        <Link to="/register" className="btn btn-primary px-5">
-          {t('home.createAccount')}
-        </Link>
-        <Link to="/sign-in" className="btn px-5">
-          {t('home.signIn')}
-        </Link>
-      </p>
-    </section>
+    <div className="w-full max-w-5xl">
+      <section className="grid items-center gap-12 pt-2 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+        <div>
+          <h1 className="text-[2.25rem] leading-[1.15] font-semibold text-balance sm:text-5xl">{t('landing.title')}</h1>
+          <p className="lede mt-4 text-lg">{t('landing.lede')}</p>
+          <p className="mt-9 flex flex-wrap gap-3">
+            <Link to="/register" className="btn btn-primary px-5">
+              {t('home.createAccount')}
+            </Link>
+            <Link to="/sign-in" className="btn px-5">
+              {t('home.signIn')}
+            </Link>
+          </p>
+        </div>
+
+        <figure aria-labelledby="specimen" className="card px-6 pt-5 pb-3">
+          <figcaption id="specimen" className="mb-3 text-sm text-muted">
+            {t('landing.specimen')}
+          </figcaption>
+          <ul className="border-t border-line">
+            {specimen.map((author) => (
+              <li
+                key={author.id}
+                className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-line py-3 last:border-b-0"
+              >
+                <span aria-hidden="true" className="font-book text-[1.375rem] leading-none text-accent">
+                  {indexLetter(displayName(author, language))}
+                </span>
+                <span className="min-w-0">
+                  <span className="font-book block text-xl leading-snug font-medium">
+                    <bdi>{displayName(author, language)}</bdi>
+                  </span>
+                  <span className="font-book block text-sm text-muted">
+                    <bdi>{otherName(author, language)}</bdi>
+                  </span>
+                </span>
+                <span className="text-sm text-muted">{indexYear(author, t, language)}</span>
+              </li>
+            ))}
+          </ul>
+        </figure>
+      </section>
+
+      <section aria-labelledby="what-you-can-do" className="mt-20 max-w-3xl sm:mt-24">
+        <h2 id="what-you-can-do" className="section-title">
+          {t('landing.whatTitle')}
+        </h2>
+        <dl className="mt-4 border-t border-line">
+          {(['catalogue', 'read', 'benefits'] as const).map((key) => (
+            <div key={key} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-6">
+              <dt className="font-medium">{t(`landing.${key}`)}</dt>
+              <dd className="text-muted">{t(`landing.${key}About`)}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
   )
 }
 
@@ -110,11 +174,13 @@ function Library() {
                       className="group -mx-3 flex items-baseline gap-x-6 rounded-lg px-3 py-3 transition-colors duration-150 hover:bg-hover"
                     >
                       <span className="min-w-0 flex-1">
-                        <bdi className="font-book block text-xl leading-snug font-medium group-hover:text-accent">
-                          {bookTitle(placed, language)}
-                        </bdi>
+                        <span className="font-book block text-xl leading-snug font-medium group-hover:text-accent">
+                          <bdi>{bookTitle(placed, language)}</bdi>
+                        </span>
                         {authorsOf(placed.work, language) && (
-                          <bdi className="font-book block text-sm text-muted">{authorsOf(placed.work, language)}</bdi>
+                          <span className="font-book block text-sm text-muted">
+                            <bdi>{authorsOf(placed.work, language)}</bdi>
+                          </span>
                         )}
                       </span>
                       <span className="flex shrink-0 items-center gap-1.5 text-sm text-muted">
