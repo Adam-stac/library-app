@@ -65,6 +65,18 @@
     "benefits": "Latest benefits",
     "allBenefits": "All {{number}} benefits"
   },
+  "landing": {
+    "title": "The index of your library",
+    "lede": "Catalogue the books you own, with their authors and editions. Keep your place in each one, and save the benefits you find, in Arabic and English.",
+    "specimen": "An example: authors, as Khizāna lists them",
+    "whatTitle": "What you can do",
+    "catalogue": "Catalogue",
+    "catalogueAbout": "Each copy you own, with its work, authors, edition, shelf and price, and the sciences your library covers.",
+    "read": "Read",
+    "readAbout": "A bookmark in every book, the dates you started and finished, and the books bought but not yet opened.",
+    "benefits": "Keep benefits",
+    "benefitsAbout": "Save what you learn with the book, volume and page it came from, and find it again: search ignores vowel marks."
+  },
   "settings": {
     "title": "Settings",
     "account": "Account settings",
@@ -76,7 +88,15 @@
     "twoFactor": "Two-step verification",
     "twoFactorAbout": "A code from an authenticator app when you sign in.",
     "passkeys": "Passkeys",
-    "passkeysAbout": "Sign in with your fingerprint, face or device PIN."
+    "passkeysAbout": "Sign in with your fingerprint, face or device PIN.",
+    "library": "Library settings",
+    "libraryAbout": "The currency new prices start in."
+  },
+  "librarySettings": {
+    "title": "Library settings",
+    "currency": "Default currency",
+    "noCurrency": "None",
+    "currencyHint": "The currency a new book's price starts in. Prices are kept in the currency paid and never converted."
   },
   "notFound": {
     "title": "Page not found",
@@ -324,7 +344,7 @@
       "reading": "Reading",
       "finished": "Finished"
     },
-    "reading": "Reading",
+    "reading": "Your reading",
     "startToday": "Start reading today",
     "finishToday": "Finished today",
     "bookmarkAt": "Page {{page}}",

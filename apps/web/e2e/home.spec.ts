@@ -15,7 +15,7 @@ test.describe('Home page', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'ar')
     await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
-    await expect(page.getByRole('heading', { name: 'مرحبًا بك' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'فهرس مكتبتك' })).toBeVisible()
     // Catches anything the Content-Security-Policy blocks, and any JavaScript crash
     expect(errors).toEqual([])
   })
@@ -25,11 +25,11 @@ test.describe('Home page', () => {
 
     await page.getByRole('button', { name: 'English' }).click()
     await expect(page.locator('html')).toHaveAttribute('dir', 'ltr')
-    await expect(page.getByRole('heading', { name: 'Welcome' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'The index of your library' })).toBeVisible()
 
     await page.reload()
     await expect(page.locator('html')).toHaveAttribute('lang', 'en')
-    await expect(page.getByRole('heading', { name: 'Welcome' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'The index of your library' })).toBeVisible()
   })
 
   test('the layout mirrors between Arabic and English', async ({ page }) => {

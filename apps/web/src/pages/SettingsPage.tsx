@@ -5,6 +5,7 @@ import Icon, { type IconName } from '../components/Icon'
 
 /** Every account setting, in one place. Signed-in accounts only. */
 const SETTINGS: { to: string; key: string; icon: IconName }[] = [
+  { to: '/library-settings', key: 'library', icon: 'bookOpen' },
   { to: '/account', key: 'account', icon: 'user' },
   { to: '/security', key: 'security', icon: 'shield' },
   { to: '/change-password', key: 'changePassword', icon: 'key' },

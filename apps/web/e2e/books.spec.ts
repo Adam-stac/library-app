@@ -39,6 +39,13 @@ test.describe('Books', () => {
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
     await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 
+    // Your default currency, which a new book's price starts in
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
+    await page.getByRole('link', { name: /^Library settings/ }).click()
+    await page.getByLabel('Default currency').selectOption('SAR')
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByRole('status')).toHaveText('Changes saved.')
+
     // An empty shelf
     await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Books' }).click()
     await expect(page.getByRole('heading', { name: 'Books', level: 1 })).toBeVisible()
@@ -54,6 +61,7 @@ test.describe('Books', () => {
     await page.getByLabel('Science').selectOption({ label: 'Ḥadīth' })
     await page.getByLabel('Volumes').fill('9')
     await page.getByLabel('Publisher').fill('دار طوق النجاة')
+    await expect(page.getByLabel('Currency')).toHaveValue('SAR')
     await expectAccessible(page)
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByRole('heading', { name: 'Sahih al-Bukhari', level: 1 })).toBeVisible()

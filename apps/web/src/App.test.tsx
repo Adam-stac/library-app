@@ -30,7 +30,7 @@ describe('App', () => {
   it('shows Arabic, right-to-left, by default', async () => {
     renderApp()
 
-    expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'فهرس مكتبتك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('lang', 'ar')
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
   })
@@ -41,7 +41,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: 'English' }))
 
-    expect(await screen.findByRole('heading', { name: 'Welcome' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'The index of your library' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('lang', 'en')
     expect(document.documentElement).toHaveAttribute('dir', 'ltr')
     expect(localStorage.getItem('language')).toBe('en')
@@ -54,7 +54,7 @@ describe('App', () => {
 
     await user.click(screen.getByRole('button', { name: 'العربية' }))
 
-    expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'فهرس مكتبتك' })).toBeInTheDocument()
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
   })
 
@@ -74,7 +74,7 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
     await user.click(screen.getByRole('link', { name: 'اذهب إلى الصفحة الرئيسية' }))
 
-    expect(await screen.findByRole('heading', { name: 'مرحبًا بك' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'فهرس مكتبتك' })).toBeInTheDocument()
   })
 
   it('names the app خِزانة, in Amiri, with its Latin name on the English page', async () => {
