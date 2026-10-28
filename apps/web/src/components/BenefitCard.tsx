@@ -25,12 +25,12 @@ export default function BenefitCard({ benefit, withoutBook = false, onDeleted }:
 
   return (
     <article className="flex flex-col gap-3 py-5">
-      <p className="font-book max-w-[65ch] text-lg leading-[1.85] break-words whitespace-pre-line" dir="auto">
+      <p className="font-book max-w-[65ch] text-lg leading-reading break-words whitespace-pre-line" dir="auto">
         {benefit.text}
       </p>
       <footer className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
         {benefit.edition && !withoutBook && (
-          <Link to={`/books/${encodeURIComponent(benefit.edition.id)}`} className="link font-book text-[0.9375rem]">
+          <Link to={`/books/${encodeURIComponent(benefit.edition.id)}`} className="link font-book text-ui">
             <bdi>{bookTitle(benefit.edition, language)}</bdi>
           </Link>
         )}

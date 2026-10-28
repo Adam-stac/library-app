@@ -43,7 +43,7 @@ export default function TextAreaField({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className={`field py-2 ${book ? 'font-book text-[1.0625rem] leading-relaxed' : ''}`}
+        className={`field py-2 ${book ? 'font-book text-reading leading-relaxed' : ''}`}
       />
       {hint && (
         <p id={`${id}-hint`} className="text-sm text-muted">

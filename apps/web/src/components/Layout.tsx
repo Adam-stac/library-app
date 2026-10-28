@@ -38,7 +38,7 @@ const SECTIONS: { to: string; key: string; icon: IconName; end?: boolean }[] = [
 ]
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
-  `flex min-h-10 shrink-0 items-center gap-3 rounded-lg px-3 text-[0.9375rem] font-medium transition-colors duration-150 ${
+  `flex min-h-10 shrink-0 items-center gap-3 rounded-lg px-3 text-ui font-medium transition-colors duration-150 ${
     isActive ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-hover hover:text-ink'
   }`
 
@@ -49,17 +49,21 @@ const navLink = ({ isActive }: { isActive: boolean }) =>
  * frosted top bar (the page scrolls under it) with the sections in a row under it. Pages sit at the start of the
  * space beside the sidebar, up to the width of a list; forms and reading pages narrow themselves.
  *
- * Signed out, or while checking: the mark, signing in and the language along the top, and the page in a single
- * centred column. Every link here leads to a page that exists; sections are added as their pages are built.
+ * Signed out: the mark, signing in and the language along the top, and the page in a single centred column.
+ * While checking who is signed in, nothing shows, so the page never jumps from one frame to the other. Every link
+ * here leads to a page that exists; sections are added as their pages are built.
  */
 export default function Layout({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const { state } = useAuth()
 
   const signedIn = state.status === 'signedIn'
+  const frame = signedIn ? 'min-h-screen lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]' : 'min-h-screen'
 
   return (
-    <div className={signedIn ? 'min-h-screen lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]' : 'min-h-screen'}>
+    // Hidden while checking who is signed in, a moment at most: drawing the signed-out frame first and swapping in
+    // the sidebar moved the whole page (a layout shift of 0.17 on every signed-in page, measured).
+    <div className={state.status === 'loading' ? `${frame} invisible` : frame}>
       {signedIn ? (
         <aside className="glass-bar sticky top-0 z-10 border-b border-line lg:h-screen lg:border-e lg:border-b-0 lg:bg-paper lg:backdrop-filter-none">
           <div className="grid grid-cols-[1fr_auto] items-center gap-x-1 gap-y-2 px-4 pt-3 pb-2 lg:flex lg:h-full lg:flex-col lg:items-stretch lg:gap-0 lg:px-3 lg:pt-6 lg:pb-3">

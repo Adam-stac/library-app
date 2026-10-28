@@ -44,7 +44,7 @@ export default function AuthorsPicker({ id, label, value, onChange, error }: Pro
                   {formatNumber(index + 1, language)}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3">
-                  <bdi className="font-book truncate text-[1.0625rem]">{name}</bdi>
+                  <bdi className="font-book truncate text-reading">{name}</bdi>
                   {otherNameOf(author, language) && (
                     <bdi className="font-book truncate text-sm text-muted">{otherNameOf(author, language)}</bdi>
                   )}

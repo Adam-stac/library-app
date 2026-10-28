@@ -76,3 +76,29 @@ for one firm rule: nothing on screen may be a placeholder. Every button and link
   tests change in the same pull request.
 - The name changed in the emails, the authenticator app entry (now "Khizana") and the passkey prompts. Codes
   already set up keep working; only the label is new.
+
+## Update, 28 October 2026: the redesign's foundations (Phase B2, slice P1)
+
+The owner approved a redesign, mocked up first (a slim rail, a frosted card on a faint colour wash, one deep green
+card each page leads with, large figures, pill buttons, and the share of each science as a ring in a green scale).
+This slice lays its foundations; the look itself arrives in later slices.
+
+- **A type scale with named steps.** Every text size and line height is a named step (`text-reading`,
+  `text-title`, `text-figure`…), never a one-off value such as `text-[1.0625rem]`. `src/typeScale.test.ts` fails
+  the build on one.
+- **Alexandria for Arabic headings and large figures** (`font-display`), bundled like the other fonts. IBM Plex
+  Sans Arabic was in the mockup for interface text, but three static weights are about 130 kB against Readex Pro's
+  23 kB for the same job, so Readex Pro stays.
+- **Light, dark, or as the device is set**, chosen in Settings and kept on the device. `public/theme.js` applies it
+  before the page first draws, so a choice never flashes the other theme; it is a file, not an inline script,
+  because the Content-Security-Policy allows scripts from this site only. The dark colours appear twice in
+  `index.css` (for the device's setting and for the reader's choice); a test keeps the two the same.
+- **New tokens:** fields, progress tracks, dark pills, the frosted card, the deep focal card, shadows, rounder
+  corners (`rounded-field`, `-panel`, `-card`, `-frame`), the wash, and a six-step green scale from most to least.
+  `src/colours.test.ts` checks every text pair is at least 4.5:1 and field borders 3:1, in light and dark,
+  against every colour stop of a gradient.
+- **No layout shift on load.** Measured on a slow connection (150 ms latency, 1.6 Mbit/s), signed-in pages moved by
+  0.17 (0.53 on an Arabic book page; Google counts over 0.1 as needing improvement): the signed-out frame was drawn
+  first, then swapped for the sidebar, and book titles rewrapped when Lateef arrived. Now the frame stays hidden
+  until the app knows who is signed in, the fonts nearly every page uses are preloaded, and Latin text waits in
+  Arial resized to Geist's measurements. Measured again: 0 on every page tried.

@@ -42,7 +42,7 @@ export default function IndexList({ rows, byLetter = false }: Props) {
       {runs.map((run, i) => (
         <div key={`${run.letter}-${i}`} className="border-b border-line sm:grid sm:grid-cols-[4rem_minmax(0,1fr)]">
           {/* The rows already start with the name, so the letter is only for the eye */}
-          <p aria-hidden="true" className="font-book pt-4 text-[1.625rem] leading-none text-accent sm:pt-[1.125rem]">
+          <p aria-hidden="true" className="font-book pt-4 text-letter leading-none text-accent sm:pt-4.5">
             {run.letter}
           </p>
           <Rows rows={run.rows} />
