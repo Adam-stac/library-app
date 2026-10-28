@@ -69,16 +69,9 @@ export default function BooksPage() {
       />
       <Notice />
 
-      <nav aria-label={t('books.order')} className="mt-8 flex flex-wrap gap-1 border-b border-line">
+      <nav aria-label={t('books.order')} className="tabs mt-8">
         {ORDERS.map((o) => (
-          <Link
-            key={o}
-            to={address(o)}
-            aria-current={o === order ? 'page' : undefined}
-            className={`-mb-px inline-flex min-h-10 items-center border-b-2 px-3 text-sm font-medium transition-colors duration-150 ${
-              o === order ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-ink'
-            }`}
-          >
+          <Link key={o} to={address(o)} aria-current={o === order ? 'page' : undefined} className="tab">
             {t(`books.orders.${o}`)}
           </Link>
         ))}

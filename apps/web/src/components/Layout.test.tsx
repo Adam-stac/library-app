@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { useEffect } from 'react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AuthProvider from '../auth/AuthProvider'
 import i18n from '../i18n'
@@ -225,5 +225,60 @@ describe('Layout account controls', () => {
       ['Settings', '/settings'],
     ])
     expect(within(sections).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
+  })
+  it('on a phone, keeps the rest of the sections behind More, which closes with Escape', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(
+          path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+        ),
+      ),
+    )
+    const user = renderLayout()
+
+    const more = await screen.findByRole('button', { name: 'More' })
+    expect(more).toHaveAttribute('aria-expanded', 'false')
+    await user.click(more)
+    const list = screen.getByRole('list')
+    expect(
+      within(list)
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual(['/places', '/sciences', '/settings'])
+    await user.keyboard('{Escape}')
+    expect(more).toHaveAttribute('aria-expanded', 'false')
+    expect(more).toHaveFocus()
+  })
+
+  it('on a phone, searches the library from any page, but not twice on the search page', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((path: string) =>
+        Promise.resolve(
+          path === '/api/v1/auth/me' ? json(200, { email: 'reader@example.com', language: 'en' }) : json(204),
+        ),
+      ),
+    )
+    function Where() {
+      const location = useLocation()
+      return <p>at {location.pathname + location.search}</p>
+    }
+    render(
+      <MemoryRouter initialEntries={['/books']}>
+        <AuthProvider>
+          <Layout>
+            <Routes>
+              <Route path="*" element={<Where />} />
+            </Routes>
+          </Layout>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+    const user = userEvent.setup()
+
+    await user.type(await screen.findByRole('searchbox', { name: 'Search your library' }), 'bukhari{Enter}')
+    expect(await screen.findByText('at /search?q=bukhari')).toBeInTheDocument()
+    expect(screen.queryByRole('searchbox', { name: 'Search your library' })).not.toBeInTheDocument()
   })
 })

@@ -50,16 +50,9 @@ export default function PlacesPage() {
       />
       <Notice />
 
-      <nav aria-label={t('places.show')} className="mt-8 flex flex-wrap gap-1 border-b border-line">
+      <nav aria-label={t('places.show')} className="tabs mt-8">
         {SCOPES.map((s) => (
-          <Link
-            key={s}
-            to={`/places?scope=${s}`}
-            aria-current={s === scope ? 'page' : undefined}
-            className={`-mb-px inline-flex min-h-10 items-center border-b-2 px-3 text-sm font-medium transition-colors duration-150 ${
-              s === scope ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-ink'
-            }`}
-          >
+          <Link key={s} to={`/places?scope=${s}`} aria-current={s === scope ? 'page' : undefined} className="tab">
             {t(`places.scope.${s}`)}
           </Link>
         ))}

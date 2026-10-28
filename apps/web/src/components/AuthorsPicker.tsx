@@ -35,7 +35,7 @@ export default function AuthorsPicker({ id, label, value, onChange, error }: Pro
   return (
     <div className="flex flex-col gap-3">
       {value.length > 0 && (
-        <ol aria-label={label} className="divide-y divide-line rounded-xl border border-line bg-surface">
+        <ol aria-label={label} className="card divide-y divide-line">
           {value.map((author, index) => {
             const name = nameOf(author, language)
             return (

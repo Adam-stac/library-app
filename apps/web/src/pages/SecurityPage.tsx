@@ -93,7 +93,7 @@ export default function SecurityPage() {
         <>
           <ul aria-labelledby="sessions-title" className="mt-3 flex flex-col gap-3">
             {sessions.map((session) => (
-              <li key={session.handle} className="rounded-xl border border-line bg-surface p-5">
+              <li key={session.handle} className="card p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold">
@@ -163,7 +163,7 @@ export default function SecurityPage() {
       </h2>
       <p className="mt-2 text-muted">{t('security.activityIntro')}</p>
       {events && events.length > 0 && (
-        <ol aria-labelledby="activity-title" className="mt-3 divide-y divide-line rounded-lg border border-line bg-surface">
+        <ol aria-labelledby="activity-title" className="card mt-3 divide-y divide-line">
           {events.map((event, index) => (
             <li key={`${event.occurredAt}-${index}`} className="px-4 py-3">
               <p className="font-semibold">

@@ -227,7 +227,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
             book
           />
         </div>
-        <fieldset className="rounded-xl border border-line bg-surface p-5">
+        <fieldset className="card p-5 sm:p-6">
           <legend className="section-title float-start mb-2 w-full">{t('places.position')}</legend>
           <p className="clear-both mb-5 text-sm text-muted">{t('places.form.positionHint')}</p>
           <div className="grid gap-5 sm:grid-cols-2">
