@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -92,6 +92,26 @@ describe('BookFormPage', () => {
       published: { hijri: null, ce: null },
       startedOn: null,
     })
+  })
+
+  it('fills in your default currency when it arrives, even after you have started typing, unless you chose one', async () => {
+    let settingsArrive: (response: Response) => void = () => {}
+    fakeApi(
+      {
+        [SCIENCES]: sciences,
+        '/api/v1/library-settings': () => new Promise<Response>((resolve) => (settingsArrive = resolve)),
+      },
+      'r@example.com',
+    )
+    const user = renderPage('/books/new')
+
+    await user.type(await screen.findByLabelText('Title in Arabic'), 'صحيح البخاري')
+    settingsArrive(json(200, { defaultCurrency: 'SAR' }))
+    await waitFor(() => expect(screen.getByLabelText('Currency')).toHaveValue('SAR'))
+    expect(screen.getByLabelText('Title in Arabic')).toHaveValue('صحيح البخاري')
+
+    await user.selectOptions(screen.getByLabelText('Currency'), 'GBP')
+    expect(screen.getByLabelText('Currency')).toHaveValue('GBP')
   })
 
   it('adds another copy of a work you already have', async () => {
