@@ -70,11 +70,11 @@ function ThemeChoice() {
       </p>
       <fieldset aria-describedby="appearance-about" className="mt-4">
         <legend className="sr-only">{t('settings.theme.legend')}</legend>
-        <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-surface p-1">
+        <div className="grid grid-cols-3 gap-1 rounded-full border border-line bg-field p-1">
           {THEME_OPTIONS.map(({ value, icon }) => (
             <label
               key={value}
-              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-2 text-sm font-medium text-muted transition-colors duration-150 select-none hover:bg-hover hover:text-ink has-checked:bg-accent-soft has-checked:text-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-2 text-sm font-medium text-muted transition-colors duration-150 select-none hover:bg-hover hover:text-ink has-checked:bg-surface has-checked:text-ink has-checked:shadow-lift has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
             >
               <input
                 type="radio"

@@ -27,7 +27,13 @@ type Props = {
  * (indexLetter repeats the database's order exactly, so each letter is one run).
  */
 export default function IndexList({ rows, byLetter = false }: Props) {
-  if (!byLetter) return <Rows rows={rows} />
+  if (!byLetter) {
+    return (
+      <div className="card px-2 py-1.5 sm:px-3">
+        <Rows rows={rows} />
+      </div>
+    )
+  }
 
   const runs: { letter: string; rows: IndexRow[] }[] = []
   for (const row of rows) {
@@ -38,11 +44,11 @@ export default function IndexList({ rows, byLetter = false }: Props) {
   }
 
   return (
-    <div className="border-t border-line">
+    <div className="card divide-y divide-line px-2 py-1.5 sm:px-3">
       {runs.map((run, i) => (
-        <div key={`${run.letter}-${i}`} className="border-b border-line sm:grid sm:grid-cols-[4rem_minmax(0,1fr)]">
+        <div key={`${run.letter}-${i}`} className="sm:grid sm:grid-cols-[4.5rem_minmax(0,1fr)]">
           {/* The rows already start with the name, so the letter is only for the eye */}
-          <p aria-hidden="true" className="font-book pt-4 text-letter leading-none text-accent sm:pt-4.5">
+          <p aria-hidden="true" className="font-book px-3 pt-4 text-letter leading-none text-accent sm:pt-4.5">
             {run.letter}
           </p>
           <Rows rows={run.rows} />
@@ -59,7 +65,7 @@ function Rows({ rows }: { rows: IndexRow[] }) {
         <li key={row.id}>
           <Link
             to={row.to}
-            className="group -mx-3 flex items-baseline gap-x-6 rounded-lg px-3 py-3 transition-colors duration-150 hover:bg-hover"
+            className="group flex items-baseline gap-x-6 rounded-xl px-3 py-3.5 transition-colors duration-150 hover:bg-hover"
           >
             <span className="flex min-w-0 flex-1 flex-col sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-3">
               <span className="font-book text-xl leading-snug font-medium break-words transition-colors duration-150 group-hover:text-accent">

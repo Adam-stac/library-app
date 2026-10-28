@@ -119,3 +119,17 @@ This slice lays its foundations; the look itself arrives in later slices.
   check it on the landing page and on the home page in Arabic.
 - **A size budget** (`scripts/check-bundle-size.mjs`, run in CI after the build): first-visit scripts, styles,
   preloaded fonts and the largest page each have a ceiling; raising one is a decision made in the pull request.
+
+## Update, 28 October 2026: the new frame (slice P3)
+
+- **Wide screens:** a slim rail (the mark, every section as an icon over its name, the language and the account at
+  its foot), and the page on a frosted card (`frame-card`, solid when the device asks for less transparency) over
+  the colour wash.
+- **Phones:** the mark, the language and the account in a frosted bar along the top; along the bottom a search box
+  (not on the search page itself) and a tab bar with Home, Books, Benefits and Authors, and "More" for Places,
+  Sciences and Settings. The rail and the tab bar are one list of links laid out two ways, so the sections are in
+  the page once.
+- **Shared pieces:** buttons are pills at least 44 px tall (the main action a dark pill), fields are softer and
+  48 px tall, cards rest on a shadow (with an edge in dark), views of a list are a row of pills (`tabs`, `tab`),
+  page titles are larger, and lists read like an index on a card. Every page takes these on without changes of its
+  own.

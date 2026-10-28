@@ -69,7 +69,7 @@ export default function PasskeysPage() {
           ) : (
             <ul className="mt-3 flex flex-col gap-3">
               {passkeys.map((passkey) => (
-                <li key={passkey.id} className="rounded-xl border border-line bg-surface p-5">
+                <li key={passkey.id} className="card p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-semibold break-words">{passkey.label}</p>

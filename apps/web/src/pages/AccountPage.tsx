@@ -8,7 +8,7 @@ import { type Language, saveLanguage } from '../language'
 
 const primary = 'btn btn-primary'
 const danger = 'btn btn-danger'
-const card = 'mt-4 rounded-lg border border-line bg-surface p-6'
+const card = 'card mt-4 p-6'
 
 /** Account settings: language, email address, and deleting the account. Signed-in accounts only. */
 export default function AccountPage() {

@@ -10,9 +10,8 @@ import Icon from './Icon'
  * else. It closes with Escape (focus goes back to the button), a click elsewhere, moving focus out of it, or going to
  * another page.
  *
- * Wide screens: at the foot of the sidebar, showing the email address, and opening upwards above the sidebar's
- * foot (positioned by it, so the menu covers nothing else there). Phones: just the initial, in the top bar, opening
- * downwards.
+ * Wide screens: the initial at the foot of the rail, opening beside it. Phones: the initial, in the top bar, opening
+ * downwards. The email address is in the button's name, and shown at the top of the menu.
  */
 export default function AccountMenu({ email }: { email: string }) {
   const { t } = useTranslation()
@@ -50,7 +49,7 @@ export default function AccountMenu({ email }: { email: string }) {
   return (
     <div
       ref={container}
-      className="relative lg:static"
+      className="relative"
       onKeyDown={(event) => {
         if (event.key === 'Escape' && open) {
           event.stopPropagation()
@@ -68,27 +67,26 @@ export default function AccountMenu({ email }: { email: string }) {
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen(!open)}
-        className={`flex min-h-10 w-full items-center gap-3 rounded-lg p-1 text-start transition-colors duration-150 hover:bg-hover lg:px-2 lg:py-1.5 ${
+        className={`grid size-12 place-items-center rounded-full transition-colors duration-150 hover:bg-hover ${
           open ? 'bg-hover' : ''
         }`}
       >
         <span
           aria-hidden="true"
-          className="grid size-8 shrink-0 place-items-center rounded-full bg-accent-soft text-sm font-semibold text-accent"
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-accent text-base font-semibold text-on-accent"
         >
           {email.charAt(0).toUpperCase()}
         </span>
         <span className="sr-only">{t('nav.yourAccount')}, </span>
-        <bdi dir="ltr" className="sr-only min-w-0 flex-1 truncate text-sm font-medium lg:not-sr-only">
+        <bdi dir="ltr" className="sr-only">
           {email}
         </bdi>
-        <Icon name="upDown" className="hidden size-4 text-muted lg:block" />
       </button>
 
       {open && (
         <div
           id={menuId}
-          className="absolute end-0 top-full z-20 mt-2 w-64 glass-panel rounded-xl border border-line p-1.5 shadow-menu lg:start-0 lg:end-auto lg:top-auto lg:bottom-full lg:mt-0 lg:mb-2 lg:w-full lg:min-w-56"
+          className="glass-panel absolute end-0 top-full z-30 mt-2 w-64 rounded-panel border border-line p-1.5 shadow-menu lg:start-full lg:end-auto lg:top-auto lg:bottom-0 lg:mt-0 lg:ms-3"
         >
           <p className="px-2.5 pt-2 pb-2.5 text-xs text-muted">
             {t('nav.signedInAs')}
@@ -118,4 +116,4 @@ export default function AccountMenu({ email }: { email: string }) {
 }
 
 const item =
-  'flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-start text-sm font-medium transition-colors duration-150 hover:bg-hover disabled:opacity-60'
+  'flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 text-start text-sm font-medium transition-colors duration-150 hover:bg-hover disabled:opacity-60'

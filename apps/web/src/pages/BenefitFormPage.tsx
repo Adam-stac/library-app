@@ -164,7 +164,7 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
           book
         />
 
-        <fieldset className="rounded-xl border border-line bg-surface p-5">
+        <fieldset className="card p-5 sm:p-6">
           <legend className="section-title float-start mb-2 w-full">{t('benefits.form.source')}</legend>
           <div className="clear-both flex flex-col gap-5 pt-3">
             <p className="-mt-3 text-sm text-muted">{t('benefits.form.sourceHint')}</p>

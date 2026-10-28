@@ -94,6 +94,7 @@
   --on-chip: #ffffff;
   --glass: rgb(255 255 255 / 0.62); /* the frosted card a page sits on */
   --glass-edge: rgb(255 255 255 / 0.75);
+  --card-edge: transparent; /* light cards rest on a shadow; dark ones need an edge to be seen */
   --lift: 0 1px 2px rgb(15 21 18 / 0.04), 0 10px 28px -14px rgb(15 21 18 / 0.14); /* a card resting on the page */
   --float: 0 30px 80px -40px rgb(15 40 32 / 0.28); /* the frosted card */
   --focal:
@@ -146,6 +147,7 @@
     --on-chip: #0a0d0c;
     --glass: rgb(19 24 22 / 0.66);
     --glass-edge: rgb(255 255 255 / 0.06);
+    --card-edge: #232b28;
     --lift: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 12px 30px -16px rgb(0 0 0 / 0.7);
     --float: 0 40px 90px -40px rgb(0 0 0 / 0.8);
     --focal:
@@ -191,6 +193,7 @@
   --on-chip: #0a0d0c;
   --glass: rgb(19 24 22 / 0.66);
   --glass-edge: rgb(255 255 255 / 0.06);
+  --card-edge: #232b28;
   --lift: inset 0 1px 0 rgb(255 255 255 / 0.03), 0 12px 30px -16px rgb(0 0 0 / 0.7);
   --float: 0 40px 90px -40px rgb(0 0 0 / 0.8);
   --focal:
@@ -220,8 +223,8 @@
   --text-ui: 0.9375rem; /* the sidebar, and the line under a benefit */
   --text-reading: 1.0625rem; /* words from the library in lists and fields, and section titles */
   --text-letter: 1.625rem; /* the letter a run of names is filed under */
-  --text-title: 1.75rem; /* a page's title */
-  --text-title-lg: 2rem; /* a page's title, on a wider screen */
+  --text-title: 2rem; /* a page's title */
+  --text-title-lg: 2.75rem; /* a page's title, on a wider screen */
   --text-display: 2.25rem; /* a book's or an author's name heading its page, and the landing page's headline */
   --text-display-lg: 2.75rem; /* the same, on a wider screen */
   --text-hero: 2.875rem; /* the greeting on the home page */
@@ -268,6 +271,7 @@
   --color-on-chip: var(--on-chip);
   --color-glass: var(--glass);
   --color-glass-edge: var(--glass-edge);
+  --color-card-edge: var(--card-edge);
   --color-focal-ink: var(--focal-ink);
   --color-focal-muted: var(--focal-muted);
   --color-scale-1: var(--scale-1);
@@ -325,7 +329,7 @@
     letter-spacing: -0.015em;
   }
   .section-title {
-    @apply font-display text-reading leading-snug font-semibold;
+    @apply font-display text-lg leading-snug font-semibold;
   }
   .lede {
     @apply mt-2 max-w-prose text-pretty text-muted;
@@ -336,14 +340,15 @@
     @apply text-sm font-medium;
   }
 
-  /* Buttons and button-like links. Every one is at least 40px tall, an easy target on a phone. */
+  /* Buttons and button-like links: pills, every one at least 44px tall, an easy target on a phone */
   .btn {
-    @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-surface px-5
       text-sm font-medium whitespace-nowrap transition-colors duration-150 select-none hover:border-line-strong
       disabled:cursor-not-allowed disabled:opacity-60;
   }
+  /* The page's main action: a dark pill (light in dark mode) */
   .btn-primary {
-    @apply border-accent bg-accent text-on-accent hover:border-accent-hover hover:bg-accent-hover;
+    @apply border-chip bg-chip font-semibold text-on-chip hover:border-chip hover:opacity-90;
   }
   .btn-danger {
     @apply border-danger bg-danger text-on-danger hover:border-danger-hover hover:bg-danger-hover;
@@ -353,19 +358,29 @@
     @apply border-transparent bg-transparent text-muted hover:border-transparent hover:bg-hover hover:text-ink;
   }
 
+  /* A choice of views of one list, such as "by title" and "newest first": a row of pills, the current one raised */
+  .tabs {
+    @apply inline-flex flex-wrap gap-1 rounded-full border border-line bg-field p-1;
+  }
+  .tab {
+    @apply inline-flex min-h-10 items-center rounded-full px-4 text-sm font-medium text-muted transition-colors
+      duration-150 hover:text-ink aria-[current=page]:bg-surface aria-[current=page]:font-semibold
+      aria-[current=page]:text-ink aria-[current=page]:shadow-lift;
+  }
+
   /* A link inside text */
   .link {
     @apply font-medium text-accent underline decoration-1 underline-offset-4 hover:decoration-2;
   }
   /* A link back up a level, above a page's title */
   .back-link {
-    @apply inline-flex min-h-10 items-center gap-1.5 rounded-lg text-sm font-medium text-muted transition-colors
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-lg text-sm font-medium text-muted transition-colors
       duration-150 hover:text-ink;
   }
 
   /* Text inputs and text areas */
   .field {
-    @apply min-h-10 rounded-lg border border-line-strong bg-surface px-3 text-ink transition-colors duration-150
+    @apply min-h-12 rounded-field border border-line-strong bg-field px-4 text-ink transition-colors duration-150
       hover:border-ink aria-invalid:border-danger;
   }
 
@@ -402,14 +417,23 @@
     }
   }
 
+  /* The frosted card a signed-in page sits on, over the wash, on a wide screen (Layout) */
+  .frame-card {
+    @apply lg:rounded-frame lg:border lg:border-glass-edge lg:bg-glass lg:shadow-float lg:backdrop-blur-2xl;
+    /* Solid when the device asks for less transparency (after the rule above, so it wins) */
+    @media (prefers-reduced-transparency: reduce) {
+      background-color: var(--surface);
+    }
+  }
+
   /* A raised panel */
   .card {
-    @apply rounded-xl border border-line bg-surface;
+    @apply rounded-panel border border-card-edge bg-surface shadow-lift;
   }
 
   /* A message about what just happened, such as "Author added." */
   .notice {
-    @apply flex items-start gap-2.5 rounded-lg bg-accent-soft px-4 py-3 text-sm text-ink;
+    @apply flex items-start gap-2.5 rounded-panel bg-accent-soft px-4 py-3 text-sm text-ink;
   }
 
   /* The card a page leads with: deep green, light text (the redesign's focal point) */

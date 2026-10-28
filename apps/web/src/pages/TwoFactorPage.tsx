@@ -425,7 +425,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
       <ul
         dir="ltr"
         aria-label={t('twoFactor.codesTitle')}
-        className="mt-6 grid grid-cols-1 gap-2 rounded-lg border border-line bg-surface p-6 font-mono text-lg sm:grid-cols-2"
+        className="card mt-6 grid grid-cols-1 gap-2 p-6 font-mono text-lg sm:grid-cols-2"
       >
         {codes.map((code) => (
           <li key={code}>{code}</li>

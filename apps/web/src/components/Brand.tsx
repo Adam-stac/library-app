@@ -18,15 +18,15 @@ export function Mark({ className }: { className: string }) {
 /**
  * The خِزانة mark, with the name in Latin letters on the English page. A khizāna is where a scholar kept their
  * books. The mark is a shape rather than text, so it looks the same everywhere and takes the theme's colour. The
- * link's name is the app's name in the page's language.
+ * link's name is the app's name in the page's language. `compact` (the narrow rail) shows the mark alone.
  */
-export default function Brand() {
+export default function Brand({ compact = false }: { compact?: boolean }) {
   const { t, i18n } = useTranslation()
 
   return (
     <Link to="/" aria-label={t('app.name')} className="inline-flex min-h-10 items-center gap-2.5 rounded-lg">
       <Mark className="h-10" />
-      {i18n.language !== 'ar' && (
+      {i18n.language !== 'ar' && !compact && (
         <span aria-hidden="true" className="text-reading font-semibold tracking-tight">
           {t('app.name')}
         </span>

@@ -639,7 +639,7 @@ function workBodyOf(work: Work) {
 
 function Group({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <fieldset className="rounded-xl border border-line bg-surface p-5">
+    <fieldset className="card p-5 sm:p-6">
       <legend className="section-title float-start mb-2 w-full">{title}</legend>
       <div className="clear-both flex flex-col gap-5 pt-3">
         {hint && <p className="-mt-3 text-sm text-muted">{hint}</p>}

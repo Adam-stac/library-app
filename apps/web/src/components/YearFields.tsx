@@ -25,7 +25,7 @@ export default function YearFields({ kind, value, onChange, errors }: Props) {
   const errorText = (code: string) => t(`errors.${code}`, { defaultValue: t('errors.unexpected') })
 
   return (
-    <fieldset className="rounded-xl border border-line bg-surface p-5">
+    <fieldset className="card p-5 sm:p-6">
       {/* Floated, so the title sits inside the box rather than on its border */}
       <legend className="section-title float-start mb-5 w-full">{label('legend')}</legend>
       <div className="clear-both flex flex-col gap-5">

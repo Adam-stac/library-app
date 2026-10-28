@@ -226,11 +226,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           book
         />
 
-        <details
-          open={moreNamesOpen}
-          onToggle={(e) => setMoreNamesOpen(e.currentTarget.open)}
-          className="group rounded-xl border border-line bg-surface"
-        >
+        <details open={moreNamesOpen} onToggle={(e) => setMoreNamesOpen(e.currentTarget.open)} className="group card">
           <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-5 text-sm font-medium [&::-webkit-details-marker]:hidden">
             <Icon
               name="forward"
@@ -278,7 +274,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
           errors={{ hijri: errors['death.hijri'], ce: errors['death.ce'] }}
         />
 
-        <fieldset className="rounded-xl border border-line bg-surface p-5">
+        <fieldset className="card p-5 sm:p-6">
           <legend className="section-title float-start mb-5 w-full">{t('authors.form.places')}</legend>
           <div className="clear-both grid gap-5 sm:grid-cols-2">
             <PlacePicker
