@@ -66,6 +66,8 @@ jobs:
         run: pnpm --filter @library-app/web test
       - name: Build
         run: pnpm --filter @library-app/web build
+      - name: Size budget
+        run: pnpm --filter @library-app/web size
 
   docker:
     name: docker

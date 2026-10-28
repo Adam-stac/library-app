@@ -1,11 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
-import { expect, type Page, test } from '@playwright/test'
-import { PASSWORD, verificationLinkFor, WCAG_AA } from './mailpit'
-
-async function expectAccessible(page: Page) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
-  expect(results.violations).toEqual([])
-}
+import { expect, test } from '@playwright/test'
+import { PASSWORD, verificationLinkFor } from './mailpit'
+import { expectAccessible } from './accessibility'
 
 // Runs against the full stack (Docker Compose), including Mailpit.
 test.describe('Books', () => {

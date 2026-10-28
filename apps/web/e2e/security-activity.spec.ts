@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
-import { emailText, PASSWORD, verificationLinkFor, WCAG_AA } from './mailpit'
+import { emailText, PASSWORD, verificationLinkFor } from './mailpit'
+import { expectAccessible } from './accessibility'
 
 // Runs against the full stack (Docker Compose), including Mailpit.
 // Two browser contexts are two devices: each has its own cookies, and its own User-Agent so the app can tell them apart.
@@ -56,8 +56,7 @@ test.describe('Security activity', () => {
     await expect(where.getByRole('listitem').first()).toContainText('Chrome on Windows')
     await expect(where.getByRole('listitem').first()).toContainText('This device')
     await expect(laptop.getByText('Signed in with your password').first()).toBeVisible()
-    const results = await new AxeBuilder({ page: laptop }).withTags(WCAG_AA).analyze()
-    expect(results.violations).toEqual([])
+    await expectAccessible(laptop)
 
     // ...and signs the other device out
     await laptop.getByRole('button', { name: 'Sign out Firefox on Linux' }).click()

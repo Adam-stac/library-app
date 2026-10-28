@@ -102,3 +102,20 @@ This slice lays its foundations; the look itself arrives in later slices.
   first, then swapped for the sidebar, and book titles rewrapped when Lateef arrived. Now the frame stays hidden
   until the app knows who is signed in, the fonts nearly every page uses are preloaded, and Latin text waits in
   Arial resized to Geist's measurements. Measured again: 0 on every page tried.
+
+## Update, 28 October 2026: a safety net before the look changes (slice P2)
+
+- **Every axe check runs in light and dark** (`e2e/accessibility.ts`), with motion reduced so no colour is caught
+  mid-transition. Every spec uses the one helper.
+- **The library in Arabic, end to end** (`e2e/arabic.spec.ts`): add a book, keep your place, save a benefit, find
+  both by searching, and choose dark, using the Arabic texts from `ar.json`, so a renamed text breaks the test, not
+  the reader. The other library journeys stay in English.
+- **The end-to-end tests are type-checked** with the rest (`tsconfig.e2e.json`).
+- **Each page is its own file**, fetched when first opened and the rest fetched once the app is idle; the home page
+  comes with the frame. A first visit now downloads 133 kB of script instead of 165 kB.
+- **Lateef is no longer preloaded.** On a slow connection it held the first page back by half a second. A book's
+  page moved by 0.18 when it arrived (its actions rewrapped beside the title), so on such pages the actions now sit
+  on the row of the way back, above the title. Layout shift is 0 on every page measured, and the end-to-end tests
+  check it on the landing page and on the home page in Arabic.
+- **A size budget** (`scripts/check-bundle-size.mjs`, run in CI after the build): first-visit scripts, styles,
+  preloaded fonts and the largest page each have a ceiling; raising one is a decision made in the pull request.

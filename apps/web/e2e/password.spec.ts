@@ -1,6 +1,6 @@
-import AxeBuilder from '@axe-core/playwright'
 import { type APIRequestContext, expect, type Page, test } from '@playwright/test'
-import { emailedLink, PASSWORD, verificationLinkFor, WCAG_AA } from './mailpit'
+import { emailedLink, PASSWORD, verificationLinkFor } from './mailpit'
+import { expectAccessible } from './accessibility'
 
 // Runs against the full stack (Docker Compose), including Mailpit.
 const NEW_PASSWORD = 'a brand new passphrase for 2026'
@@ -77,8 +77,7 @@ test.describe('Passwords', () => {
       for (const path of ['/forgot-password', '/reset-password#token=x']) {
         await page.goto(path)
         await expect(page.locator('h1')).toBeVisible()
-        const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
-        expect(results.violations, path).toEqual([])
+        await expectAccessible(page, path)
       }
     })
   }

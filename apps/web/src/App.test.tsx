@@ -71,7 +71,8 @@ describe('App', () => {
     const user = userEvent.setup()
     renderApp('/no-such-page')
 
-    expect(screen.getByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
+    // Each page is its own file, so it arrives a moment after the frame
+    expect(await screen.findByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
     await user.click(screen.getByRole('link', { name: 'اذهب إلى الصفحة الرئيسية' }))
 
     expect(await screen.findByRole('heading', { name: 'فهرس مكتبتك' })).toBeInTheDocument()

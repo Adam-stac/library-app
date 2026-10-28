@@ -1,14 +1,9 @@
-import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, test } from '@playwright/test'
-import { PASSWORD, verificationLinkFor, WCAG_AA } from './mailpit'
+import { PASSWORD, verificationLinkFor } from './mailpit'
 import { totp } from './totp'
+import { expectAccessible } from './accessibility'
 
 // Runs against the full stack (Docker Compose), including Mailpit.
-async function expectAccessible(page: Page, what: string) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
-  expect(results.violations, what).toEqual([])
-}
-
 /** Signs out and waits until the server has ended the session, so the next step can't race it. */
 async function signOut(page: Page) {
   await page.getByRole('button', { name: /^Your account/ }).click() // the account menu
