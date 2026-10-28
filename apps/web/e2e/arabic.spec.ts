@@ -70,12 +70,14 @@ test.describe('The library in Arabic', () => {
     await page.getByRole('button', { name: ar.common.save, exact: true }).click()
     await expect(page.getByRole('status')).toHaveText(ar.benefits.added)
 
-    // Search finds the book without the article, and the benefit without its vowel marks
+    // Search finds the work without the article, and the benefit without its vowel marks
     await library.getByRole('link', { name: ar.nav.search }).click()
     await page.getByRole('searchbox', { name: ar.search.label }).fill('بخاري')
     await page.getByRole('button', { name: ar.search.button, exact: true }).click()
     const found = (group: string) => page.getByRole('region', { name: new RegExp(`^${group}`) })
-    await expect(found(ar.nav.books).getByRole('link', { name: /صحيح البخاري/ })).toBeVisible()
+    // A title belongs to the work, so the book is found among the works (a copy's own details, such as its
+    // publisher, are what the books group matches)
+    await expect(found(ar.search.works).getByRole('link', { name: /صحيح البخاري/ })).toBeVisible()
     await page.getByRole('searchbox', { name: ar.search.label }).fill('الاعمال')
     await page.getByRole('button', { name: ar.search.button, exact: true }).click()
     await expect(found(ar.nav.benefits).getByRole('link')).toContainText('الأعمال')
