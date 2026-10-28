@@ -66,6 +66,38 @@ export type Edition = EditionSummary & {
   version: number
 }
 
+/** A book as a benefit or a search names it. */
+export type EditionReference = { id: string; title: string | null; volumes: number | null; work: WorkSummary }
+
+/**
+ * A benefit (فائدة): plain text, maybe from a book, with a volume and page. `edition` is null when none was named or
+ * the book was deleted since (the volume and page are kept). `source` is set by the server: app, or hasib.
+ */
+export type Benefit = {
+  id: string
+  text: string
+  edition: EditionReference | null
+  volume: number | null
+  page: number | null
+  source: string
+  version: number
+  createdAt: string
+}
+
+export type BenefitPage = { items: Benefit[]; page: number; size: number; total: number }
+
+/** GET /api/v1/search: matches of each kind (at most `limit` of each) and how many there are in all. */
+export type SearchResults = {
+  authors: { items: Named[]; total: number }
+  places: { items: Named[]; total: number }
+  works: { items: WorkSummary[]; total: number }
+  editions: { items: EditionReference[]; total: number }
+  benefits: {
+    items: { id: string; excerpt: string; shortened: boolean; editionId: string | null; createdAt: string }[]
+    total: number
+  }
+}
+
 /** A book in one of the home page's short lists. */
 export type ShelfBook = {
   id: string
@@ -93,6 +125,7 @@ export type HomeSummary = {
   notStarted: ShelfBook[]
   quiet: ShelfBook[]
   recentBookmarks: PlacedBookmark[]
+  recentBenefits: Benefit[]
 }
 
 export type EditionPage = { items: EditionSummary[]; page: number; size: number; total: number }

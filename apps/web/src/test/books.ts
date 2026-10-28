@@ -31,3 +31,15 @@ export const EDITION = {
   bookmark: null,
   version: 4,
 }
+
+export const BENEFIT = {
+  id: 'b1',
+  text: 'إنما الأعمال بالنيات.\nأول حديث في الصحيح.',
+  edition: { id: 'e1', title: null, volumes: 9, work: WORK },
+  volume: 1,
+  page: 6,
+  source: 'app',
+  version: 2,
+  createdAt: '2026-10-20T10:00:00Z',
+  updatedAt: '2026-10-20T10:00:00Z',
+}
