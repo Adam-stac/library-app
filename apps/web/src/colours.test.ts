@@ -54,6 +54,7 @@ const TEXT: [string, string][] = [
   ['on-chip', 'chip'],
   ['focal-ink', 'focal'],
   ['focal-muted', 'focal'],
+  ['focal-deep', 'focal-ink'],
 ]
 const BORDERS: [string, string][] = [
   ['line-strong', 'surface'],

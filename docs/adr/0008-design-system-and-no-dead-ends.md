@@ -133,3 +133,13 @@ This slice lays its foundations; the look itself arrives in later slices.
   48 px tall, cards rest on a shadow (with an edge in dark), views of a list are a row of pills (`tabs`, `tab`),
   page titles are larger, and lists read like an index on a card. Every page takes these on without changes of its
   own.
+
+## Update, 29 October 2026: the home page (slice P4)
+
+The home page now leads with one thing: the book you're reading, in the deep focal card, with the page you're on
+as the one large figure and a ruler through its volumes (a plain bar past 24 volumes). The figure is decoration;
+the same place is written out in words for screen readers. Beside it: the other books you're reading, the ones
+bought but not started, and the ones gone quiet. Below: the sciences as a ring in a scale of greens, deepest for
+the largest share (up to six slices; past five sciences, the rest are put together), with a key that carries the
+numbers; this year as large figures; and the latest benefits. A search box sits under the greeting on a wide
+screen (a phone has one at the foot of the screen). No API change: it is all from `GET /api/v1/home`.

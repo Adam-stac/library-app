@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../auth/context'
 import { type AuthorSummary, displayName, formatNumber, indexYear, otherName } from '../authors'
 import { bookmarkText, formatDate, formatPrice } from '../books'
@@ -8,7 +8,7 @@ import BenefitCard from '../components/BenefitCard'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
 import { indexLetter, sortKey } from '../indexLetter'
-import { authorsOf, bookTitle, type HomeSummary, nameOf, type ShelfBook } from '../library'
+import { authorsOf, bookTitle, type HomeSummary, nameOf, type PlacedBookmark, type ShelfBook } from '../library'
 import { useLoad } from '../useLoad'
 
 /**
@@ -148,153 +148,427 @@ function Library() {
     )
   }
 
+  const [current, ...alsoReading] = home.recentBookmarks
+
   return (
     <section>
-      <h1 className="page-title">{t('home.title')}</h1>
-      {/* The library in one sentence, rather than a row of numbers */}
-      <p className="mt-4 max-w-3xl text-xl leading-relaxed text-pretty text-muted sm:text-2xl">
-        {t('home.holds', {
-          books: t('home.books', { count: counts.books, number: n(counts.books) }),
-          authors: t('home.authors', { count: counts.authors, number: n(counts.authors) }),
-        })}{' '}
-        {counts.reading > 0
-          ? t('home.reading', { count: counts.reading, number: n(counts.reading) })
-          : t('home.readingNone')}
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-5">
+        <div className="min-w-0">
+          {/* The welcome, then the question the page answers */}
+          <h1 className="font-display text-title leading-tight font-semibold text-balance sm:text-hero">
+            <span className="text-muted">{t('home.welcome')}</span>
+            <br />
+            {t('home.question')}
+          </h1>
+          <p className="mt-3 max-w-3xl text-lg text-pretty text-muted">
+            {t('home.holds', {
+              books: t('home.books', { count: counts.books, number: n(counts.books) }),
+              authors: t('home.authors', { count: counts.authors, number: n(counts.authors) }),
+            })}{' '}
+            {counts.reading > 0
+              ? t('home.reading', { count: counts.reading, number: n(counts.reading) })
+              : t('home.readingNone')}
+          </p>
+        </div>
+        <p className="flex flex-wrap gap-2">
+          <Link to="/benefits/new" className="btn">
+            <Icon name="quote" className="size-4" />
+            {t('benefits.add')}
+          </Link>
+          <Link to="/books/new" className="btn btn-primary">
+            <Icon name="plus" className="size-4" />
+            {t('books.add')}
+          </Link>
+        </p>
+      </div>
 
-      <div className="mt-14 grid gap-14 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-16">
-        <div className="flex flex-col gap-14">
-          {home.recentBookmarks.length > 0 && (
-            <Part id="where" title={t('home.where')}>
-              <ul className="divide-y divide-line border-y border-line">
-                {home.recentBookmarks.map((placed) => (
+      <HomeSearch />
+
+      <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Reading placed={current} />
+        <div className="flex min-w-0 flex-col gap-5">
+          {alsoReading.length > 0 && (
+            <Panel id="also" title={t('home.alsoReading')}>
+              <ul className="divide-y divide-line">
+                {alsoReading.map((placed) => (
                   <li key={placed.editionId}>
                     <Link
                       to={`/books/${encodeURIComponent(placed.editionId)}`}
-                      className="group -mx-3 flex items-baseline gap-x-6 rounded-lg px-3 py-3 transition-colors duration-150 hover:bg-hover"
+                      className="group -mx-2 block rounded-xl px-2 py-3 transition-colors duration-150 hover:bg-hover"
                     >
-                      <span className="min-w-0 flex-1">
-                        <span className="font-book block text-xl leading-snug font-medium group-hover:text-accent">
+                      <span className="flex items-baseline justify-between gap-4">
+                        <span className="font-book min-w-0 text-xl font-semibold group-hover:text-accent">
                           <bdi>{bookTitle(placed, language)}</bdi>
                         </span>
-                        {authorsOf(placed.work, language) && (
-                          <span className="font-book block text-sm text-muted">
-                            <bdi>{authorsOf(placed.work, language)}</bdi>
-                          </span>
-                        )}
+                        <span className="shrink-0 text-sm text-muted">
+                          {bookmarkText(placed.bookmark, t, language)}
+                        </span>
                       </span>
-                      <span className="flex shrink-0 items-center gap-1.5 text-sm text-muted">
-                        <Icon name="bookmark" className="size-3.5 text-accent" />
-                        {bookmarkText(placed.bookmark, t, language)}
-                      </span>
+                      <VolumeBar placed={placed} />
                     </Link>
                   </li>
                 ))}
               </ul>
-            </Part>
+            </Panel>
           )}
-
-          {home.recentBenefits.length > 0 && (
-            <Part id="benefits" title={t('home.benefits')}>
-              <ul className="divide-y divide-line border-y border-line">
-                {home.recentBenefits.map((benefit) => (
-                  <li key={benefit.id}>
-                    <BenefitCard benefit={benefit} />
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3">
-                <Link to="/benefits" className="link text-sm">
-                  {t('home.allBenefits', { number: n(counts.benefits) })}
-                </Link>
-              </p>
-            </Part>
-          )}
-
-          {home.bySciences.length > 0 && (
-            <Part id="sciences" title={t('home.bySciences')}>
-              <ul className="flex flex-col gap-4">
-                {home.bySciences.map((share) => (
-                  <li
-                    key={share.science?.id ?? 'none'}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5"
-                  >
-                    <bdi className={share.science ? 'font-book text-reading' : 'text-muted'}>
-                      {share.science ? nameOf(share.science, language) : t('home.noScience')}
-                    </bdi>
-                    <span className="text-sm text-muted">
-                      {t('home.share', {
-                        percent: n(share.percent),
-                        books: t('home.books', { count: share.books, number: n(share.books) }),
-                      })}
-                    </span>
-                    {/* The bar repeats the percentage beside it, so it is only for the eye */}
-                    <span aria-hidden="true" className="col-span-2 h-1.5 overflow-hidden rounded-full bg-hover">
-                      <span
-                        className="block h-full rounded-full bg-accent"
-                        style={{ width: `${Math.max(share.percent, 1)}%` }}
-                      />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </Part>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-14">
-          <Part id="year" title={t('home.thisYear', { year: n(thisYear.year) })}>
-            <dl className="divide-y divide-line border-y border-line">
-              <Row label={t('home.started')} value={n(thisYear.started)} />
-              <Row label={t('home.finished')} value={n(thisYear.finished)} />
-              <Row
-                label={t('home.spent')}
-                value={
-                  thisYear.spent.length > 0
-                    ? thisYear.spent.map((spent) => formatPrice(spent, language)).join(language === 'ar' ? '، ' : ', ')
-                    : n(0)
-                }
-              />
-            </dl>
-          </Part>
-
           {home.notStarted.length > 0 && (
-            <Part id="not-started" title={t('home.notStarted')} hint={t('home.notStartedHint')}>
+            <Panel id="not-started" title={t('home.notStarted')} hint={t('home.notStartedHint')}>
               <ShelfList
                 books={home.notStarted}
                 note={(book) => book.purchasedOn && formatDate(book.purchasedOn, language)}
               />
-            </Part>
+            </Panel>
           )}
-
           {home.quiet.length > 0 && (
-            <Part id="quiet" title={t('home.quiet')} hint={t('home.quietHint')}>
+            <Panel id="quiet" title={t('home.quiet')} hint={t('home.quietHint')}>
               <ShelfList books={home.quiet} note={(book) => book.startedOn && formatDate(book.startedOn, language)} />
-            </Part>
+            </Panel>
           )}
         </div>
+      </div>
+
+      {home.bySciences.length > 0 && <Sciences shares={home.bySciences} books={counts.books} />}
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <Panel id="year" title={t('home.thisYear', { year: n(thisYear.year) })} large>
+          <dl className="grid grid-cols-3 gap-4">
+            <Figure label={t('home.started')} value={n(thisYear.started)} />
+            <Figure label={t('home.finished')} value={n(thisYear.finished)} accent />
+            <div className="min-w-0">
+              <dt className="text-sm text-muted">{t('home.spent')}</dt>
+              <dd className="font-display mt-2 text-xl leading-snug font-semibold">
+                {thisYear.spent.length > 0
+                  ? thisYear.spent.map((spent) => (
+                      <span key={spent.currency} className="block">
+                        {formatPrice(spent, language)}
+                      </span>
+                    ))
+                  : n(0)}
+              </dd>
+            </div>
+          </dl>
+        </Panel>
+
+        {home.recentBenefits.length > 0 && (
+          <Panel
+            id="benefits"
+            title={t('home.benefits')}
+            large
+            end={
+              <Link to="/benefits" className="link text-sm">
+                {t('home.allBenefits', { number: n(counts.benefits) })}
+              </Link>
+            }
+          >
+            <ul className="-my-5 divide-y divide-line">
+              {home.recentBenefits.slice(0, 2).map((benefit) => (
+                <li key={benefit.id}>
+                  <BenefitCard benefit={benefit} />
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        )}
       </div>
     </section>
   )
 }
 
-function Part({ id, title, hint, children }: { id: string; title: string; hint?: string; children: ReactNode }) {
+/** On a wide screen, the search box right under the greeting (a phone has one at the bottom of the screen) */
+function HomeSearch() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [text, setText] = useState('')
+
   return (
-    <section aria-labelledby={`home-${id}`}>
-      <h2 id={`home-${id}`} className="section-title">
-        {title}
+    <form
+      role="search"
+      onSubmit={(event: FormEvent) => {
+        event.preventDefault()
+        if (text.trim()) navigate(`/search?q=${encodeURIComponent(text.trim())}`)
+      }}
+      className="mt-8 hidden max-w-3xl items-center gap-3 rounded-panel border border-line bg-surface p-2 ps-5 shadow-lift lg:flex"
+    >
+      <Icon name="search" className="size-5 text-muted" />
+      <label htmlFor="home-search" className="sr-only">
+        {t('search.label')}
+      </label>
+      <input
+        id="home-search"
+        type="search"
+        dir="auto"
+        maxLength={100}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        placeholder={t('home.searchPlaceholder')}
+        className="min-h-11 min-w-0 flex-1 bg-transparent text-reading outline-offset-4"
+      />
+      <button type="submit" className="btn btn-primary">
+        {t('search.button')}
+      </button>
+    </form>
+  )
+}
+
+/**
+ * The book you're reading, in the deep card the page leads with: its title, its author, and the page you're on as
+ * the one large figure, with a ruler through its volumes. The figure is for the eye; the same place is also written
+ * out in words for screen readers.
+ */
+function Reading({ placed }: { placed: PlacedBookmark | undefined }) {
+  const { t, i18n } = useTranslation()
+  const language = i18n.language === 'ar' ? 'ar' : 'en'
+  const n = (value: number) => formatNumber(value, language)
+
+  return (
+    <section
+      aria-labelledby="home-where"
+      className="bg-focal flex min-w-0 flex-col self-start rounded-card p-7 shadow-focal"
+    >
+      <h2
+        id="home-where"
+        className="inline-flex items-center gap-2 self-start rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-sm font-semibold"
+      >
+        <Icon name="bookmark" className="size-4" />
+        {t('home.where')}
       </h2>
-      {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
-      <div className="mt-3">{children}</div>
+      {placed ? (
+        <>
+          <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+            <div className="min-w-0 flex-1 basis-60">
+              <Link
+                to={`/books/${encodeURIComponent(placed.editionId)}`}
+                className="font-book block text-display leading-tight font-semibold break-words hover:underline"
+              >
+                <bdi>{bookTitle(placed, language)}</bdi>
+              </Link>
+              {authorsOf(placed.work, language) && (
+                <p className="font-book mt-1 text-xl text-focal-muted">
+                  <bdi>{authorsOf(placed.work, language)}</bdi>
+                </p>
+              )}
+            </div>
+            <p className="text-end">
+              <span className="sr-only">{bookmarkText(placed.bookmark, t, language)}</span>
+              <span aria-hidden="true" className="block text-sm text-focal-muted">
+                {t('books.bookmark.page')}
+              </span>
+              <span aria-hidden="true" className="font-display block text-figure leading-figure font-semibold">
+                {n(placed.bookmark.page)}
+              </span>
+            </p>
+          </div>
+          {placed.bookmark.volume !== null && placed.volumes !== null && placed.volumes > 1 && (
+            <div aria-hidden="true" className="mt-6">
+              <p className="mb-2.5 text-sm text-focal-muted">
+                {t('home.volumeOf', { volume: n(placed.bookmark.volume), volumes: n(placed.volumes) })}
+              </p>
+              <Ruler at={placed.bookmark.volume} of={placed.volumes} />
+            </div>
+          )}
+          <p className="mt-7 flex flex-wrap gap-2.5">
+            <Link
+              to={`/books/${encodeURIComponent(placed.editionId)}`}
+              className="btn border-transparent bg-focal-ink text-focal-deep hover:border-transparent hover:opacity-90"
+            >
+              <Icon name="bookmark" className="size-4" />
+              {t('home.moveBookmark')}
+            </Link>
+            <Link
+              to={`/benefits/new?book=${encodeURIComponent(placed.editionId)}`}
+              className="btn border-white/30 bg-transparent text-focal-ink hover:border-white/60"
+            >
+              {t('home.noteBenefit')}
+            </Link>
+          </p>
+        </>
+      ) : (
+        <div className="mt-6">
+          <p className="max-w-md text-lg">{t('home.readingNone')}</p>
+          <Link
+            to="/books"
+            className="btn mt-5 border-transparent bg-focal-ink text-focal-deep hover:border-transparent hover:opacity-90"
+          >
+            {t('home.pickBook')}
+          </Link>
+        </div>
+      )}
     </section>
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+/** One mark per volume, filled up to the one you're in; a plain bar when there are too many to tell apart. */
+function Ruler({ at, of }: { at: number; of: number }) {
+  if (of > 24) {
+    return (
+      <span className="block h-2 overflow-hidden rounded-full bg-white/15">
+        <span className="block h-full rounded-full bg-focal-fill" style={{ width: `${(at / of) * 100}%` }} />
+      </span>
+    )
+  }
   return (
-    <div className="flex items-baseline justify-between gap-4 py-2.5">
-      <dt className="text-muted">{label}</dt>
-      <dd className="font-medium">{value}</dd>
+    <span className="grid items-end gap-1.5" style={{ gridTemplateColumns: `repeat(${of}, minmax(0, 1fr))` }}>
+      {Array.from({ length: of }, (_, i) => (
+        <span
+          key={i}
+          className={`block rounded-full ${
+            i + 1 === at ? 'h-4.5 bg-focal-mark' : i + 1 < at ? 'h-2 bg-focal-fill' : 'h-2 bg-white/15'
+          }`}
+        />
+      ))}
+    </span>
+  )
+}
+
+/** A thin bar of how far through its volumes a book is, for sets; nothing for a single volume */
+function VolumeBar({ placed }: { placed: PlacedBookmark }) {
+  if (placed.bookmark.volume === null || placed.volumes === null || placed.volumes < 2) return null
+  return (
+    <span aria-hidden="true" className="mt-2.5 block h-1.5 overflow-hidden rounded-full bg-track">
+      <span
+        className="block h-full rounded-full bg-accent"
+        style={{ width: `${(placed.bookmark.volume / placed.volumes) * 100}%` }}
+      />
+    </span>
+  )
+}
+
+/** The scale of greens, most to least, for the ring of sciences */
+const SCALE = ['bg-scale-1', 'bg-scale-2', 'bg-scale-3', 'bg-scale-4', 'bg-scale-5', 'bg-scale-6']
+const STROKE = [
+  'stroke-scale-1',
+  'stroke-scale-2',
+  'stroke-scale-3',
+  'stroke-scale-4',
+  'stroke-scale-5',
+  'stroke-scale-6',
+]
+
+/**
+ * How the library divides between the sciences: a ring in a scale of greens, deepest for the largest share, beside
+ * a key with each science, its books and its share. The ring is for the eye; the key carries the numbers. Up to six
+ * slices: past that, the rest are put together as "other sciences".
+ */
+function Sciences({ shares, books }: { shares: HomeSummary['bySciences']; books: number }) {
+  const { t, i18n } = useTranslation()
+  const language = i18n.language === 'ar' ? 'ar' : 'en'
+  const n = (value: number) => formatNumber(value, language)
+
+  const shown = shares.length > 6 ? shares.slice(0, 5) : shares
+  const rest = shares.slice(shown.length)
+  const slices = [
+    ...shown.map((share) => ({
+      key: share.science?.id ?? 'none',
+      name: share.science ? nameOf(share.science, language) : t('home.noScience'),
+      book: share.science !== null,
+      books: share.books,
+      percent: share.percent,
+    })),
+    ...(rest.length > 0
+      ? [
+          {
+            key: 'rest',
+            name: t('home.otherSciences'),
+            book: false,
+            books: rest.reduce((sum, share) => sum + share.books, 0),
+            percent: rest.reduce((sum, share) => sum + share.percent, 0),
+          },
+        ]
+      : []),
+  ]
+  const circumference = 2 * Math.PI * 80
+  let start = 0
+
+  return (
+    <section aria-labelledby="home-sciences" className="card mt-5 p-7">
+      <h2 id="home-sciences" className="section-title">
+        {t('home.bySciences')}
+      </h2>
+      <div className="mt-6 flex flex-wrap items-center gap-x-12 gap-y-8">
+        <div className="relative mx-auto size-56 shrink-0 sm:mx-0">
+          <svg viewBox="0 0 200 200" aria-hidden="true" className="size-full -rotate-90">
+            <circle cx="100" cy="100" r="80" fill="none" strokeWidth="22" className="stroke-track" />
+            {slices.map((slice, i) => {
+              const length = (slice.percent / 100) * circumference
+              const arc = (
+                <circle
+                  key={slice.key}
+                  cx="100"
+                  cy="100"
+                  r="80"
+                  fill="none"
+                  strokeWidth="22"
+                  className={STROKE[i]}
+                  strokeDasharray={`${Math.max(length - 3, 0.5)} ${circumference}`}
+                  strokeDashoffset={-start}
+                />
+              )
+              start += length
+              return arc
+            })}
+          </svg>
+          <p aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="font-display text-stat leading-none font-semibold">{n(books)}</span>
+            <span className="mt-1.5 text-sm text-muted">{t('home.inLibrary')}</span>
+          </p>
+        </div>
+        <ul className="grid min-w-0 flex-1 basis-80 gap-x-10 sm:grid-cols-2">
+          {slices.map((slice, i) => (
+            <li key={slice.key} className="flex items-center gap-3 border-b border-line py-3">
+              <span aria-hidden="true" className={`size-3 shrink-0 rounded-sm border border-line ${SCALE[i]}`} />
+              <bdi className={`min-w-0 flex-1 ${slice.book ? 'font-book text-xl font-semibold' : 'text-muted'}`}>
+                {slice.name}
+              </bdi>
+              <span className="text-sm text-muted">
+                {t('home.books', { count: slice.books, number: n(slice.books) })}
+              </span>
+              <span className="font-display w-14 text-end text-lg font-semibold">
+                {t('home.percent', { percent: n(slice.percent) })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+function Panel({
+  id,
+  title,
+  hint,
+  end,
+  large = false,
+  children,
+}: {
+  id: string
+  title: string
+  hint?: string
+  end?: ReactNode
+  large?: boolean
+  children: ReactNode
+}) {
+  return (
+    <section aria-labelledby={`home-${id}`} className={`card min-w-0 ${large ? 'p-7' : 'p-6'}`}>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 id={`home-${id}`} className="section-title">
+          {title}
+        </h2>
+        {end}
+      </div>
+      {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
+      <div className={large ? 'mt-5' : 'mt-3'}>{children}</div>
+    </section>
+  )
+}
+
+function Figure({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-sm text-muted">{label}</dt>
+      <dd className={`font-display mt-2 text-stat leading-none font-semibold ${accent ? 'text-accent' : ''}`}>
+        {value}
+      </dd>
     </div>
   )
 }
@@ -303,17 +577,17 @@ function ShelfList({ books, note }: { books: ShelfBook[]; note: (book: ShelfBook
   const { i18n } = useTranslation()
   const language = i18n.language
   return (
-    <ul className="divide-y divide-line border-y border-line">
+    <ul className="flex flex-col gap-2">
       {books.map((book) => (
         <li key={book.id}>
           <Link
             to={`/books/${encodeURIComponent(book.id)}`}
-            className="group -mx-3 flex items-baseline gap-x-4 rounded-lg px-3 py-2.5 transition-colors duration-150 hover:bg-hover"
+            className="group flex items-baseline gap-x-4 rounded-xl bg-field px-4 py-2.5 transition-colors duration-150 hover:bg-hover"
           >
             <bdi className="font-book min-w-0 flex-1 text-reading group-hover:text-accent">
               {bookTitle(book, language)}
             </bdi>
-            {note(book) && <span className="shrink-0 text-sm text-muted">{note(book)}</span>}
+            {note(book) && <span className="shrink-0 text-xs text-muted">{note(book)}</span>}
           </Link>
         </li>
       ))}
