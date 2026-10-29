@@ -13,7 +13,8 @@ A feature is finished only when every relevant layer below is tested and CI is g
 | Architecture | Modules don't reach into each other | Spring Modulith |
 | Component | Screens behave correctly in Arabic and English | Vitest, React Testing Library |
 | End-to-end | Real journeys work in a real browser, RTL and LTR, desktop and mobile | Playwright |
-| Accessibility | WCAG 2.2 AA | axe-core |
+| Accessibility | WCAG 2.2 AA | axe-core; reflow and text-spacing checks; by hand ([checklist](testing/manual-checklist.md)) |
+| Visual | Nothing changes how a page looks by accident | Playwright screenshots, in Playwright's Linux image |
 | Dynamic security | The running app resists common attacks | OWASP ZAP |
 
 ## Rules
@@ -38,6 +39,24 @@ A feature is finished only when every relevant layer below is tested and CI is g
 - **`src/noDeadEnds.test.ts`** (web) reads every page and component and fails on a link to an address with no page,
   a button that does nothing, a "coming soon" text, or a text missing from Arabic or English (ADR 0008). It runs
   with the other web tests, so CI fails before a placeholder can be merged.
+
+## Screenshots and reflow (`apps/web/visual/`)
+- **The built app with a fixed library**: the API is answered in the browser from `visual/library.ts`, and the clock
+  is fixed at 28 October 2026, so every run draws exactly the same pages. No server or database is needed.
+- **Reflow** (`reflow.spec.ts`, WCAG 1.4.10 and 1.4.12): every page, in Arabic and English, at 320 px wide (a phone,
+  or 400% zoom), at 200% zoom, and at 320 px with wider line, letter, word and paragraph spacing, must not scroll
+  sideways. When it fails, it names the elements that stick out. Run anywhere: `pnpm --filter @library-app/web build`
+  then `pnpm --filter @library-app/web visual -g Reflow`.
+- **Screenshots** (`screens.spec.ts`): 16 pages on a wide screen in Arabic (light) and English (dark), and on a
+  phone in Arabic, compared with the approved pictures in `visual/screenshots/`. Fonts are drawn slightly
+  differently on every system, so screenshots are only taken and compared in Playwright's own Linux image: in CI
+  (the `visual` job), and on your machine with Docker:
+  - `pnpm --filter @library-app/web visual:docker` checks them;
+  - `pnpm --filter @library-app/web visual:docker --update-snapshots` approves new ones after a change you meant.
+    Look at each changed picture before committing it; the pull request shows them side by side.
+- When CI's `visual` job fails, its `visual-differences` download has the expected, actual and difference images.
+- Upgrading Playwright means updating the image in `ci.yml` (the job checks the two match) and approving new
+  screenshots, since a new browser can draw a little differently.
 
 ## Coming next
 - Mutation testing (PIT), nightly: proves the tests would catch real bugs

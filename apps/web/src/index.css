@@ -317,6 +317,11 @@
     background: var(--accent-soft);
   }
 
+  /* A fieldset is as wide as its content by default, so on a narrow screen it would push the page sideways */
+  fieldset {
+    min-inline-size: 0;
+  }
+
   /* Numbers line up in columns and lists */
   body {
     font-variant-numeric: tabular-nums;

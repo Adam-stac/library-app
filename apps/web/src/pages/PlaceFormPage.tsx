@@ -227,7 +227,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
           rows={3}
           book
         />
-        <div className="grid gap-7 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2">
           <FormField
             id="countryAr"
             label={t('places.form.countryAr')}
@@ -252,7 +252,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
         <fieldset className="card p-5 sm:p-6">
           <legend className="section-title float-start mb-2 w-full">{t('places.position')}</legend>
           <p className="clear-both mb-5 text-sm text-muted">{t('places.form.positionHint')}</p>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField
               id="latitude"
               label={t('places.form.latitude')}

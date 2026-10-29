@@ -20,7 +20,7 @@ export default function Details({ rows, className = 'mt-10' }: { rows: DetailRow
       {shown.map((row) => (
         <div
           key={row.label}
-          className="grid gap-1 border-b border-line py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6"
+          className="grid grid-cols-1 gap-1 border-b border-line py-3 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6"
         >
           <dt className="text-sm text-muted sm:pt-0.5">{row.label}</dt>
           <dd className={`break-words ${row.book ? 'font-book text-reading' : ''}`}>

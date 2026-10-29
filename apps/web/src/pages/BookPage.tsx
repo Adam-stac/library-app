@@ -164,7 +164,7 @@ export default function BookPage() {
       <Notice className="mt-6" />
 
       {/* Where you are in it, and reading it: the card the page leads with */}
-      <div className="bg-focal mt-9 grid gap-8 rounded-card p-7 shadow-focal lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-10">
+      <div className="bg-focal mt-9 grid grid-cols-1 gap-8 rounded-card p-7 shadow-focal lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-10">
         <BookmarkPanel key={book.id} book={book} onMoved={(bookmark) => replace({ ...book, bookmark })} />
         <Reading book={book} onSaved={replace} onStale={reload} />
       </div>
@@ -207,7 +207,7 @@ function CopyDetails({ rows }: { rows: DetailRow[] }) {
       <h2 id="copy" className="section-title">
         {t('books.aboutCopy')}
       </h2>
-      <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {known.slice(0, 4).map((row) => (
           <div key={row.label} className="min-w-0 rounded-panel bg-field px-4 py-3.5">
             <dt className="text-xs text-muted">{row.label}</dt>
@@ -508,7 +508,7 @@ function BookBenefits({ bookId }: { bookId: string }) {
       {benefits && benefits.total === 0 && <p className="mt-3 text-muted">{t('benefits.noneFromBook')}</p>}
       {benefits && benefits.total > 0 && (
         <>
-          <ul className="mt-4 grid gap-4 md:grid-cols-2">
+          <ul className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             {benefits.items.map((benefit) => (
               <li key={benefit.id} className="card px-6 py-1">
                 <BenefitCard benefit={benefit} withoutBook onDeleted={reload} />

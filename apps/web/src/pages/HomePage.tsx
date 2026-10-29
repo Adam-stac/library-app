@@ -56,7 +56,7 @@ function Welcome() {
 
   return (
     <div className="w-full max-w-5xl">
-      <section className="grid items-center gap-14 pt-2 sm:pt-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
+      <section className="grid grid-cols-1 items-center gap-14 pt-2 sm:pt-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
         <div>
           <p className="pill bg-accent-soft text-accent">
             <span aria-hidden="true" className="size-2 rounded-full bg-accent" />
@@ -143,7 +143,7 @@ function Welcome() {
         <h2 id="what-you-can-do" className="font-display text-title leading-display font-semibold sm:text-title-lg">
           {t('landing.whatTitle')}
         </h2>
-        <ul className="mt-8 grid gap-4 md:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {(
             [
               ['catalogue', 'bookOpen'],
@@ -260,7 +260,7 @@ function Library() {
 
       <HomeSearch />
 
-      <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Reading placed={current} />
         <div className="flex min-w-0 flex-col gap-5">
           {alsoReading.length > 0 && (
@@ -305,12 +305,13 @@ function Library() {
 
       {home.bySciences.length > 0 && <Sciences shares={home.bySciences} books={counts.books} />}
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Panel id="year" title={t('home.thisYear', { year: n(thisYear.year) })} large>
-          <dl className="grid grid-cols-3 gap-4">
+          {/* On a phone, two figures to a row, and the money on a row of its own: amounts are wide */}
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <Figure label={t('home.started')} value={n(thisYear.started)} />
             <Figure label={t('home.finished')} value={n(thisYear.finished)} accent />
-            <div className="min-w-0">
+            <div className="col-span-2 min-w-0 sm:col-span-1">
               <dt className="text-sm text-muted">{t('home.spent')}</dt>
               <dd className="font-display mt-2 text-xl leading-snug font-semibold">
                 {thisYear.spent.length > 0
@@ -588,7 +589,7 @@ function Sciences({ shares, books }: { shares: HomeSummary['bySciences']; books:
             <span className="mt-1.5 text-sm text-muted">{t('home.inLibrary')}</span>
           </p>
         </div>
-        <ul className="grid min-w-0 flex-1 basis-80 gap-x-10 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 min-w-0 flex-1 basis-80 gap-x-10 sm:grid-cols-2">
           {slices.map((slice, i) => (
             <li key={slice.key} className="flex items-center gap-3 border-b border-line py-3">
               <span aria-hidden="true" className={`size-3 shrink-0 rounded-sm border border-line ${SCALE[i]}`} />

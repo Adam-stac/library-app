@@ -29,7 +29,7 @@ export default function YearFields({ kind, value, onChange, errors }: Props) {
       {/* Floated, so the title sits inside the box rather than on its border */}
       <legend className="section-title float-start mb-5 w-full">{label('legend')}</legend>
       <div className="clear-both flex flex-col gap-5">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label htmlFor={id('hijri')} className="label">
               {label('hijri')}
