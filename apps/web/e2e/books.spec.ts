@@ -80,7 +80,7 @@ test.describe('Books', () => {
     await expect(where).toContainText('Volume 2, page 50')
     await expect(page.getByRole('region', { name: 'Your library by science' })).toContainText('Ḥadīth')
     await expectAccessible(page)
-    await where.getByRole('link').click()
+    await where.getByRole('link', { name: 'Move the bookmark' }).click()
 
     // Edit the copy
     await page.getByRole('link', { name: 'Edit' }).click()

@@ -64,7 +64,18 @@
     "quiet": "Gone quiet",
     "quietHint": "Started, but the bookmark hasn't moved for three months.",
     "benefits": "Latest benefits",
-    "allBenefits": "All {{number}} benefits"
+    "allBenefits": "All {{number}} benefits",
+    "question": "Where are you in your reading?",
+    "searchPlaceholder": "Search your books, authors and benefits…",
+    "volumeOf": "Volume {{volume}} of {{volumes}}",
+    "moveBookmark": "Move the bookmark",
+    "noteBenefit": "Note a benefit from it",
+    "alsoReading": "Also reading",
+    "pickBook": "Choose a book from your shelf",
+    "inLibrary": "in your library",
+    "percent": "{{percent}}%",
+    "otherSciences": "Other sciences",
+    "welcome": "Welcome back,"
   },
   "landing": {
     "title": "The index of your library",

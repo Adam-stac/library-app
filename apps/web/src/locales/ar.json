@@ -76,7 +76,18 @@
     "quiet": "توقفت عندها",
     "quietHint": "بدأتها، ولم تتحرك علامتها منذ ثلاثة أشهر.",
     "benefits": "أحدث الفوائد",
-    "allBenefits": "كل الفوائد ({{number}})"
+    "allBenefits": "كل الفوائد ({{number}})",
+    "question": "أين وصلت في قراءتك؟",
+    "searchPlaceholder": "ابحث في كتبك ومؤلفيك وفوائدك…",
+    "volumeOf": "الجزء {{volume}} من {{volumes}}",
+    "moveBookmark": "حرّك العلامة",
+    "noteBenefit": "دوّن فائدة منه",
+    "alsoReading": "تقرأ أيضًا",
+    "pickBook": "اختر كتابًا من رفّك",
+    "inLibrary": "في مكتبتك",
+    "percent": "{{percent}}٪",
+    "otherSciences": "فنون أخرى",
+    "welcome": "مرحبًا بك،"
   },
   "landing": {
     "title": "فهرس مكتبتك",

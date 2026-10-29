@@ -103,6 +103,9 @@
   --focal-shadow: 0 30px 60px -28px rgb(14 40 33 / 0.55);
   --focal-ink: #f2f6f4;
   --focal-muted: #b4cfc5;
+  --focal-deep: #0f2a23; /* text on a light pill in the focal card */
+  --focal-fill: #7cc4ad; /* the part of a ruler already read */
+  --focal-mark: #cdefe3; /* where you are on the ruler */
   /* Most to least: the share of each science, deep green to nearly white */
   --scale-1: #123e33;
   --scale-2: #1d5c4e;
@@ -156,6 +159,9 @@
     --focal-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.85);
     --focal-ink: #f2f6f4;
     --focal-muted: #b4cfc5;
+    --focal-deep: #0f2a23; /* text on a light pill in the focal card */
+    --focal-fill: #7cc4ad; /* the part of a ruler already read */
+    --focal-mark: #cdefe3; /* where you are on the ruler */
     --scale-1: #b3e3d3;
     --scale-2: #7cc4ad;
     --scale-3: #4f9c85;
@@ -202,6 +208,9 @@
   --focal-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.85);
   --focal-ink: #f2f6f4;
   --focal-muted: #b4cfc5;
+  --focal-deep: #0f2a23; /* text on a light pill in the focal card */
+  --focal-fill: #7cc4ad; /* the part of a ruler already read */
+  --focal-mark: #cdefe3; /* where you are on the ruler */
   --scale-1: #b3e3d3;
   --scale-2: #7cc4ad;
   --scale-3: #4f9c85;
@@ -274,6 +283,9 @@
   --color-card-edge: var(--card-edge);
   --color-focal-ink: var(--focal-ink);
   --color-focal-muted: var(--focal-muted);
+  --color-focal-deep: var(--focal-deep);
+  --color-focal-fill: var(--focal-fill);
+  --color-focal-mark: var(--focal-mark);
   --color-scale-1: var(--scale-1);
   --color-scale-2: var(--scale-2);
   --color-scale-3: var(--scale-3);
