@@ -5,10 +5,19 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { type ApiResult, deleteJson, getJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import { formatNumber } from '../authors'
-import { bookmarkText, editionInputOf, formatDate, formatPrice, languageName, statusText, today } from '../books'
+import {
+  bookmarkText,
+  editionInputOf,
+  formatDate,
+  formatPrice,
+  languageName,
+  statusText,
+  today,
+  volumesText,
+} from '../books'
 import BenefitCard from '../components/BenefitCard'
 import ConfirmDelete from '../components/ConfirmDelete'
-import Details from '../components/Details'
+import Details, { type DetailRow } from '../components/Details'
 import Icon from '../components/Icon'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
@@ -71,25 +80,68 @@ export default function BookPage() {
     return result
   }
 
+  const details: DetailRow[] = [
+    { label: t('books.fields.shelf'), value: book.shelf, book: true },
+    { label: t('books.fields.publisher'), value: book.publisher, book: true },
+    { label: t('books.fields.muhaqqiq'), value: book.muhaqqiq, book: true },
+    { label: t('books.fields.translator'), value: book.translator, book: true },
+    { label: t('books.fields.publicationPlace'), value: book.publicationPlace, book: true },
+    { label: t('books.fields.published'), value: publishedText(book, t, language) },
+    {
+      label: t('books.fields.editionNumber'),
+      value: book.editionNumber && formatNumber(book.editionNumber, language),
+    },
+    { label: t('books.fields.language'), value: book.language && languageName(book.language, language) },
+    { label: t('books.fields.volumes'), value: book.volumes && formatNumber(book.volumes, language) },
+    { label: t('books.fields.isbn'), value: book.isbn && <bdi dir="ltr">{book.isbn}</bdi> },
+    {
+      label: t('books.fields.legalDeposit'),
+      value: book.legalDeposit && <bdi dir="ltr">{book.legalDeposit}</bdi>,
+    },
+    { label: t('books.fields.purchasedOn'), value: book.purchasedOn && formatDate(book.purchasedOn, language) },
+    { label: t('books.fields.price'), value: book.price && formatPrice(book.price, language) },
+  ]
+
   return (
-    <article className="max-w-3xl">
+    <article className="max-w-5xl">
       <PageHeader
         back={back}
         book
+        above={
+          <p className="mb-4 flex flex-wrap gap-2">
+            {book.work.science && (
+              <Link to="/sciences" className="pill bg-accent-soft text-accent">
+                <span aria-hidden="true" className="size-2 rounded-full bg-accent" />
+                <bdi>{nameOf(book.work.science, language)}</bdi>
+              </Link>
+            )}
+            {book.status !== 'not_started' && (
+              <span className={`pill ${book.status === 'reading' ? 'bg-accent-soft text-accent' : 'bg-field'}`}>
+                {statusText(book.status, t)}
+              </span>
+            )}
+            {volumesText(book.volumes, t, language) && (
+              <span className="pill border border-line text-muted">{volumesText(book.volumes, t, language)}</span>
+            )}
+          </p>
+        }
         title={<bdi>{title}</bdi>}
         lede={
           <>
             {otherTitle && (
-              <span className="font-book block text-lg">
+              <span className="font-book block text-xl">
                 <bdi>{otherTitle}</bdi>
               </span>
             )}
             {book.work.authors.length > 0 && (
-              <span className="mt-1 block">
+              <span className="mt-2 block">
                 {book.work.authors.map((author, index) => (
                   <span key={author.id}>
                     {index > 0 && (language === 'ar' ? '، ' : ', ')}
-                    <Link to={`/authors/${encodeURIComponent(author.id)}`} className="link font-book text-reading">
+                    <Link
+                      to={`/authors/${encodeURIComponent(author.id)}`}
+                      className="font-book text-2xl font-semibold text-accent hover:underline"
+                    >
                       <bdi>{nameOf(author, language)}</bdi>
                     </Link>
                   </span>
@@ -115,43 +167,18 @@ export default function BookPage() {
       />
       <Notice className="mt-6" />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <Reading book={book} onSaved={replace} onStale={reload} />
+      {/* Where you are in it, and reading it: the card the page leads with */}
+      <div className="bg-focal mt-9 grid gap-8 rounded-card p-7 shadow-focal lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] lg:gap-10">
         <BookmarkPanel key={book.id} book={book} onMoved={(bookmark) => replace({ ...book, bookmark })} />
+        <Reading book={book} onSaved={replace} onStale={reload} />
       </div>
 
-      <Details
-        className="mt-12"
-        rows={[
-          {
-            label: t('books.fields.science'),
-            value: book.work.science && nameOf(book.work.science, language),
-            book: true,
-          },
-          { label: t('books.fields.language'), value: book.language && languageName(book.language, language) },
-          { label: t('books.fields.muhaqqiq'), value: book.muhaqqiq, book: true },
-          { label: t('books.fields.translator'), value: book.translator, book: true },
-          { label: t('books.fields.publisher'), value: book.publisher, book: true },
-          { label: t('books.fields.publicationPlace'), value: book.publicationPlace, book: true },
-          { label: t('books.fields.published'), value: publishedText(book, t, language) },
-          {
-            label: t('books.fields.editionNumber'),
-            value: book.editionNumber && formatNumber(book.editionNumber, language),
-          },
-          { label: t('books.fields.volumes'), value: book.volumes && formatNumber(book.volumes, language) },
-          { label: t('books.fields.shelf'), value: book.shelf, book: true },
-          { label: t('books.fields.isbn'), value: book.isbn && <bdi dir="ltr">{book.isbn}</bdi> },
-          {
-            label: t('books.fields.legalDeposit'),
-            value: book.legalDeposit && <bdi dir="ltr">{book.legalDeposit}</bdi>,
-          },
-          { label: t('books.fields.purchasedOn'), value: book.purchasedOn && formatDate(book.purchasedOn, language) },
-          { label: t('books.fields.price'), value: book.price && formatPrice(book.price, language) },
-        ]}
-      />
+      <BookBenefits bookId={book.id} />
+
+      <CopyDetails rows={details} />
 
       {book.notes && (
-        <section aria-labelledby="notes" className="mt-12">
+        <section aria-labelledby="notes" className="card mt-5 p-7">
           <h2 id="notes" className="section-title">
             {t('books.fields.notes')}
           </h2>
@@ -161,14 +188,49 @@ export default function BookPage() {
         </section>
       )}
 
-      <BookBenefits bookId={book.id} />
-
-      <p className="mt-12">
+      <p className="mt-8">
         <Link to={`/books?work=${encodeURIComponent(book.work.id)}`} className="link text-sm">
           {t('books.allCopies')}
         </Link>
       </p>
     </article>
+  )
+}
+
+/**
+ * What's recorded about the copy: the first four things known, as tiles (where it is on the shelf first), and the
+ * whole list behind "All details".
+ */
+function CopyDetails({ rows }: { rows: DetailRow[] }) {
+  const { t } = useTranslation()
+  const known = rows.filter((row) => row.value !== null && row.value !== undefined && row.value !== '')
+  if (known.length === 0) return null
+
+  return (
+    <section aria-labelledby="copy" className="card mt-5 p-7">
+      <h2 id="copy" className="section-title">
+        {t('books.aboutCopy')}
+      </h2>
+      <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {known.slice(0, 4).map((row) => (
+          <div key={row.label} className="min-w-0 rounded-panel bg-field px-4 py-3.5">
+            <dt className="text-xs text-muted">{row.label}</dt>
+            <dd className={`mt-1 break-words ${row.book ? 'font-book text-xl' : 'font-medium'}`}>
+              {typeof row.value === 'string' ? <bdi>{row.value}</bdi> : row.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {known.length > 4 && (
+        <details className="group mt-5">
+          <summary className="btn cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            {t('books.allDetails')}
+            <Icon name="down" className="size-4 transition-transform duration-150 group-open:rotate-180" />
+          </summary>
+          <Details className="mt-4" rows={known.slice(4)} />
+        </details>
+      )}
+    </section>
   )
 }
 
@@ -210,30 +272,30 @@ function Reading({ book, onSaved, onStale }: { book: Edition; onSaved: (book: Ed
   }
 
   return (
-    <section aria-labelledby="reading" className="card flex flex-col gap-3 p-5">
-      <h2 id="reading" className="section-title">
+    <section aria-labelledby="reading" className="flex flex-col gap-4 lg:border-s lg:border-white/15 lg:ps-10">
+      <h2 id="reading" className="text-sm font-medium text-focal-muted">
         {t('books.reading')}
       </h2>
-      <p className="text-reading">{statusText(book.status, t)}</p>
-      <dl className="flex flex-col gap-1 text-sm text-muted">
+      <p className="font-display text-2xl font-semibold">{statusText(book.status, t)}</p>
+      <dl className="flex flex-col gap-1.5 text-sm">
         {book.startedOn && (
-          <div className="flex gap-2">
-            <dt>{t('books.fields.startedOn')}</dt>
-            <dd className="text-ink">{formatDate(book.startedOn, language)}</dd>
+          <div className="flex flex-wrap gap-2">
+            <dt className="text-focal-muted">{t('books.fields.startedOn')}</dt>
+            <dd>{formatDate(book.startedOn, language)}</dd>
           </div>
         )}
         {book.finishedOn && (
-          <div className="flex gap-2">
-            <dt>{t('books.fields.finishedOn')}</dt>
-            <dd className="text-ink">{formatDate(book.finishedOn, language)}</dd>
+          <div className="flex flex-wrap gap-2">
+            <dt className="text-focal-muted">{t('books.fields.finishedOn')}</dt>
+            <dd>{formatDate(book.finishedOn, language)}</dd>
           </div>
         )}
       </dl>
       {book.status !== 'finished' && (
-        <p className="mt-auto pt-1">
+        <p className="mt-auto pt-2">
           <button
             type="button"
-            className="btn"
+            className="btn border-white/40 bg-transparent text-focal-ink hover:border-white/70"
             disabled={saving}
             onClick={() => void mark(book.status === 'not_started' ? { startedOn: today() } : { finishedOn: today() })}
           >
@@ -242,7 +304,7 @@ function Reading({ book, onSaved, onStale }: { book: Edition; onSaved: (book: Ed
         </p>
       )}
       {error === 'stale_version' ? (
-        <div role="alert" className="text-sm text-danger">
+        <div role="alert" className="rounded-panel bg-surface p-4 text-sm text-danger">
           <p>{t('common.stale')}</p>
           <button type="button" className="btn mt-2" onClick={onStale}>
             {t('common.loadLatest')}
@@ -250,7 +312,7 @@ function Reading({ book, onSaved, onStale }: { book: Edition; onSaved: (book: Ed
         </div>
       ) : (
         error && (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="rounded-panel bg-surface px-4 py-3 text-sm text-danger">
             {errorMessage(t, language, error)}
           </p>
         )
@@ -311,7 +373,7 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
 
   const field = (key: 'volume' | 'page', value: string, set: (v: string) => void) => (
     <div className="flex w-28 flex-col gap-2">
-      <label htmlFor={`bookmark-${key}`} className="label">
+      <label htmlFor={`bookmark-${key}`} className="text-sm font-medium text-focal-muted">
         {t(`books.bookmark.${key}`)}
       </label>
       <input
@@ -323,29 +385,56 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
         onChange={(event) => set(event.target.value)}
         aria-invalid={errors[key] ? true : undefined}
         aria-describedby={errors[key] ? `bookmark-${key}-error` : undefined}
-        className="field w-full"
+        className="field-on-focal"
       />
     </div>
   )
+  const volumes = book.volumes
+  const at = book.bookmark?.volume ?? null
 
   return (
-    <section aria-labelledby="bookmark" className="card flex flex-col gap-3 p-5">
-      <h2 id="bookmark" className="section-title flex items-center gap-2">
-        <Icon name="bookmark" className="size-4 text-accent" />
+    <section aria-labelledby="bookmark" className="flex min-w-0 flex-col gap-5">
+      <h2
+        id="bookmark"
+        className="inline-flex items-center gap-2 self-start rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-sm font-semibold"
+      >
+        <Icon name="bookmark" className="size-4" />
         {t('books.bookmark.title')}
       </h2>
-      <p className="text-reading" aria-live="polite">
-        {book.bookmark ? bookmarkText(book.bookmark, t, language) : t('books.bookmark.none')}
-        {moved && <span className="sr-only"> {t('books.bookmark.moved')}</span>}
-      </p>
+      {book.bookmark ? (
+        <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
+          {/* The page as the one large figure, for the eye; the line beside it says the same in words */}
+          <span aria-hidden="true" className="font-display text-figure leading-figure font-semibold">
+            {formatNumber(book.bookmark.page, language)}
+          </span>
+          <p className="pb-3 text-lg text-focal-muted" aria-live="polite">
+            {bookmarkText(book.bookmark, t, language)}
+            {moved && <span className="sr-only"> {t('books.bookmark.moved')}</span>}
+          </p>
+        </div>
+      ) : (
+        <p className="text-lg text-focal-muted" aria-live="polite">
+          {t('books.bookmark.none')}
+        </p>
+      )}
+      {at !== null && volumes !== null && volumes > 1 && <VolumeRuler at={at} of={volumes} />}
       <form noValidate onSubmit={(e) => void onSubmit(e)} className="flex flex-wrap items-end gap-3">
         {needsVolume && field('volume', volume, setVolume)}
         {field('page', page, setPage)}
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button
+          type="submit"
+          className="btn border-transparent bg-focal-ink text-focal-deep hover:border-transparent hover:opacity-90"
+          disabled={saving}
+        >
           {t(book.bookmark ? 'books.bookmark.move' : 'books.bookmark.put')}
         </button>
         {book.bookmark && (
-          <button type="button" className="btn btn-ghost" disabled={saving} onClick={() => void remove()}>
+          <button
+            type="button"
+            className="btn border-transparent bg-transparent text-focal-ink hover:bg-white/10"
+            disabled={saving}
+            onClick={() => void remove()}
+          >
             {t('books.bookmark.remove')}
           </button>
         )}
@@ -353,12 +442,43 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
       {(['volume', 'page'] as const).map(
         (key) =>
           errors[key] && (
-            <p key={key} id={`bookmark-${key}-error`} className="text-sm text-danger">
+            <p
+              key={key}
+              id={`bookmark-${key}-error`}
+              className="self-start rounded-panel bg-surface px-4 py-2.5 text-sm text-danger"
+            >
               {errorMessage(t, language, errors[key])}
             </p>
           ),
       )}
     </section>
+  )
+}
+
+/** One mark per volume, filled up to the one the bookmark is in; a plain bar when there are too many to tell apart */
+function VolumeRuler({ at, of }: { at: number; of: number }) {
+  if (of > 24) {
+    return (
+      <span aria-hidden="true" className="block h-2 overflow-hidden rounded-full bg-white/15">
+        <span className="block h-full rounded-full bg-focal-fill" style={{ width: `${(at / of) * 100}%` }} />
+      </span>
+    )
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className="grid items-end gap-1.5"
+      style={{ gridTemplateColumns: `repeat(${of}, minmax(0, 1fr))` }}
+    >
+      {Array.from({ length: of }, (_, i) => (
+        <span
+          key={i}
+          className={`block rounded-full ${
+            i + 1 === at ? 'h-4.5 bg-focal-mark' : i + 1 < at ? 'h-2 bg-focal-fill' : 'h-2 bg-white/15'
+          }`}
+        />
+      ))}
+    </span>
   )
 }
 
@@ -373,12 +493,15 @@ function BookBenefits({ bookId }: { bookId: string }) {
   const benefits = loaded.status === 'ok' ? loaded.data : null
 
   return (
-    <section aria-labelledby="book-benefits" className="mt-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h2 id="book-benefits" className="section-title">
+    <section aria-labelledby="book-benefits" className="mt-10">
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        <h2 id="book-benefits" className="section-title text-xl">
           {t('benefits.fromThisBook')}
+          {benefits && benefits.total > 0 && (
+            <span className="ms-2 text-base font-normal text-muted">{formatNumber(benefits.total, i18n.language)}</span>
+          )}
         </h2>
-        <Link to={`/benefits/new?book=${encodeURIComponent(bookId)}`} className="btn">
+        <Link to={`/benefits/new?book=${encodeURIComponent(bookId)}`} className="btn btn-primary">
           <Icon name="plus" className="size-4" />
           {t('benefits.add')}
         </Link>
@@ -386,9 +509,9 @@ function BookBenefits({ bookId }: { bookId: string }) {
       {benefits && benefits.total === 0 && <p className="mt-3 text-muted">{t('benefits.noneFromBook')}</p>}
       {benefits && benefits.total > 0 && (
         <>
-          <ul className="mt-3 divide-y divide-line border-y border-line">
+          <ul className="mt-4 grid gap-4 md:grid-cols-2">
             {benefits.items.map((benefit) => (
-              <li key={benefit.id}>
+              <li key={benefit.id} className="card px-6 py-1">
                 <BenefitCard benefit={benefit} withoutBook onDeleted={reload} />
               </li>
             ))}

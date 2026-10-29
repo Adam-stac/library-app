@@ -380,6 +380,17 @@
       aria-[current=page]:text-ink aria-[current=page]:shadow-lift;
   }
 
+  /* A small rounded label, such as a book's science or status */
+  .pill {
+    @apply inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-sm font-semibold;
+  }
+
+  /* A text field inside the deep focal card: light text on a darker well, with a border at least 3:1 */
+  .field-on-focal {
+    @apply min-h-12 w-full rounded-field border border-white/45 bg-black/20 px-4 text-lg font-semibold
+      text-focal-ink transition-colors duration-150 hover:border-white/80 aria-invalid:border-focal-mark;
+  }
+
   /* A link inside text */
   .link {
     @apply font-medium text-accent underline decoration-1 underline-offset-4 hover:decoration-2;

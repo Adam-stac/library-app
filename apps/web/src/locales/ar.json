@@ -448,7 +448,9 @@
       "priceCurrency": "العملة",
       "noCurrency": "بلا",
       "readingHint": "اتركهما فارغين إن لم تبدأ قراءته."
-    }
+    },
+    "aboutCopy": "عن هذه النسخة",
+    "allDetails": "كل التفاصيل"
   },
   "benefits": {
     "title": "الفوائد",

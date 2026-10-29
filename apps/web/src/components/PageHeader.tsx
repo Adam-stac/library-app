@@ -11,6 +11,8 @@ type Props = {
   back?: { to: string; label: ReactNode }
   /** Library words (a name, a title) are set in Lateef, larger */
   book?: boolean
+  /** Small labels above the title, such as a book's science and status */
+  above?: ReactNode
 }
 
 /**
@@ -20,7 +22,7 @@ type Props = {
  * Beside a long title they would wrap under it or not depending on the title's width, and the title's font arrives
  * a moment after the page, so the page would jump when it did.
  */
-export default function PageHeader({ title, lede, actions, back, book = false }: Props) {
+export default function PageHeader({ title, lede, actions, back, book = false, above }: Props) {
   const actionsOnTop = book && back !== undefined && actions !== undefined
   const backLink = back && (
     <Link to={back.to} className={actionsOnTop ? 'back-link' : 'back-link mb-6'}>
@@ -42,6 +44,7 @@ export default function PageHeader({ title, lede, actions, back, book = false }:
       )}
       <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div className="min-w-0">
+          {above}
           <h1
             className={
               book ? 'font-book text-display leading-tight font-semibold break-words sm:text-display-lg' : 'page-title'
