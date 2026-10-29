@@ -420,7 +420,9 @@
       "priceCurrency": "Currency",
       "noCurrency": "None",
       "readingHint": "Leave both empty if you have not started it."
-    }
+    },
+    "aboutCopy": "About this copy",
+    "allDetails": "All details"
   },
   "benefits": {
     "title": "Benefits",

@@ -60,6 +60,37 @@ describe('BookPage', () => {
     expect(screen.getByRole('link', { name: 'All copies of this work' })).toHaveAttribute('href', '/books?work=w1')
   })
 
+  it('leads with the science and volumes as labels, and the first four things known about the copy as tiles', async () => {
+    fakeApi(
+      {
+        [BOOK]: () =>
+          json(200, {
+            ...EDITION,
+            status: 'reading',
+            bookmark: { volume: 3, page: 212, movedAt: '2026-10-20T10:00:00Z' },
+          }),
+      },
+      'r@example.com',
+    )
+    renderPage()
+
+    expect(await screen.findByRole('link', { name: 'Hadith' })).toHaveAttribute('href', '/sciences')
+    expect(screen.getByText('9 volumes')).toBeInTheDocument()
+    expect(screen.getAllByText('Reading')[0]).toBeInTheDocument()
+    const copy = within(screen.getByRole('region', { name: 'About this copy' }))
+    // Where it is on the shelf first, then what is known, four at most; the rest behind "All details"
+    const tiles = copy
+      .getAllByRole('term')
+      .slice(0, 4)
+      .map((term) => term.textContent)
+    expect(tiles).toEqual(['Shelf', 'Publisher', 'Edited by (muḥaqqiq)', 'Place of publication'])
+    expect(copy.getByText('All details').closest('details')).not.toHaveAttribute('open')
+    // The page is one large figure for the eye; the words beside it say where you are
+    const bookmark = within(screen.getByRole('region', { name: 'Bookmark' }))
+    expect(bookmark.getByText('212')).toHaveAttribute('aria-hidden', 'true')
+    expect(bookmark.getByText('Volume 3, page 212')).toBeInTheDocument()
+  })
+
   it('starts reading today, keeping everything else as it was', async () => {
     const api = fakeApi(
       {

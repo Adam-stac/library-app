@@ -143,3 +143,13 @@ bought but not started, and the ones gone quiet. Below: the sciences as a ring i
 the largest share (up to six slices; past five sciences, the rest are put together), with a key that carries the
 numbers; this year as large figures; and the latest benefits. A search box sits under the greeting on a wide
 screen (a phone has one at the foot of the screen). No API change: it is all from `GET /api/v1/home`.
+
+## Update, 29 October 2026: the book page (slice P5)
+
+A book's page now reads top to bottom as: the way back and its actions; small labels for its science (linking to
+the sciences), whether you're reading it, and its volumes; the title large in Lateef with its author. Then the deep
+focal card: the page the bookmark is at as the one large figure (with the place in words beside it), a ruler
+through the volumes, moving the bookmark, and on its other side when you started and the button to finish it
+today. Below: the benefits from this book as cards, and the copy itself as four tiles (where it is on the shelf
+first), with every other detail behind "All details". Fields inside the deep card have their own style
+(`field-on-focal`), with a border at least 3:1 against it; errors there show on a light panel so they stay legible.
