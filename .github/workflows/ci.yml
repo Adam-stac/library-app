@@ -88,6 +88,8 @@ jobs:
             echo "::error::@playwright/test is $used: update the image above (and in ci.yml only), then approve new screenshots with pnpm visual:docker --update-snapshots"
             exit 1
           fi
+      - name: Let Git trust the checkout (the container runs as root; the files belong to the runner's user)
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install pnpm
         run: npm install -g pnpm@12.14.0
       - name: Install dependencies (exactly as locked)
