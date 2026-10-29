@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.1</version>
+		<version>4.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.github.adamstac</groupId>
@@ -28,7 +28,7 @@
 	</scm>
   <properties>
     <java.version>25</java.version>
-    <spring-modulith.version>2.1.1</spring-modulith.version>
+    <spring-modulith.version>2.1.2</spring-modulith.version>
     <!-- Security overrides: remove each once Spring Boot ships this version or newer. -->
     <!-- Jackson 3.1.7 fixes CVE-2026-89407, -89425, -68497, -91776, -91777 (denial of service). -->
     <jackson-bom.version>3.1.7</jackson-bom.version>
