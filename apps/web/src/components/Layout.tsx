@@ -7,6 +7,7 @@ import AccountMenu from './AccountMenu'
 import Brand from './Brand'
 import Icon from './Icon'
 import MoreMenu, { type Section } from './MoreMenu'
+import UndoProvider from './UndoProvider'
 
 /** The button that switches between Arabic and English, labelled in the language it switches to. */
 function LanguageButton({ className = '' }: { className?: string }) {
@@ -113,68 +114,70 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     // Hidden while checking who is signed in, a moment at most: drawing the signed-out frame first and swapping in
     // the sidebar moved the whole page (a layout shift of 0.17 on every signed-in page, measured).
-    <div className={state.status === 'loading' ? `${frame} invisible` : frame}>
-      {signedIn ? (
-        <aside className="sticky top-0 z-20 lg:top-5 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:w-22 lg:shrink-0 lg:flex-col lg:items-center">
-          {/* The phone's top bar is frosted. The frost is a layer of its own, so the tab bar inside the aside can
+    <UndoProvider>
+      <div className={state.status === 'loading' ? `${frame} invisible` : frame}>
+        {signedIn ? (
+          <aside className="sticky top-0 z-20 lg:top-5 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:w-22 lg:shrink-0 lg:flex-col lg:items-center">
+            {/* The phone's top bar is frosted. The frost is a layer of its own, so the tab bar inside the aside can
               still be fixed to the bottom of the screen (a frosted parent would hold it inside the bar). */}
-          <div aria-hidden="true" className="glass-bar absolute inset-0 -z-10 border-b border-line lg:hidden" />
-          <div className="flex items-center justify-between gap-2 px-4 py-2.5 lg:contents">
-            <div className="lg:mt-2 lg:mb-8">
-              <Brand compact />
+            <div aria-hidden="true" className="glass-bar absolute inset-0 -z-10 border-b border-line lg:hidden" />
+            <div className="flex items-center justify-between gap-2 px-4 py-2.5 lg:contents">
+              <div className="lg:mt-2 lg:mb-8">
+                <Brand compact />
+              </div>
+              <div className="flex items-center gap-1 lg:order-last lg:mt-auto lg:flex-col lg:gap-2">
+                <LanguageButton className="lg:min-h-12 lg:w-19 lg:flex-col lg:gap-1 lg:px-0 lg:text-xs" />
+                <AccountMenu email={state.account.email} />
+              </div>
             </div>
-            <div className="flex items-center gap-1 lg:order-last lg:mt-auto lg:flex-col lg:gap-2">
-              <LanguageButton className="lg:min-h-12 lg:w-19 lg:flex-col lg:gap-1 lg:px-0 lg:text-xs" />
-              <AccountMenu email={state.account.email} />
+            <div className="fixed inset-x-0 bottom-0 z-20 pt-2 lg:contents">
+              <div aria-hidden="true" className="glass-bar absolute inset-0 -z-10 border-t border-line lg:hidden" />
+              <PhoneSearch />
+              <nav
+                aria-label={t('nav.main')}
+                className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:flex lg:flex-col lg:items-center lg:gap-1.5 lg:p-0"
+              >
+                {SECTIONS.map(({ to, key, icon, end }) => (
+                  <NavLink key={to} to={to} end={end} className={sectionLink(TABS.includes(to))}>
+                    <Icon name={icon} className="size-5.5" />
+                    {t(`nav.${key}`)}
+                  </NavLink>
+                ))}
+                <MoreMenu sections={MORE} className="lg:hidden" />
+              </nav>
             </div>
-          </div>
-          <div className="fixed inset-x-0 bottom-0 z-20 pt-2 lg:contents">
-            <div aria-hidden="true" className="glass-bar absolute inset-0 -z-10 border-t border-line lg:hidden" />
-            <PhoneSearch />
-            <nav
-              aria-label={t('nav.main')}
-              className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:flex lg:flex-col lg:items-center lg:gap-1.5 lg:p-0"
-            >
-              {SECTIONS.map(({ to, key, icon, end }) => (
-                <NavLink key={to} to={to} end={end} className={sectionLink(TABS.includes(to))}>
-                  <Icon name={icon} className="size-5.5" />
-                  {t(`nav.${key}`)}
-                </NavLink>
-              ))}
-              <MoreMenu sections={MORE} className="lg:hidden" />
-            </nav>
-          </div>
-        </aside>
-      ) : (
-        <header>
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
-            <Brand />
-            <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
-              {state.status === 'signedOut' && (
-                <Link to="/sign-in" className="btn btn-ghost">
-                  {t('nav.signIn')}
-                </Link>
-              )}
-              <LanguageButton />
-            </nav>
-          </div>
-        </header>
-      )}
-      {/*
-       * The page stays in the same place in both frames. If it moved, React would build it again when the check of
-       * who is signed in finishes, and a page that reads a one-time token from the address (confirming a change of
-       * email address) would lose it.
-       */}
-      <main
-        className={
-          signedIn
-            ? 'min-w-0 px-4 pt-6 pb-44 sm:px-8 frame-card lg:min-h-[calc(100dvh-2.5rem)] lg:flex-1 lg:px-12 lg:pt-10 lg:pb-16'
-            : 'px-4 pt-10 pb-20 sm:px-8 sm:pt-16'
-        }
-      >
-        {/* Signed out, each page sets its own width (most are narrow forms) and is centred */}
-        <div className={signedIn ? 'max-w-5xl' : '[&>*]:mx-auto'}>{children}</div>
-      </main>
-    </div>
+          </aside>
+        ) : (
+          <header>
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
+              <Brand />
+              <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
+                {state.status === 'signedOut' && (
+                  <Link to="/sign-in" className="btn btn-ghost">
+                    {t('nav.signIn')}
+                  </Link>
+                )}
+                <LanguageButton />
+              </nav>
+            </div>
+          </header>
+        )}
+        {/*
+         * The page stays in the same place in both frames. If it moved, React would build it again when the check of
+         * who is signed in finishes, and a page that reads a one-time token from the address (confirming a change of
+         * email address) would lose it.
+         */}
+        <main
+          className={
+            signedIn
+              ? 'min-w-0 px-4 pt-6 pb-44 sm:px-8 frame-card lg:min-h-[calc(100dvh-2.5rem)] lg:flex-1 lg:px-12 lg:pt-10 lg:pb-16'
+              : 'px-4 pt-10 pb-20 sm:px-8 sm:pt-16'
+          }
+        >
+          {/* Signed out, each page sets its own width (most are narrow forms) and is centred */}
+          <div className={signedIn ? 'max-w-5xl' : '[&>*]:mx-auto'}>{children}</div>
+        </main>
+      </div>
+    </UndoProvider>
   )
 }

@@ -140,10 +140,12 @@ class EditionService {
 
     private final JdbcClient jdbc;
     private final WorkService works;
+    private final BinService bin;
 
-    EditionService(JdbcClient jdbc, WorkService works) {
+    EditionService(JdbcClient jdbc, WorkService works, BinService bin) {
         this.jdbc = jdbc;
         this.works = works;
+        this.bin = bin;
     }
 
     // ---- Reading -----------------------------------------------------------------------------------------------
@@ -274,15 +276,13 @@ class EditionService {
         return get(ownerId, id);
     }
 
+    /**
+     * Moves the edition to the bin (ADR 0009), where it is kept for 30 days and can be put back. With
+     * {@code withWorkIfLast}, a work left with no copies goes to the bin with it; otherwise the work stays.
+     */
     @Transactional
-    void delete(UUID ownerId, UUID id) {
-        int deleted = jdbc.sql("DELETE FROM editions WHERE id = :id AND owner_id = :owner")
-                .param("id", id)
-                .param("owner", ownerId)
-                .update();
-        if (deleted == 0) {
-            throw new NotFoundException();
-        }
+    void delete(UUID ownerId, UUID id, boolean withWorkIfLast) {
+        bin.moveBook(ownerId, id, withWorkIfLast);
     }
 
     /**

@@ -7,6 +7,7 @@ import { type AuthorPage, formatNumber } from '../authors'
 import AuthorIndex from '../components/AuthorIndex'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 
 const PAGE_SIZE = 50
 
@@ -65,6 +66,7 @@ export default function AuthorsPage() {
         </p>
       )}
 
+      {!shown && <Loading shape="list" className="mt-8" />}
       {shown?.failed && (
         <p role="alert" className="mt-8 text-danger">
           {t('authors.loadFailed')}

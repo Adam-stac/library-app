@@ -6,9 +6,12 @@ import { useAuth } from '../auth/context'
 import { type Author, displayName } from '../authors'
 import FormField from '../components/FormField'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import PlacePicker from '../components/PlacePicker'
 import TextAreaField from '../components/TextAreaField'
 import YearFields from '../components/YearFields'
+import UnsavedChanges from '../components/UnsavedChanges'
+import { useFormChecks } from '../formChecks'
 import { type Named, orNull } from '../library'
 import { draftOf, EMPTY_YEAR, type YearDraft, yearOf } from '../yearDraft'
 
@@ -72,6 +75,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const checks = useFormChecks(setErrors)
   const [moreNamesOpen, setMoreNamesOpen] = useState(false)
   const showAuthor = useCallback((author: Author) => {
     setEditing(author)
@@ -115,9 +119,8 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
 
   const setText = (field: keyof TextFields) => (value: string) => setDraft({ ...draft, [field]: value })
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    setFormError(null)
+  /** What is wrong with the form as it stands, by field: checked on saving, and as each field is left */
+  function problems(): Record<string, string> {
     const birth = yearOf(draft.birth)
     const death = yearOf(draft.death)
     const found: Record<string, string> = {}
@@ -126,8 +129,17 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
     if (birth.errors.ce) found['birth.ce'] = birth.errors.ce
     if (death.errors.hijri) found['death.hijri'] = death.errors.hijri
     if (death.errors.ce) found['death.ce'] = death.errors.ce
+    return found
+  }
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault()
+    setFormError(null)
+    const found = problems()
     setErrors(found)
     if (Object.keys(found).length > 0) return
+    const birth = yearOf(draft.birth)
+    const death = yearOf(draft.death)
 
     const body = {
       nameAr: orNull(draft.nameAr),
@@ -174,7 +186,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
       </section>
     )
   }
-  if (mode === 'edit' && !editing) return null
+  if (mode === 'edit' && !editing) return <Loading />
 
   const title = editing ? t('authors.editTitle', { name: displayName(editing, language) }) : t('authors.addTitle')
 
@@ -203,7 +215,13 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
         )
       )}
 
-      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-10 flex flex-col gap-7">
+      <UnsavedChanges when={checks.dirty && !saving} />
+      <form
+        noValidate
+        onSubmit={(e) => void onSubmit(e)}
+        {...checks.formProps(problems)}
+        className="mt-10 flex flex-col gap-7"
+      >
         <FormField
           id="nameAr"
           label={t('authors.form.nameAr')}
@@ -306,7 +324,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
         />
 
         <p>
-          <button type="submit" className={primary} disabled={saving}>
+          <button type="submit" className={primary} disabled={saving} aria-busy={saving || undefined}>
             {t('authors.save')}
           </button>
         </p>

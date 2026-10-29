@@ -8,6 +8,7 @@ import { chooseTheme, savedTheme, type Theme } from '../theme'
 /** Every setting, in one place: the account's, and how the app looks on this device. Signed-in accounts only. */
 const SETTINGS: { to: string; key: string; icon: IconName }[] = [
   { to: '/library-settings', key: 'library', icon: 'bookOpen' },
+  { to: '/bin', key: 'bin', icon: 'trash' },
   { to: '/account', key: 'account', icon: 'user' },
   { to: '/security', key: 'security', icon: 'shield' },
   { to: '/change-password', key: 'changePassword', icon: 'key' },

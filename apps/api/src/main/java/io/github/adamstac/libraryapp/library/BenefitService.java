@@ -75,10 +75,12 @@ class BenefitService {
 
     private final JdbcClient jdbc;
     private final WorkService works;
+    private final BinService bin;
 
-    BenefitService(JdbcClient jdbc, WorkService works) {
+    BenefitService(JdbcClient jdbc, WorkService works, BinService bin) {
         this.jdbc = jdbc;
         this.works = works;
+        this.bin = bin;
     }
 
     // ---- Reading -----------------------------------------------------------------------------------------------
@@ -190,15 +192,10 @@ class BenefitService {
         return get(ownerId, id);
     }
 
+    /** Moves the benefit to the bin (ADR 0009), where it is kept for 30 days and can be put back. */
     @Transactional
     void delete(UUID ownerId, UUID id) {
-        int deleted = jdbc.sql("DELETE FROM benefits WHERE id = :id AND owner_id = :owner")
-                .param("id", id)
-                .param("owner", ownerId)
-                .update();
-        if (deleted == 0) {
-            throw new NotFoundException();
-        }
+        bin.moveBenefit(ownerId, id);
     }
 
     // ---- Rules -------------------------------------------------------------------------------------------------

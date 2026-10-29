@@ -5,6 +5,7 @@ import { useAuth } from '../auth/context'
 import ConfirmDelete from '../components/ConfirmDelete'
 import Details from '../components/Details'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
 import { nameOf, otherNameOf, type Place } from '../library'
@@ -33,7 +34,7 @@ export default function PlacePage() {
       </article>
     )
   }
-  if (loaded.status !== 'ok') return null
+  if (loaded.status !== 'ok') return <Loading />
 
   const place = loaded.data
   const name = nameOf(place, language)

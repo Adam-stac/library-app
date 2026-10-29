@@ -5,6 +5,7 @@ import { useAuth } from '../auth/context'
 import { formatNumber } from '../authors'
 import { formatInstant } from '../books'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import { authorsOf, bookTitle, nameOf, otherNameOf, type SearchResults, workTitle } from '../library'
 import { useLoad } from '../useLoad'
@@ -77,6 +78,7 @@ export default function SearchPage() {
         </button>
       </form>
 
+      {searchable && loaded.status === 'loading' && <Loading shape="list" className="mt-8" />}
       {searchable && loaded.status === 'failed' && (
         <p role="alert" className="mt-8 text-danger">
           {t('common.loadFailed')}

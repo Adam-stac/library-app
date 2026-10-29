@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { useAuth } from '../auth/context'
@@ -6,6 +5,7 @@ import { formatNumber } from '../authors'
 import BenefitCard from '../components/BenefitCard'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
 import Pagination from '../components/Pagination'
@@ -26,7 +26,6 @@ export default function BenefitsPage() {
     `/api/v1/benefits?page=${page - 1}&size=${PAGE_SIZE}${bookId ? `&editionId=${encodeURIComponent(bookId)}` : ''}`,
   )
   const [book] = useLoad<Edition>(bookId ? `/api/v1/editions/${encodeURIComponent(bookId)}` : null)
-  const [deleted, setDeleted] = useState(false)
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
@@ -60,13 +59,8 @@ export default function BenefitsPage() {
         }
       />
       <Notice />
-      {deleted && (
-        <p role="status" className="notice mt-8">
-          <Icon name="check" className="mt-px size-4 text-accent" />
-          {t('benefits.deleted')}
-        </p>
-      )}
 
+      {loaded.status === 'loading' && <Loading shape="list" className="mt-8" />}
       {loaded.status === 'failed' && (
         <p role="alert" className="mt-8 text-danger">
           {t('common.loadFailed')}
@@ -81,14 +75,7 @@ export default function BenefitsPage() {
           <ul className="divide-y divide-line border-y border-line">
             {benefits.items.map((benefit) => (
               <li key={benefit.id}>
-                <BenefitCard
-                  benefit={benefit}
-                  withoutBook={Boolean(bookId)}
-                  onDeleted={() => {
-                    setDeleted(true)
-                    reload()
-                  }}
-                />
+                <BenefitCard benefit={benefit} withoutBook={Boolean(bookId)} onDeleted={reload} />
               </li>
             ))}
           </ul>

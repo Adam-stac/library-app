@@ -117,9 +117,19 @@ class EditionController {
         return ResponseEntity.ok().eTag(RecordVersion.etag(edition.version())).body(edition);
     }
 
+    /**
+     * Moves the copy to the bin, where it is kept for 30 days (ADR 0009). The work stays, unless
+     * {@code withWork=ifLast} asks for a work left with no copies to go to the bin with it.
+     */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable UUID id, Authentication authentication) {
-        editions.delete(SignedInUser.id(authentication), id);
+    void delete(
+            @PathVariable UUID id,
+            @RequestParam(required = false) String withWork,
+            Authentication authentication) {
+        if (withWork != null && !withWork.equals("ifLast")) {
+            throw new FieldValidationException("withWork", "invalid");
+        }
+        editions.delete(SignedInUser.id(authentication), id, withWork != null);
     }
 }
