@@ -377,7 +377,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
           )}
           {!draft.existingWork && (
             <>
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <FormField
                   id="titleAr"
                   label={t('books.form.titleAr')}
@@ -445,7 +445,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
             dir="auto"
             book
           />
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField
               id="volumes"
               label={t('books.fields.volumes')}
@@ -487,7 +487,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         </Group>
 
         <Group title={t('books.form.imprint')}>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField
               id="muhaqqiq"
               label={t('books.fields.muhaqqiq')}
@@ -572,7 +572,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         </Group>
 
         <Group title={t('books.form.purchase')}>
-          <div className="grid gap-5 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <DateField id="purchasedOn" label={t('books.fields.purchasedOn')} draft={draft} set={set} error={error} />
             <FormField
               id="priceAmount"
@@ -611,7 +611,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         </Group>
 
         <Group title={t('books.reading')} hint={t('books.form.readingHint')}>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <DateField id="startedOn" label={t('books.fields.startedOn')} draft={draft} set={set} error={error} />
             <DateField id="finishedOn" label={t('books.fields.finishedOn')} draft={draft} set={set} error={error} />
           </div>

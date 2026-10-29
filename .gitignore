@@ -38,6 +38,8 @@ coverage/
 .vite/
 playwright-report/
 test-results/
+visual-report/
+visual-results/
 *.tsbuildinfo
 
 # --- Logs and local data ---

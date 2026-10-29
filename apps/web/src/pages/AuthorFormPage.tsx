@@ -294,7 +294,7 @@ export default function AuthorFormPage({ mode }: { mode: 'add' | 'edit' }) {
 
         <fieldset className="card p-5 sm:p-6">
           <legend className="section-title float-start mb-5 w-full">{t('authors.form.places')}</legend>
-          <div className="clear-both grid gap-5 sm:grid-cols-2">
+          <div className="clear-both grid grid-cols-1 gap-5 sm:grid-cols-2">
             <PlacePicker
               id="birthPlace"
               label={t('authors.birthPlace')}
