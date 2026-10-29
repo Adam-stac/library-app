@@ -62,7 +62,7 @@ describe('App', () => {
     const user = userEvent.setup()
     renderApp()
 
-    await user.click(await screen.findByRole('link', { name: 'إنشاء حساب' }))
+    await user.click((await screen.findAllByRole('link', { name: 'إنشاء حساب' }))[0])
 
     expect(await screen.findByRole('heading', { name: 'إنشاء حساب' })).toBeInTheDocument()
   })

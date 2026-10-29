@@ -148,8 +148,9 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           </aside>
         ) : (
-          <header>
-            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-8">
+          <header className="px-4 sm:px-8">
+            {/* As wide as the pages below it, so the mark lines up with the landing page's headline */}
+            <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 py-4">
               <Brand />
               <nav aria-label={t('nav.label')} className="flex flex-wrap items-center gap-1">
                 {state.status === 'signedOut' && (
