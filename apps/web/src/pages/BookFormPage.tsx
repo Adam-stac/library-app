@@ -6,9 +6,12 @@ import { useAuth } from '../auth/context'
 import { COMMON_LANGUAGES, currencies, currencyName, languageName, today } from '../books'
 import AuthorsPicker from '../components/AuthorsPicker'
 import FormField from '../components/FormField'
+import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import SearchPicker, { Picked } from '../components/SearchPicker'
 import TextAreaField from '../components/TextAreaField'
+import UnsavedChanges from '../components/UnsavedChanges'
+import { useFormChecks } from '../formChecks'
 import {
   authorsOf,
   bookTitle,
@@ -161,13 +164,14 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const checks = useFormChecks(setErrors)
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
 
   if (mode === 'edit' && !editing) {
     const failed = [edition.status, work.status].find((s) => s === 'notFound' || s === 'failed')
-    if (!failed) return null
+    if (!failed) return <Loading />
     return (
       <section className="max-w-2xl">
         <PageHeader back={{ to: '/books', label: t('books.all') }} title={t('books.title')} />
@@ -191,7 +195,19 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
   }
 
   /** Checks what can be checked here; returns the body, or null after showing what's wrong. */
+  /** What is wrong with the form as it stands, by field: checked on saving, and as each field is left */
+  function problems(): Record<string, string> {
+    return inspect().found
+  }
+
+  /** Sets the errors; the edition's fields as the API takes them when there are none */
   function checked() {
+    const { found, body } = inspect()
+    setErrors(found)
+    return Object.keys(found).length > 0 ? null : body
+  }
+
+  function inspect() {
     const found: Record<string, string> = {}
     const numberOf = (field: keyof Draft, max: number, code = 'invalid_number') => {
       const value = wholeNumber(draft[field] as string, max)
@@ -216,10 +232,8 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
     if (draft.finishedOn && !draft.startedOn) found.startedOn = 'start_required'
     else if (draft.finishedOn && draft.startedOn && draft.finishedOn < draft.startedOn)
       found.finishedOn = 'before_start'
-    setErrors(found)
-    if (Object.keys(found).length > 0) return null
 
-    return {
+    const body = {
       title: orNull(draft.title),
       language: orNull(draft.language),
       translator: orNull(draft.translator),
@@ -238,6 +252,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
       startedOn: orNull(draft.startedOn),
       finishedOn: orNull(draft.finishedOn),
     }
+    return { found, body }
   }
 
   const workBody = () => ({
@@ -322,7 +337,13 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         )
       )}
 
-      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-10 flex flex-col gap-7">
+      <UnsavedChanges when={checks.dirty && !saving} />
+      <form
+        noValidate
+        onSubmit={(e) => void onSubmit(e)}
+        {...checks.formProps(problems)}
+        className="mt-10 flex flex-col gap-7"
+      >
         <Group title={t('books.form.work')} hint={editing ? t('books.form.workEditHint') : undefined}>
           {!editing && (
             <div className="flex flex-col gap-2">
@@ -607,7 +628,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         />
 
         <p>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
             {t('common.save')}
           </button>
         </p>

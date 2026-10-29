@@ -459,6 +459,25 @@
     @apply flex items-start gap-2.5 rounded-panel bg-accent-soft px-4 py-3 text-sm text-ink;
   }
 
+  /* "Moved to the bin. Undo", rising into view (UndoProvider). Reduced motion stills it (the rule above). */
+  .toast {
+    animation: rise-in 180ms ease-out;
+  }
+
+  /* A grey block standing in for text while a page loads (Loading), gently pulsing */
+  .skeleton {
+    @apply rounded-field bg-field;
+    animation: pulse-soft 1.6s ease-in-out infinite;
+  }
+
+  /* A button that is working (aria-busy): its words stay, with a small turning ring before them */
+  .btn[aria-busy='true']::before,
+  .btn-busy[aria-busy='true']::before {
+    content: '';
+    @apply size-4 shrink-0 rounded-full border-2 border-current border-e-transparent;
+    animation: turn 0.8s linear infinite;
+  }
+
   /* The card a page leads with: deep green, light text (the redesign's focal point) */
   .bg-focal {
     background-image: var(--focal);
@@ -472,5 +491,24 @@
   /* Words from the library itself, in Lateef (see the top of this file) */
   .font-book {
     font-family: var(--font-book);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
   }
 }

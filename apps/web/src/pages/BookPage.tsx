@@ -2,7 +2,7 @@ import type { TFunction } from 'i18next'
 import { type FormEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
-import { type ApiResult, deleteJson, getJson, putJson } from '../api'
+import { deleteJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import { formatNumber } from '../authors'
 import {
@@ -16,9 +16,10 @@ import {
   volumesText,
 } from '../books'
 import BenefitCard from '../components/BenefitCard'
-import ConfirmDelete from '../components/ConfirmDelete'
+import DeleteButton from '../components/DeleteButton'
 import Details, { type DetailRow } from '../components/Details'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
 import {
@@ -26,12 +27,12 @@ import {
   type Bookmark,
   bookTitle,
   type Edition,
-  type EditionPage,
   errorMessage,
   nameOf,
   wholeNumber,
   workTitle,
 } from '../library'
+import { useOfferUndo } from '../undo'
 import { useLoad } from '../useLoad'
 
 /**
@@ -43,6 +44,7 @@ export default function BookPage() {
   const { state } = useAuth()
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const offerUndo = useOfferUndo()
   const language = i18n.language === 'ar' ? 'ar' : 'en'
   const [loaded, { reload, replace }] = useLoad<Edition>(`/api/v1/editions/${encodeURIComponent(id)}`)
 
@@ -60,25 +62,12 @@ export default function BookPage() {
       </article>
     )
   }
-  if (loaded.status !== 'ok') return null
+  if (loaded.status !== 'ok') return <Loading />
 
   const book = loaded.data
   const title = bookTitle(book, language)
   const workName = workTitle(book.work, language)
   const otherTitle = book.title ? (workName !== book.title ? workName : null) : otherWorkTitle(book, language)
-
-  /** Deletes the copy; when it was the last copy of its work, the work goes too, so nothing is left behind. */
-  async function deleteBook(): Promise<ApiResult> {
-    const result = await deleteJson(`/api/v1/editions/${encodeURIComponent(book.id)}`)
-    if (!result.ok) return result
-    const others = await getJson<EditionPage>(
-      `/api/v1/editions?page=0&size=1&sort=added&workId=${encodeURIComponent(book.work.id)}`,
-    )
-    if (others.ok && others.data && others.data.total === 0) {
-      await deleteJson(`/api/v1/works/${encodeURIComponent(book.work.id)}`)
-    }
-    return result
-  }
 
   const details: DetailRow[] = [
     { label: t('books.fields.shelf'), value: book.shelf, book: true },
@@ -156,11 +145,18 @@ export default function BookPage() {
               <Icon name="pencil" className="size-4" />
               {t('common.edit')}
             </Link>
-            <ConfirmDelete
+            {/* To the bin at once, with Undo; the work goes too if this was its last copy */}
+            <DeleteButton
               label={t('common.delete')}
-              question={t('books.deleteConfirm', { title })}
-              onDelete={deleteBook}
-              onDeleted={() => navigate('/books', { state: { notice: t('books.deleted', { title }) } })}
+              onDelete={() => deleteJson(`/api/v1/editions/${encodeURIComponent(book.id)}?withWork=ifLast`)}
+              onDeleted={() => {
+                offerUndo({
+                  message: t('books.movedToBin', { title }),
+                  id: book.id,
+                  openAfter: `/books/${encodeURIComponent(book.id)}`,
+                })
+                navigate('/books')
+              }}
             />
           </>
         }
@@ -297,6 +293,7 @@ function Reading({ book, onSaved, onStale }: { book: Edition; onSaved: (book: Ed
             type="button"
             className="btn border-white/40 bg-transparent text-focal-ink hover:border-white/70"
             disabled={saving}
+            aria-busy={saving || undefined}
             onClick={() => void mark(book.status === 'not_started' ? { startedOn: today() } : { finishedOn: today() })}
           >
             {t(book.status === 'not_started' ? 'books.startToday' : 'books.finishToday')}
@@ -425,6 +422,7 @@ function BookmarkPanel({ book, onMoved }: { book: Edition; onMoved: (bookmark: B
           type="submit"
           className="btn border-transparent bg-focal-ink text-focal-deep hover:border-transparent hover:opacity-90"
           disabled={saving}
+          aria-busy={saving || undefined}
         >
           {t(book.bookmark ? 'books.bookmark.move' : 'books.bookmark.put')}
         </button>
@@ -506,6 +504,7 @@ function BookBenefits({ bookId }: { bookId: string }) {
           {t('benefits.add')}
         </Link>
       </div>
+      {loaded.status === 'loading' && <Loading shape="list" rows={2} className="mt-4" />}
       {benefits && benefits.total === 0 && <p className="mt-3 text-muted">{t('benefits.noneFromBook')}</p>}
       {benefits && benefits.total > 0 && (
         <>

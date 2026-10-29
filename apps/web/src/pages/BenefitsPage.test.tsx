@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AuthProvider from '../auth/AuthProvider'
+import UndoProvider from '../components/UndoProvider'
 import i18n from '../i18n'
 import { BENEFIT, EDITION } from '../test/books'
 import { clearCsrfCookie, fakeApi, json } from '../test/fakeApi'
@@ -14,9 +15,11 @@ function renderPage(path = '/benefits') {
   render(
     <MemoryRouter initialEntries={[path]}>
       <AuthProvider>
-        <Routes>
-          <Route path="/benefits" element={<BenefitsPage />} />
-        </Routes>
+        <UndoProvider>
+          <Routes>
+            <Route path="/benefits" element={<BenefitsPage />} />
+          </Routes>
+        </UndoProvider>
       </AuthProvider>
     </MemoryRouter>,
   )
@@ -57,7 +60,7 @@ describe('BenefitsPage', () => {
     )
   })
 
-  it('shows the benefits from one book, and deletes one after you confirm', async () => {
+  it('shows the benefits from one book, and deletes one at once, with Undo', async () => {
     let deleted = false
     fakeApi(
       {
@@ -71,6 +74,10 @@ describe('BenefitsPage', () => {
           deleted = true
           return json(204)
         },
+        '/api/v1/bin/b1/restore': () => {
+          deleted = false
+          return json(200, { id: 'b1', kind: 'benefit' })
+        },
       },
       'r@example.com',
     )
@@ -80,10 +87,13 @@ describe('BenefitsPage', () => {
     expect(screen.getByText(/^From/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Add a benefit' })).toHaveAttribute('href', '/benefits/new?book=e1')
     await user.click(screen.getByRole('button', { name: 'Delete the benefit of 20 October 2026' }))
-    await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
 
-    expect(await screen.findByText('Benefit deleted.')).toBeInTheDocument()
     expect(await screen.findByText('No benefits from this book yet.')).toBeInTheDocument()
+    expect(screen.getByText('Benefit moved to the bin.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Undo' }))
+
+    expect(await screen.findByText('1 benefit')).toBeInTheDocument()
+    expect(screen.getByText('Put back.')).toBeInTheDocument()
   })
 
   it('says when there are none yet', async () => {

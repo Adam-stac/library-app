@@ -3,23 +3,27 @@ import { Link } from 'react-router'
 import { deleteJson } from '../api'
 import { citationText, formatInstant } from '../books'
 import { type Benefit, bookTitle } from '../library'
-import ConfirmDelete from './ConfirmDelete'
+import { useOfferUndo } from '../undo'
+import DeleteButton from './DeleteButton'
 import Icon from './Icon'
 
 type Props = {
   benefit: Benefit
   /** Leave out the book's title (on the book's own page) */
   withoutBook?: boolean
-  /** Edit and delete, with what happens after a deletion */
+  /** Edit and delete, with what happens after a deletion (it goes to the bin, with Undo) */
   onDeleted?: () => void
+  /** Where to go if the deletion is undone; without it, `onDeleted` runs again to show the benefit back */
+  openAfterUndo?: string
 }
 
 /**
  * One benefit: its text in the library's font, then where it came from (the book, volume and page), when it was
  * saved, and whether it came through Ḥāsib. With `onDeleted`, it can also be edited and deleted.
  */
-export default function BenefitCard({ benefit, withoutBook = false, onDeleted }: Props) {
+export default function BenefitCard({ benefit, withoutBook = false, onDeleted, openAfterUndo }: Props) {
   const { t, i18n } = useTranslation()
+  const offerUndo = useOfferUndo()
   const language = i18n.language
   const citation = citationText(benefit.volume, benefit.page, t, language)
 
@@ -40,7 +44,7 @@ export default function BenefitCard({ benefit, withoutBook = false, onDeleted }:
           <span className="rounded-full bg-hover px-2 py-0.5 text-xs font-medium">{t('benefits.fromHasib')}</span>
         )}
         {onDeleted && (
-          <span className="ms-auto flex flex-wrap gap-1 has-[>div]:basis-full">
+          <span className="ms-auto flex flex-wrap gap-1 has-[>p]:basis-full">
             <Link
               to={`/benefits/${encodeURIComponent(benefit.id)}/edit`}
               className="btn btn-ghost"
@@ -49,12 +53,18 @@ export default function BenefitCard({ benefit, withoutBook = false, onDeleted }:
               <Icon name="pencil" className="size-4" />
               {t('common.edit')}
             </Link>
-            <ConfirmDelete
+            <DeleteButton
               label={t('common.delete')}
               hiddenName={t('benefits.fromDate', { date: formatInstant(benefit.createdAt, language) })}
-              question={t('benefits.deleteConfirm')}
               onDelete={() => deleteJson(`/api/v1/benefits/${encodeURIComponent(benefit.id)}`)}
-              onDeleted={onDeleted}
+              onDeleted={() => {
+                offerUndo({
+                  message: t('benefits.movedToBin'),
+                  id: benefit.id,
+                  ...(openAfterUndo ? { openAfter: openAfterUndo } : { onUndone: onDeleted }),
+                })
+                onDeleted()
+              }}
             />
           </span>
         )}

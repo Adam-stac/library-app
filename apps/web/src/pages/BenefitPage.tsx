@@ -31,7 +31,8 @@ export default function BenefitPage() {
         <div className="mt-6 border-y border-line">
           <BenefitCard
             benefit={loaded.data}
-            onDeleted={() => navigate('/benefits', { state: { notice: t('benefits.deleted') } })}
+            onDeleted={() => navigate('/benefits')}
+            openAfterUndo={`/benefits/${encodeURIComponent(loaded.data.id)}`}
           />
         </div>
       )}

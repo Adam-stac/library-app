@@ -5,6 +5,7 @@ import { formatNumber } from '../authors'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
 import IndexList from '../components/IndexList'
+import Loading from '../components/Loading'
 import Notice from '../components/Notice'
 import PageHeader from '../components/PageHeader'
 import Pagination from '../components/Pagination'
@@ -58,6 +59,7 @@ export default function PlacesPage() {
         ))}
       </nav>
 
+      {loaded.status === 'loading' && <Loading shape="list" className="mt-8" />}
       {loaded.status === 'failed' && (
         <p role="alert" className="mt-8 text-danger">
           {t('common.loadFailed')}

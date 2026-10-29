@@ -95,7 +95,7 @@ export default function LibrarySettingsPage() {
             )}
           </div>
           <p>
-            <button type="submit" className="btn btn-primary" disabled={saving}>
+            <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
               {t('common.save')}
             </button>
           </p>

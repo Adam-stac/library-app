@@ -38,6 +38,7 @@ const AuthorsPage = page(() => import('./pages/AuthorsPage'))
 const BenefitFormPage = page(() => import('./pages/BenefitFormPage'))
 const BenefitPage = page(() => import('./pages/BenefitPage'))
 const BenefitsPage = page(() => import('./pages/BenefitsPage'))
+const BinPage = page(() => import('./pages/BinPage'))
 const BookFormPage = page(() => import('./pages/BookFormPage'))
 const BookPage = page(() => import('./pages/BookPage'))
 const BooksPage = page(() => import('./pages/BooksPage'))
@@ -79,6 +80,7 @@ export default function App() {
             <Route path="/passkeys" element={<PasskeysPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/library-settings" element={<LibrarySettingsPage />} />
+            <Route path="/bin" element={<BinPage />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />

@@ -8,6 +8,7 @@ import ConfirmDelete from '../components/ConfirmDelete'
 import Details from '../components/Details'
 import Icon from '../components/Icon'
 import IndexList from '../components/IndexList'
+import Loading from '../components/Loading'
 import { type Named, nameOf, type WorkPage, workTitle } from '../library'
 import { useLoad } from '../useLoad'
 
@@ -54,6 +55,7 @@ export default function AuthorPage() {
         {t('authors.all')}
       </Link>
 
+      {!shown && <Loading className="mt-6" />}
       {shown?.error && (
         <p role="alert" className="mt-6 text-danger">
           {t(`authors.${shown.error}`)}

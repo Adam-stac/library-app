@@ -7,6 +7,7 @@ import { bookmarkText, formatDate, formatPrice } from '../books'
 import BenefitCard from '../components/BenefitCard'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import { indexLetter, sortKey } from '../indexLetter'
 import { authorsOf, bookTitle, type HomeSummary, nameOf, type PlacedBookmark, type ShelfBook } from '../library'
 import { useLoad } from '../useLoad'
@@ -113,7 +114,7 @@ function Library() {
   const [loaded] = useLoad<HomeSummary>('/api/v1/home')
   const n = (value: number) => formatNumber(value, language)
 
-  if (loaded.status === 'loading') return null
+  if (loaded.status === 'loading') return <Loading />
   if (loaded.status !== 'ok') {
     return (
       <section>

@@ -36,7 +36,12 @@
     "pages": "Pages",
     "previous": "Previous page",
     "next": "Next page",
-    "pageOf": "Page {{page}} of {{pages}}"
+    "pageOf": "Page {{page}} of {{pages}}",
+    "loading": "Loading…",
+    "unsavedTitle": "Leave without saving?",
+    "unsavedText": "Your changes on this page haven't been saved.",
+    "stay": "Keep editing",
+    "leave": "Leave without saving"
   },
   "home": {
     "title": "Welcome",
@@ -103,6 +108,8 @@
     "passkeysAbout": "Sign in with your fingerprint, face or device PIN.",
     "library": "Library settings",
     "libraryAbout": "The currency new prices start in.",
+    "bin": "Bin",
+    "binAbout": "Deleted books and benefits, kept for 30 days.",
     "appearance": "Appearance",
     "appearanceAbout": "Automatic follows your device's light or dark setting. Kept on this device only.",
     "theme": {
@@ -356,8 +363,7 @@
     "volumesCount_one": "{{number}} volume",
     "volumesCount_other": "{{number}} volumes",
     "added": "Book added.",
-    "deleted": "{{title}} was deleted.",
-    "deleteConfirm": "Delete {{title}}? Its bookmark goes too. Benefits from it are kept. This can't be undone.",
+    "movedToBin": "{{title}} was moved to the bin.",
     "notFound": "This book isn't in your library. It may have been deleted.",
     "status": {
       "not_started": "Not started",
@@ -440,8 +446,7 @@
     "count_one": "{{number}} benefit",
     "count_other": "{{number}} benefits",
     "added": "Benefit saved.",
-    "deleted": "Benefit deleted.",
-    "deleteConfirm": "Delete this benefit? This can't be undone.",
+    "movedToBin": "Benefit moved to the bin.",
     "notFound": "This benefit isn't in your library. It may have been deleted.",
     "fromHasib": "From Ḥāsib",
     "volumeOnly": "Volume {{volume}}",
@@ -702,6 +707,34 @@
     "work_required": "Choose a work you have, or fill in a new one.",
     "work_or_work_id": "Choose a work you have, or fill in a new one, not both.",
     "edition_required": "Choose the book before giving a volume or page.",
-    "unknown_edition": "That book isn't in your library any more. Choose another."
+    "unknown_edition": "That book isn't in your library any more. Choose another.",
+    "work_gone": "Its work was deleted for good, so this book can't be put back. You can delete it from the bin."
+  },
+  "bin": {
+    "title": "Bin",
+    "intro": "Deleted books and benefits stay here for {{days}} days, so you can put them back. After that they are deleted for good.",
+    "none": "The bin is empty.",
+    "book": "Book",
+    "benefit": "Benefit",
+    "untitled": "Untitled book",
+    "deletedOn": "Deleted {{date}}",
+    "goneOn": "Deleted for good on {{date}}",
+    "restore": "Put back",
+    "restoreNamed": "Put back {{name}}",
+    "deleteForever": "Delete for good",
+    "deleteForeverNamed": "Delete {{name}} for good",
+    "deleteForeverConfirm": "Delete this for good? This can't be undone.",
+    "empty": "Empty the bin",
+    "emptyConfirm": "Delete everything in the bin for good? This can't be undone.",
+    "emptied": "The bin was emptied.",
+    "restored": "{{title}} was put back.",
+    "restoredBenefit": "The benefit was put back.",
+    "openIt": "Open it",
+    "undo": "Undo",
+    "putBack": "Put back.",
+    "dismiss": "Dismiss",
+    "open": "Open the bin",
+    "count_one": "{{number}} item",
+    "count_other": "{{number}} items"
   }
 }

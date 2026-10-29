@@ -99,11 +99,25 @@ test.describe('Books', () => {
     await page.getByRole('link', { name: /Sahih al-Bukhari/ }).click()
     await expect(page.getByText(/Copies of/)).toBeVisible()
 
-    // Delete it
+    // Delete it: it goes to the bin at once, with its work (its last copy), and Undo puts it all back
     await page.getByRole('link', { name: /Sahih al-Bukhari/ }).click()
-    await page.getByRole('button', { name: 'Delete' }).click()
-    await page.getByRole('button', { name: 'Yes, delete' }).click()
-    await expect(page.getByRole('status')).toHaveText('Sahih al-Bukhari was deleted.')
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await expect(page.getByText('Sahih al-Bukhari was moved to the bin.')).toBeVisible()
     await expect(page.getByText("You haven't added any books yet.")).toBeVisible()
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(page.getByRole('heading', { name: 'Sahih al-Bukhari', level: 1 })).toBeVisible()
+    await expect(page.getByRole('link', { name: /البخاري/ })).toBeVisible()
+
+    // Delete it again, then for good, from the bin in Settings
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+    await expect(page.getByText("You haven't added any books yet.")).toBeVisible()
+    await page.getByRole('navigation', { name: 'Library' }).getByRole('link', { name: 'Settings' }).click()
+    await page.getByRole('link', { name: /^Bin/ }).click()
+    await expect(page.getByRole('heading', { name: 'Bin', level: 1 })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Sahih al-Bukhari' })).toBeVisible()
+    await expectAccessible(page, 'the bin')
+    await page.getByRole('button', { name: 'Delete for good Sahih al-Bukhari' }).click()
+    await page.getByRole('button', { name: 'Yes, delete' }).click()
+    await expect(page.getByText('The bin is empty.')).toBeVisible()
   })
 })

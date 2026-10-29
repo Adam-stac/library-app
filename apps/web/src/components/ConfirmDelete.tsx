@@ -56,7 +56,13 @@ export default function ConfirmDelete({ label, hiddenName, question, onDelete, o
     <div className="mt-2 w-full basis-full rounded-xl border border-danger-line bg-danger-soft p-5">
       <p>{question}</p>
       <div className="mt-4 flex flex-wrap gap-2">
-        <button type="button" className="btn btn-danger" disabled={deleting} onClick={() => void confirm()}>
+        <button
+          type="button"
+          className="btn btn-danger"
+          disabled={deleting}
+          aria-busy={deleting || undefined}
+          onClick={() => void confirm()}
+        >
           {t('common.deleteYes')}
         </button>
         <button type="button" className="btn" onClick={() => setAsking(false)}>

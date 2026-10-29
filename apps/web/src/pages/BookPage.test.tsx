@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AuthProvider from '../auth/AuthProvider'
+import UndoProvider from '../components/UndoProvider'
 import { today } from '../books'
 import i18n from '../i18n'
 import { BENEFIT, EDITION } from '../test/books'
@@ -25,10 +26,12 @@ function renderPage() {
   render(
     <MemoryRouter initialEntries={['/books/e1']}>
       <AuthProvider>
-        <Routes>
-          <Route path="/books" element={<BooksList />} />
-          <Route path="/books/:id" element={<BookPage />} />
-        </Routes>
+        <UndoProvider>
+          <Routes>
+            <Route path="/books" element={<BooksList />} />
+            <Route path="/books/:id" element={<BookPage />} />
+          </Routes>
+        </UndoProvider>
       </AuthProvider>
     </MemoryRouter>,
   )
@@ -143,42 +146,43 @@ describe('BookPage', () => {
     expect(JSON.parse(put.body as string)).toEqual({ volume: 3, page: 120 })
   })
 
-  it('deletes the last copy of a work, and the work with it', async () => {
+  it('moves the book to the bin at once, its work too if it was the last copy, and Undo puts it back', async () => {
     const api = fakeApi(
       {
-        [BOOK]: (init) => (init.method === 'DELETE' ? json(204) : json(200, EDITION)),
-        '/api/v1/editions?page=0&size=1&sort=added&workId=w1': () =>
-          json(200, { items: [], page: 0, size: 1, total: 0 }),
-        '/api/v1/works/w1': () => json(204),
+        [BOOK]: () => json(200, EDITION),
+        [`${BOOK}?withWork=ifLast`]: () => json(204),
+        '/api/v1/bin/e1/restore': () => json(200, { id: 'e1', kind: 'book' }),
       },
       'r@example.com',
     )
     const user = renderPage()
 
     await user.click(await screen.findByRole('button', { name: 'Delete' }))
-    expect(screen.getByText(/Benefits from it are kept/)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
-
-    expect(await screen.findByText('Sahih al-Bukhari was deleted.')).toBeInTheDocument()
-    expect(callTo(api, '/api/v1/works/w1').method).toBe('DELETE')
-  })
-
-  it('keeps the work when other copies of it remain', async () => {
-    const api = fakeApi(
-      {
-        [BOOK]: (init) => (init.method === 'DELETE' ? json(204) : json(200, EDITION)),
-        '/api/v1/editions?page=0&size=1&sort=added&workId=w1': () =>
-          json(200, { items: [{ ...EDITION, id: 'e2' }], page: 0, size: 1, total: 1 }),
-      },
-      'r@example.com',
-    )
-    const user = renderPage()
-
-    await user.click(await screen.findByRole('button', { name: 'Delete' }))
-    await user.click(screen.getByRole('button', { name: 'Yes, delete' }))
 
     expect(await screen.findByRole('heading', { name: 'Books list' })).toBeInTheDocument()
-    expect(api.mock.calls.some(([path]) => path === '/api/v1/works/w1')).toBe(false)
+    expect(callTo(api, `${BOOK}?withWork=ifLast`).method).toBe('DELETE')
+    expect(screen.getByText('Sahih al-Bukhari was moved to the bin.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Undo' }))
+
+    expect(await screen.findByRole('heading', { name: 'Sahih al-Bukhari', level: 1 })).toBeInTheDocument()
+    expect(callTo(api, '/api/v1/bin/e1/restore').method).toBe('POST')
+    expect(screen.getByText('Put back.')).toBeInTheDocument()
+  })
+
+  it('says why, if the book could not be deleted', async () => {
+    fakeApi(
+      {
+        [BOOK]: () => json(200, EDITION),
+        [`${BOOK}?withWork=ifLast`]: () => json(503, { code: 'busy' }),
+      },
+      'r@example.com',
+    )
+    const user = renderPage()
+
+    await user.click(await screen.findByRole('button', { name: 'Delete' }))
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sahih al-Bukhari', level: 1 })).toBeInTheDocument()
   })
 
   it('shows the benefits from this book, and the way to add one', async () => {

@@ -80,6 +80,13 @@ const ICONS = {
   // Drawn pointing right: "forward" in English, mirrored for right-to-left pages
   forward: <path d="m9 18 6-6-6-6" />,
   check: <path d="M20 6 9 17l-5-5" />,
+  // Drawn turning back to the left, mirrored for right-to-left pages
+  undo: (
+    <>
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" />
+    </>
+  ),
   user: (
     <>
       <circle cx="12" cy="8" r="5" />
@@ -219,7 +226,7 @@ const ICONS = {
 export type IconName = keyof typeof ICONS
 
 /** Icons that point somewhere, and so turn round on right-to-left pages */
-const DIRECTIONAL: IconName[] = ['back', 'forward']
+const DIRECTIONAL: IconName[] = ['back', 'forward', 'undo']
 
 export default function Icon({ name, className = 'size-4.5' }: { name: IconName; className?: string }) {
   return (

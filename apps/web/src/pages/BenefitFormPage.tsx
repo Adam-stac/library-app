@@ -4,9 +4,12 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router'
 import { postJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import FormField from '../components/FormField'
+import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import SearchPicker, { Picked } from '../components/SearchPicker'
 import TextAreaField from '../components/TextAreaField'
+import UnsavedChanges from '../components/UnsavedChanges'
+import { useFormChecks } from '../formChecks'
 import {
   authorsOf,
   type Benefit,
@@ -62,11 +65,12 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const checks = useFormChecks(setErrors)
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
   if (mode === 'edit' && !editing) {
-    if (benefit.status === 'loading') return null
+    if (benefit.status === 'loading') return <Loading />
     return (
       <section className="max-w-2xl">
         <PageHeader back={{ to: '/benefits', label: t('benefits.all') }} title={t('benefits.editTitle')} />
@@ -90,9 +94,8 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
     reload()
   }
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    setFormError(null)
+  /** What is wrong with the form as it stands, by field: checked on saving, and as each field is left */
+  function problems(): Record<string, string> {
     const found: Record<string, string> = {}
     if (draft.text.trim() === '') found.text = 'required'
     else if (draft.text.length > MAX_TEXT) found.text = 'too_long'
@@ -103,8 +106,17 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
     if (volume === null && page !== null && page !== 'invalid' && volumes !== null && volumes > 1) {
       found.volume = 'volume_required'
     }
+    return found
+  }
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault()
+    setFormError(null)
+    const found = problems()
     setErrors(found)
     if (Object.keys(found).length > 0) return
+    const volume = needsVolume ? wholeNumber(draft.volume, volumes ?? 500) : null
+    const page = draft.edition ? wholeNumber(draft.page, 99999) : null
 
     const body = {
       text: draft.text,
@@ -151,7 +163,13 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
         )
       )}
 
-      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-10 flex flex-col gap-7">
+      <UnsavedChanges when={checks.dirty && !saving} />
+      <form
+        noValidate
+        onSubmit={(e) => void onSubmit(e)}
+        {...checks.formProps(problems)}
+        className="mt-10 flex flex-col gap-7"
+      >
         <TextAreaField
           id="text"
           label={t('benefits.form.text')}
@@ -224,7 +242,7 @@ export default function BenefitFormPage({ mode }: { mode: 'add' | 'edit' }) {
         </fieldset>
 
         <p>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
             {t('common.save')}
           </button>
         </p>

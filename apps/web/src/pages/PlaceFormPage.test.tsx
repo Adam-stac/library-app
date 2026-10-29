@@ -38,6 +38,7 @@ function renderPage(path: string) {
           <Route path="/places/new" element={<PlaceFormPage mode="add" />} />
           <Route path="/places/:id/edit" element={<PlaceFormPage mode="edit" />} />
           <Route path="/places/:id" element={<PlaceShown />} />
+          <Route path="/places" element={<h1>Places list</h1>} />
         </Routes>
       </AuthProvider>
     </MemoryRouter>,
@@ -144,5 +145,41 @@ describe('PlaceFormPage', () => {
     renderPage('/places/p2/edit')
     expect(await screen.findByRole('alert')).toHaveTextContent("This is on the shared list, so it can't be changed.")
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
+  })
+
+  it('checks a field as soon as you leave it, and clears the problem once it is put right', async () => {
+    fakeApi({}, 'r@example.com')
+    const user = renderPage('/places/new')
+
+    // Passing through an empty field says nothing
+    await user.click(await screen.findByLabelText('Name in Arabic'))
+    await user.tab()
+    expect(screen.queryByText(/Fill in the name/)).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Latitude'), '100')
+    await user.tab()
+    expect(screen.getByLabelText('Latitude')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByText(/latitude is from -90 to 90/)).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText('Latitude'))
+    await user.type(screen.getByLabelText('Latitude'), '21.4225')
+    await user.tab()
+    expect(screen.getByLabelText('Latitude')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('asks before leaving with changes not saved, and stays by default', async () => {
+    fakeApi({}, 'r@example.com')
+    const user = renderPage('/places/new')
+
+    await user.type(await screen.findByLabelText('Name in English'), 'Kufa')
+    await user.click(screen.getByRole('link', { name: 'All places' }))
+
+    expect(screen.getByRole('heading', { name: 'Leave without saving?' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Keep editing' }))
+    expect(screen.getByLabelText('Name in English')).toHaveValue('Kufa')
+
+    await user.click(screen.getByRole('link', { name: 'All places' }))
+    await user.click(screen.getByRole('button', { name: 'Leave without saving' }))
+    expect(await screen.findByRole('heading', { name: 'Places list' })).toBeInTheDocument()
   })
 })

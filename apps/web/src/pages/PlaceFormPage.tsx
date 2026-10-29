@@ -4,8 +4,11 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 import { postJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import FormField from '../components/FormField'
+import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import TextAreaField from '../components/TextAreaField'
+import UnsavedChanges from '../components/UnsavedChanges'
+import { useFormChecks } from '../formChecks'
 import { decimal, errorMessage, nameOf, orNull, type Place } from '../library'
 import { useLoad } from '../useLoad'
 
@@ -64,6 +67,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const checks = useFormChecks(setErrors)
 
   function loadLatest() {
     setErrors({})
@@ -79,7 +83,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
     : { to: '/places', label: t('places.all') }
 
   if (mode === 'edit' && loaded.status !== 'ok') {
-    if (loaded.status === 'loading') return null
+    if (loaded.status === 'loading') return <Loading />
     return (
       <section className="max-w-2xl">
         <PageHeader back={{ to: '/places', label: t('places.all') }} title={t('places.title')} />
@@ -103,13 +107,15 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const set = (field: keyof Draft) => (value: string) => setDraft({ ...draft, [field]: value })
   const message = (code: string | undefined) => (code ? errorMessage(t, language, code) : undefined)
 
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault()
-    setFormError(null)
-    const otherNames = draft.otherNames
+  const otherNamesOf = (text: string) =>
+    text
       .split('\n')
       .map((name) => name.trim())
       .filter((name) => name !== '')
+
+  /** What is wrong with the form as it stands, by field: checked on saving, and as each field is left */
+  function problems(): Record<string, string> {
+    const otherNames = otherNamesOf(draft.otherNames)
     const latitude = decimal(draft.latitude)
     const longitude = decimal(draft.longitude)
     const found: Record<string, string> = {}
@@ -122,8 +128,18 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
     if (!found.latitude && !found.longitude && (latitude === null) !== (longitude === null)) {
       found[latitude === null ? 'latitude' : 'longitude'] = 'coordinates_incomplete'
     }
+    return found
+  }
+
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault()
+    setFormError(null)
+    const found = problems()
     setErrors(found)
     if (Object.keys(found).length > 0) return
+    const otherNames = otherNamesOf(draft.otherNames)
+    const latitude = decimal(draft.latitude)
+    const longitude = decimal(draft.longitude)
 
     const body = {
       nameAr: orNull(draft.nameAr),
@@ -172,7 +188,13 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
         )
       )}
 
-      <form noValidate onSubmit={(e) => void onSubmit(e)} className="mt-10 flex flex-col gap-7">
+      <UnsavedChanges when={checks.dirty && !saving} />
+      <form
+        noValidate
+        onSubmit={(e) => void onSubmit(e)}
+        {...checks.formProps(problems)}
+        className="mt-10 flex flex-col gap-7"
+      >
         <FormField
           id="nameAr"
           label={t('places.form.nameAr')}
@@ -250,7 +272,7 @@ export default function PlaceFormPage({ mode }: { mode: 'add' | 'edit' }) {
           </div>
         </fieldset>
         <p>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
             {t('common.save')}
           </button>
         </p>

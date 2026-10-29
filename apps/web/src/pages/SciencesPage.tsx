@@ -7,6 +7,7 @@ import { formatNumber } from '../authors'
 import ConfirmDelete from '../components/ConfirmDelete'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import { errorMessage, nameOf, orNull, otherNameOf, type Science, type ScienceList } from '../library'
 import { useLoad } from '../useLoad'
@@ -47,6 +48,7 @@ export default function SciencesPage() {
           {notice}
         </p>
       )}
+      {loaded.status === 'loading' && <Loading shape="list" className="mt-8" />}
       {loaded.status === 'failed' && (
         <p role="alert" className="mt-8 text-danger">
           {t('common.loadFailed')}
@@ -211,7 +213,7 @@ function AddScience({ onAdded }: { onAdded: (name: string) => void }) {
         </p>
       )}
       <p>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
           <Icon name="plus" className="size-4" />
           {t('sciences.addButton')}
         </button>
@@ -266,7 +268,7 @@ function RenameScience({
         )
       )}
       <p className="flex flex-wrap gap-2">
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button type="submit" className="btn btn-primary" disabled={saving} aria-busy={saving || undefined}>
           {t('common.save')}
         </button>
         <button type="button" className="btn" onClick={onCancel}>
