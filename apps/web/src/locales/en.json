@@ -85,14 +85,18 @@
   "landing": {
     "title": "The index of your library",
     "lede": "Catalogue the books you own, with their authors and editions. Keep your place in each one, and save the benefits you find, in Arabic and English.",
-    "specimen": "An example: authors, as Khizāna lists them",
+    "specimen": "An example of how Khizāna shows your library: where you are in a book, and its authors",
     "whatTitle": "What you can do",
     "catalogue": "Catalogue",
     "catalogueAbout": "Each copy you own, with its work, authors, edition, shelf and price, and the sciences your library covers.",
     "read": "Read",
     "readAbout": "A bookmark in every book, the dates you started and finished, and the books bought but not yet opened.",
     "benefits": "Keep benefits",
-    "benefitsAbout": "Save what you learn with the book, volume and page it came from, and find it again: search ignores vowel marks."
+    "benefitsAbout": "Save what you learn with the book, volume and page it came from, and find it again: search ignores vowel marks.",
+    "kicker": "For the books you own · Arabic and English",
+    "private": "Your library is private: other accounts can never see it.",
+    "startTitle": "Start with one book",
+    "startText": "Add the book beside you now, with its author. The rest of your shelves can follow, a book at a time."
   },
   "settings": {
     "title": "Settings",

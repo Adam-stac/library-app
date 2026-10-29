@@ -236,6 +236,7 @@
   --text-title-lg: 2.75rem; /* a page's title, on a wider screen */
   --text-display: 2.25rem; /* a book's or an author's name heading its page, and the landing page's headline */
   --text-display-lg: 2.75rem; /* the same, on a wider screen */
+  --text-landing: 4rem; /* the landing page's headline, on a wider screen */
   --text-hero: 2.875rem; /* the greeting on the home page */
   --text-stat: 3.5rem; /* a figure in a row of figures, such as books finished this year */
   --text-figure: 7rem; /* the one figure a card leads with, such as the page you are on */

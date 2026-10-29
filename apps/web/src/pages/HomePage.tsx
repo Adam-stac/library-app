@@ -35,74 +35,149 @@ function year(hijri: number) {
   return { hijri, ce: null, approximate: false }
 }
 
+/** The example book on the landing page: a set of nine volumes, with the bookmark in the third */
+const EXAMPLE_BOOK = { titleAr: 'صحيح البخاري', titleEn: 'Ṣaḥīḥ al-Bukhārī', volume: 3, volumes: 9, page: 212 }
+
 /**
- * The landing page, for anyone not signed in: what the app is, an example of how it lists a library, what you can
- * do with it, and the way in.
+ * The landing page, for anyone not signed in. Arabic first, and type first: the headline large, then the app shown
+ * rather than described (where you are in a book, and the index of authors, as the app draws them), what you can
+ * do with it, and the way in. The examples are pictures of the app, so nothing in them is a link.
  */
 function Welcome() {
   const { t, i18n } = useTranslation()
   const language = i18n.language === 'ar' ? 'ar' : 'en'
+  const n = (value: number) => formatNumber(value, language)
   // In catalogue order for the page's language, as a real list would be
   const specimen = [...SPECIMEN].sort((a, b) =>
     sortKey(displayName(a, language)).localeCompare(sortKey(displayName(b, language)), language),
   )
+  const book = language === 'ar' ? EXAMPLE_BOOK.titleAr : EXAMPLE_BOOK.titleEn
+  const otherTitle = language === 'ar' ? EXAMPLE_BOOK.titleEn : EXAMPLE_BOOK.titleAr
 
   return (
     <div className="w-full max-w-5xl">
-      <section className="grid items-center gap-12 pt-2 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+      <section className="grid items-center gap-14 pt-2 sm:pt-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
         <div>
-          <h1 className="text-display leading-display font-semibold text-balance sm:text-5xl">{t('landing.title')}</h1>
-          <p className="lede mt-4 text-lg">{t('landing.lede')}</p>
+          <p className="pill bg-accent-soft text-accent">
+            <span aria-hidden="true" className="size-2 rounded-full bg-accent" />
+            {t('landing.kicker')}
+          </p>
+          <h1 className="mt-6 font-display text-display leading-display font-semibold text-balance sm:text-landing">
+            {t('landing.title')}
+          </h1>
+          <p className="lede mt-5 max-w-xl text-lg">{t('landing.lede')}</p>
           <p className="mt-9 flex flex-wrap gap-3">
-            <Link to="/register" className="btn btn-primary px-5">
+            <Link to="/register" className="btn btn-primary min-h-12 px-6">
               {t('home.createAccount')}
             </Link>
-            <Link to="/sign-in" className="btn px-5">
+            <Link to="/sign-in" className="btn min-h-12 px-6">
               {t('home.signIn')}
             </Link>
           </p>
+          <p className="mt-6 flex items-center gap-2 text-sm text-muted">
+            <Icon name="shield" className="size-4" />
+            {t('landing.private')}
+          </p>
         </div>
 
-        <figure aria-labelledby="specimen" className="card px-6 pt-5 pb-3">
-          <figcaption id="specimen" className="mb-3 text-sm text-muted">
+        {/* The app, shown: where you are in a book, and the index of authors, as the app draws them */}
+        <figure aria-labelledby="specimen" className="relative">
+          <figcaption id="specimen" className="sr-only">
             {t('landing.specimen')}
           </figcaption>
-          <ul className="border-t border-line">
-            {specimen.map((author) => (
-              <li
-                key={author.id}
-                className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-line py-3 last:border-b-0"
-              >
-                <span aria-hidden="true" className="font-book text-letter leading-none text-accent">
-                  {indexLetter(displayName(author, language))}
-                </span>
-                <span className="min-w-0">
-                  <span className="font-book block text-xl leading-snug font-medium">
-                    <bdi>{displayName(author, language)}</bdi>
+          <div className="bg-focal rounded-card p-7 pb-16 shadow-focal sm:me-12 sm:pb-20">
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
+              <Icon name="bookmark" className="size-4" />
+              {t('home.where')}
+            </p>
+            <p className="font-book mt-5 text-2xl leading-snug">
+              <bdi>{book}</bdi>
+              <span className="block text-base text-focal-muted">
+                <bdi>{otherTitle}</bdi>
+              </span>
+            </p>
+            <div className="mt-4 flex flex-wrap items-end gap-x-5 gap-y-1">
+              <span aria-hidden="true" className="font-display text-figure leading-figure font-semibold">
+                {n(EXAMPLE_BOOK.page)}
+              </span>
+              <span className="pb-3 text-lg text-focal-muted">
+                {t('books.bookmarkAtVolume', { volume: n(EXAMPLE_BOOK.volume), page: n(EXAMPLE_BOOK.page) })}
+              </span>
+            </div>
+            <div aria-hidden="true" className="mt-5">
+              <Ruler at={EXAMPLE_BOOK.volume} of={EXAMPLE_BOOK.volumes} />
+            </div>
+          </div>
+
+          <div className="card relative -mt-8 px-6 pt-5 pb-3 sm:ms-12 sm:-mt-12">
+            <p className="mb-3 flex items-center gap-2 text-sm font-medium text-muted">
+              <Icon name="feather" className="size-4" />
+              {t('nav.authors')}
+            </p>
+            <ul className="border-t border-line">
+              {specimen.map((author) => (
+                <li
+                  key={author.id}
+                  className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 border-b border-line py-3 last:border-b-0"
+                >
+                  <span aria-hidden="true" className="font-book text-letter leading-none text-accent">
+                    {indexLetter(displayName(author, language))}
                   </span>
-                  <span className="font-book block text-sm text-muted">
-                    <bdi>{otherName(author, language)}</bdi>
+                  <span className="min-w-0">
+                    <span className="font-book block text-xl leading-snug font-medium">
+                      <bdi>{displayName(author, language)}</bdi>
+                    </span>
+                    <span className="font-book block text-sm text-muted">
+                      <bdi>{otherName(author, language)}</bdi>
+                    </span>
                   </span>
-                </span>
-                <span className="text-sm text-muted">{indexYear(author, t, language)}</span>
-              </li>
-            ))}
-          </ul>
+                  <span className="text-sm text-muted">{indexYear(author, t, language)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </figure>
       </section>
 
-      <section aria-labelledby="what-you-can-do" className="mt-20 max-w-3xl sm:mt-24">
-        <h2 id="what-you-can-do" className="section-title">
+      <section aria-labelledby="what-you-can-do" className="mt-24 sm:mt-32">
+        <h2 id="what-you-can-do" className="font-display text-title leading-display font-semibold sm:text-title-lg">
           {t('landing.whatTitle')}
         </h2>
-        <dl className="mt-4 border-t border-line">
-          {(['catalogue', 'read', 'benefits'] as const).map((key) => (
-            <div key={key} className="grid gap-1 border-b border-line py-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-6">
-              <dt className="font-medium">{t(`landing.${key}`)}</dt>
-              <dd className="text-muted">{t(`landing.${key}About`)}</dd>
-            </div>
+        <ul className="mt-8 grid gap-4 md:grid-cols-3">
+          {(
+            [
+              ['catalogue', 'bookOpen'],
+              ['read', 'bookmark'],
+              ['benefits', 'quote'],
+            ] as const
+          ).map(([key, icon]) => (
+            <li key={key} className="card p-7">
+              <span className="grid size-11 place-items-center rounded-full bg-accent-soft text-accent">
+                <Icon name={icon} className="size-5" />
+              </span>
+              <h3 className="mt-5 text-lg font-semibold">{t(`landing.${key}`)}</h3>
+              <p className="mt-2 text-muted">{t(`landing.${key}About`)}</p>
+            </li>
           ))}
-        </dl>
+        </ul>
+      </section>
+
+      <section
+        aria-labelledby="start"
+        className="bg-focal mt-24 flex flex-col items-start gap-6 rounded-card p-8 shadow-focal sm:mt-32 sm:p-12 lg:flex-row lg:items-center lg:justify-between"
+      >
+        <div className="max-w-xl">
+          <h2 id="start" className="font-display text-title leading-display font-semibold sm:text-title-lg">
+            {t('landing.startTitle')}
+          </h2>
+          <p className="mt-3 text-lg text-focal-muted">{t('landing.startText')}</p>
+        </div>
+        <Link
+          to="/register"
+          className="btn min-h-12 shrink-0 border-transparent bg-focal-ink px-6 text-focal-deep hover:border-transparent hover:opacity-90"
+        >
+          {t('home.createAccount')}
+        </Link>
       </section>
     </div>
   )
