@@ -20,8 +20,9 @@ test.describe('Authors', () => {
     await page.goto('/')
     await page.evaluate(() => localStorage.setItem('language', 'en'))
     expect(
-      (await request.post('/api/v1/auth/register', { data: { email: address, password: PASSWORD, language: 'en' } }))
-        .status(),
+      (
+        await request.post('/api/v1/auth/register', { data: { email: address, password: PASSWORD, language: 'en' } })
+      ).status(),
     ).toBe(202)
     await page.goto(await verificationLinkFor(request, address))
     await expect(page.getByRole('heading', { name: 'Your email is confirmed' })).toBeVisible()
@@ -74,6 +75,17 @@ test.describe('Authors', () => {
     await expect(page.getByRole('heading', { name: 'المؤلفون', level: 1 })).toBeVisible()
     await expect(page.getByText('مؤلف واحد')).toBeVisible()
     await expectAccessible(page)
+
+    // On the timeline: at the year they died, with the right to left ruler and its card
+    await page.getByRole('link', { name: 'الخط الزمني', exact: true }).click()
+    const ruler = page.getByRole('slider', { name: 'الخط الزمني للمؤلفين' })
+    await expect(ruler).toHaveAttribute('aria-valuenow', '256')
+    await expect(page.getByRole('article').getByRole('heading', { name: 'البخاري' })).toBeVisible()
+    await ruler.focus()
+    await page.keyboard.press('Enter')
+    await expect(page.getByText(/بعد الهجرة بـ٢٥٦ سنة/)).toBeVisible()
+    await expectAccessible(page, 'the timeline')
+    await page.getByRole('link', { name: 'القائمة', exact: true }).click()
 
     // Delete it
     await page.getByRole('link', { name: /البخاري/ }).click()

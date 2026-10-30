@@ -34,6 +34,7 @@ const AccountDeletedPage = page(() => import('./pages/AccountDeletedPage'))
 const AccountPage = page(() => import('./pages/AccountPage'))
 const AuthorFormPage = page(() => import('./pages/AuthorFormPage'))
 const AuthorPage = page(() => import('./pages/AuthorPage'))
+const AuthorTimelinePage = page(() => import('./pages/AuthorTimelinePage'))
 const AuthorsPage = page(() => import('./pages/AuthorsPage'))
 const BenefitFormPage = page(() => import('./pages/BenefitFormPage'))
 const BenefitPage = page(() => import('./pages/BenefitPage'))
@@ -87,6 +88,7 @@ export default function App() {
             <Route path="/account-deleted" element={<AccountDeletedPage />} />
             <Route path="/authors" element={<AuthorsPage />} />
             <Route path="/authors/new" element={<AuthorFormPage mode="add" />} />
+            <Route path="/authors/timeline" element={<AuthorTimelinePage />} />
             <Route path="/authors/:id" element={<AuthorPage />} />
             <Route path="/authors/:id/edit" element={<AuthorFormPage mode="edit" />} />
             <Route path="/books" element={<BooksPage />} />

@@ -458,7 +458,7 @@
     "fromDate": "the benefit of {{date}}",
     "form": {
       "text": "The benefit",
-      "textHint": "Plain text, up to 5,000 characters. Line breaks are kept.",
+      "textHint": "Plain text, up to 5,000 characters. Line breaks are kept. You can also speak instead of typing: use the mic on your keyboard.",
       "source": "Where it is from",
       "sourceHint": "Optional: the book, and the volume and page.",
       "book": "Book",
@@ -525,7 +525,7 @@
       "bce": "BCE",
       "shownAs": "Shown as: {{text}}",
       "biography": "Biography",
-      "biographyHint": "Plain text, up to 10,000 characters.",
+      "biographyHint": "Plain text, up to 10,000 characters. You can also speak instead of typing: use the mic on your keyboard.",
       "birth": {
         "legend": "Birth",
         "hijri": "Hijri year of birth",
@@ -546,7 +546,10 @@
     },
     "birthPlace": "Place of birth",
     "deathPlace": "Place of death",
-    "books": "Books by this author"
+    "books": "Books by this author",
+    "views": "Ways to see your authors",
+    "list": "List",
+    "timeline": "Timeline"
   },
   "places": {
     "title": "Places",
@@ -740,5 +743,52 @@
     "open": "Open the bin",
     "count_one": "{{number}} item",
     "count_other": "{{number}} items"
+  },
+  "timeline": {
+    "lede": "Every author in your library on one ruler, from the first year of the Hijra to today.",
+    "count_one": "{{number}} author on the timeline",
+    "count_other": "{{number}} authors on the timeline",
+    "help": "Move along the ruler to find an author (on a phone, drag it under the needle). Click, or press Enter, to pin one, then pick another to see the years between them.",
+    "ruler": "Timeline of authors",
+    "valueText": "{{name}}, {{died}}",
+    "today": "Today",
+    "century": "{{ordinal}} century AH",
+    "centuries": [
+      "1st",
+      "2nd",
+      "3rd",
+      "4th",
+      "5th",
+      "6th",
+      "7th",
+      "8th",
+      "9th",
+      "10th",
+      "11th",
+      "12th",
+      "13th",
+      "14th",
+      "15th"
+    ],
+    "years_one": "{{number}} year",
+    "years_other": "{{number}} years",
+    "ago": "{{years}} ago",
+    "afterHijra": "{{name}}: {{after}} after the Hijra, {{ago}}",
+    "apart": "{{first}} and {{second}}: {{years}} apart",
+    "books_zero": "None of their books in your library yet",
+    "books_one": "{{number}} book in your library",
+    "books_other": "{{number}} books in your library",
+    "more_one": "and {{number}} more",
+    "more_other": "and {{number}} more",
+    "sameYear": "Died the same year:",
+    "pin": "Pin to compare",
+    "unpin": "Unpin",
+    "compareWith": "Compare with {{name}}",
+    "open": "Open author",
+    "clear": "Clear comparison",
+    "undated_one": "{{number}} author without a date of death",
+    "undated_other": "{{number}} authors without a date of death",
+    "undatedHint": "Add the year they died to place them on the timeline.",
+    "empty": "Add the year an author died, and they will appear here."
   }
 }
