@@ -10,10 +10,10 @@ vi.mock('../barcodeDecoder', () => ({ loadDecoder: vi.fn() }))
 const BOOK = '9780306406157'
 const SHOP_ITEM = '5012345678900'
 
-/** A camera whose one track can be checked for being switched off */
-function fakeCamera() {
-  const track = { stop: vi.fn() }
-  const stream = { getTracks: () => [track] } as unknown as MediaStream
+/** A camera whose one track can be checked for being switched off, and for what it was asked to do */
+function fakeCamera(applyConstraints: () => Promise<void> = async () => {}) {
+  const track = { stop: vi.fn(), applyConstraints: vi.fn(applyConstraints) }
+  const stream = { getTracks: () => [track], getVideoTracks: () => [track] } as unknown as MediaStream
   return { track, stream }
 }
 
@@ -75,6 +75,25 @@ describe('IsbnScanner', () => {
     expect(fetch).not.toHaveBeenCalled()
   })
 
+  it("asks the camera for a sharp picture that keeps focusing, and carries on when it can't", async () => {
+    const { track, stream } = fakeCamera(async () => {
+      throw new DOMException('not supported', 'OverconstrainedError')
+    })
+    const getUserMedia = useCamera(async () => stream)
+    decoderSeeing([], [BOOK])
+    const onFound = vi.fn()
+    const user = userEvent.setup()
+    render(<IsbnScanner onFound={onFound} />)
+
+    await user.click(screen.getByRole('button', { name: 'Scan barcode' }))
+
+    await waitFor(() => expect(onFound).toHaveBeenCalledWith(BOOK))
+    expect((getUserMedia.mock.calls[0] as unknown[])[0]).toEqual(
+      expect.objectContaining({ video: expect.objectContaining({ width: { ideal: 1920 }, height: { ideal: 1080 } }) }),
+    )
+    expect(track.applyConstraints).toHaveBeenCalledWith({ advanced: [{ focusMode: 'continuous' }] })
+  })
+
   it("ignores a barcode that isn't an ISBN, says so, and carries on looking", async () => {
     const { stream } = fakeCamera()
     useCamera(async () => stream)
@@ -99,7 +118,7 @@ describe('IsbnScanner', () => {
     render(<IsbnScanner onFound={onFound} />)
 
     await user.click(screen.getByRole('button', { name: 'Scan barcode' }))
-    expect(await screen.findByText('Looking for a barcode…')).toBeInTheDocument()
+    expect(await screen.findByText('Looking for a barcode… Hold the book steady, in good light.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Type it instead' }))
 
     expect(track.stop).toHaveBeenCalled()
@@ -129,7 +148,7 @@ describe('IsbnScanner', () => {
     render(<IsbnScanner onFound={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Scan barcode' }))
-    await screen.findByText('Looking for a barcode…')
+    await screen.findByText('Looking for a barcode… Hold the book steady, in good light.')
     Object.defineProperty(document, 'hidden', { get: () => true, configurable: true })
     act(() => {
       document.dispatchEvent(new Event('visibilitychange'))
@@ -146,7 +165,7 @@ describe('IsbnScanner', () => {
     const { unmount } = render(<IsbnScanner onFound={vi.fn()} />)
 
     await user.click(screen.getByRole('button', { name: 'Scan barcode' }))
-    await screen.findByText('Looking for a barcode…')
+    await screen.findByText('Looking for a barcode… Hold the book steady, in good light.')
     unmount()
 
     expect(track.stop).toHaveBeenCalled()
@@ -196,7 +215,7 @@ describe('IsbnScanner', () => {
 
     await user.click(screen.getByRole('button', { name: 'مسح الباركود' }))
 
-    expect(await screen.findByText('جارٍ البحث عن باركود…')).toBeInTheDocument()
+    expect(await screen.findByText('جارٍ البحث عن باركود… ثبّت الكتاب في مكان جيد الإضاءة.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'اكتبه بدلًا من ذلك' })).toBeInTheDocument()
   })
 })

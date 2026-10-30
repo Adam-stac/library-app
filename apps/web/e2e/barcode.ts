@@ -41,7 +41,7 @@ export function barcodePicture(digits: string): Uint8Array {
 }
 
 /**
- * A short video file for Chromium's fake camera (`--use-file-for-media-stream`) that shows only this barcode, written
+ * A short video file for Chromium's fake camera (`--use-file-for-fake-video-capture`) that shows only this barcode, written
  * to a temporary folder when a test needs it, so no video is kept in the repository. Returns its path.
  */
 export function barcodeVideo(digits: string, name = 'barcode'): string {

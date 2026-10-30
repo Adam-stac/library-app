@@ -442,7 +442,7 @@
       "have": "You already have this book:",
       "status": {
         "starting": "Starting the camera…",
-        "looking": "Looking for a barcode…",
+        "looking": "Looking for a barcode… Hold the book steady, in good light.",
         "notIsbn": "That barcode isn't an ISBN. Try the one on the back cover.",
         "denied": "The camera is turned off for this site. You can allow it in your browser's settings, or type the ISBN.",
         "unavailable": "The camera can't be used here. Type the ISBN instead."

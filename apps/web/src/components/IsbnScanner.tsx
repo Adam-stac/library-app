@@ -69,7 +69,8 @@ export default function IsbnScanner({ onFound }: { onFound: (isbn: string) => vo
       let media: MediaStream
       try {
         media = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          // As sharp a picture as the camera gives (up to 1080p): the thin bars of a barcode need the pixels
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
           audio: false,
         })
       } catch (error) {
@@ -83,6 +84,13 @@ export default function IsbnScanner({ onFound }: { onFound: (isbn: string) => vo
         return
       }
       stream = media
+      // Keep focusing as the book moves, on cameras that can (most phones). Others ignore this, or refuse it, and
+      // carry on as they are
+      for (const track of media.getVideoTracks()) {
+        void Promise.resolve(
+          track.applyConstraints?.({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] }),
+        ).catch(() => {})
+      }
       let decode: Awaited<ReturnType<typeof loadDecoder>>
       try {
         decode = await loadDecoder()
