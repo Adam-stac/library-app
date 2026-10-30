@@ -142,7 +142,9 @@ elsewhere.
 - **Importing OpenITI directly instead of Usul:** larger and more work; Usul already carries the metadata we need as
   JSON, under MIT. (Superseded in L3: Usul's data was withdrawn, and OpenITI is non-commercial and share-alike, so
   Wikidata was chosen. Wikidata covered 712 of OpenITI's 3,386 authors through its OpenITI IDs, nearly all of those
-  who died by 300 AH, and reaches later scholars through its Shamela IDs: 1,723 scholars in all.)
+  who died by 300 AH, and reaches later scholars through its Shamela IDs: 1,723 people in all. Seven non-Muslim Western writers whose
+  books Shamela carries in translation were left out on 30 October 2026, as the timelines are of Muslim scholars:
+  1,716, listed in `tools/wikidata/scholars_snapshot.py`.)
 
 ## Consequences
 
