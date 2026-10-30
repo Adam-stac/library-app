@@ -330,4 +330,195 @@ describe('BookFormPage', () => {
       expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
     })
   })
+  describe('Filling in from the ISBN', () => {
+    const ISBN = '9789933685027'
+    const SUGGESTIONS = `/api/v1/editions/suggestions?isbn=${ISBN}`
+    const settings = () => json(200, { defaultCurrency: null })
+    const fromYourBooks = {
+      publisher: { value: 'دار الغوثاني', from: 'yourBooks', country: null },
+      publicationPlace: { value: 'دمشق', from: 'yourBooks', country: null },
+      language: { value: 'ar', from: 'yourBooks', country: null },
+    }
+    const typeIsbn = async (user: ReturnType<typeof renderPage>, isbn = ISBN) =>
+      user.type(await screen.findByLabelText('ISBN'), isbn)
+
+    it('fills empty fields from your books, each with a note to check it (everyFilledFieldCarriesTheCheckNote)', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [SUGGESTIONS]: () => json(200, fromYourBooks) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+
+      expect(await screen.findByDisplayValue('دار الغوثاني')).toBeInTheDocument()
+      for (const label of ['Publisher', 'Place of publication', 'Language']) {
+        expect(screen.getByLabelText(label)).toHaveAccessibleDescription(
+          'May be incorrect, please check. From your books by the same publisher.',
+        )
+      }
+      expect(screen.getByLabelText('Place of publication')).toHaveValue('دمشق')
+      expect(screen.getByLabelText('Language')).toHaveValue('ar')
+      expect(
+        screen.getByText('Some fields were filled in for you, each saying where it came from. Please check them.'),
+      ).toBeInTheDocument()
+    })
+
+    it('never replaces what you typed, and the note goes once you edit a filled field (fillingNeverReplacesWhatYouTyped)', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [SUGGESTIONS]: () => json(200, fromYourBooks) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+      await user.type(await screen.findByLabelText('Publisher'), 'دار الفكر')
+
+      await typeIsbn(user)
+      await screen.findByDisplayValue('دمشق')
+
+      expect(screen.getByLabelText('Publisher')).toHaveValue('دار الفكر')
+      expect(screen.getByLabelText('Publisher')).not.toHaveAccessibleDescription(
+        expect.stringContaining('please check'),
+      )
+      await user.type(screen.getByLabelText('Place of publication'), ' الشام')
+      expect(screen.getByLabelText('Place of publication')).not.toHaveAccessibleDescription(
+        expect.stringContaining('please check'),
+      )
+    })
+
+    it('takes its suggestions back out when the ISBN changes to one with none', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [SUGGESTIONS]: () => json(200, fromYourBooks) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+      await screen.findByDisplayValue('دار الغوثاني')
+      await user.type(screen.getByLabelText('ISBN'), '1') // no longer an ISBN
+
+      await waitFor(() => expect(screen.getByLabelText('Publisher')).toHaveValue(''))
+      expect(screen.getByLabelText('Language')).toHaveValue('')
+    })
+
+    it("names the ISBN's country when the language comes from it", async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [SUGGESTIONS]: () =>
+            json(200, {
+              publisher: null,
+              publicationPlace: null,
+              language: { value: 'ar', from: 'country', country: 'SY' },
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+
+      await waitFor(() => expect(screen.getByLabelText('Language')).toHaveValue('ar'))
+      expect(screen.getByLabelText('Language')).toHaveAccessibleDescription(
+        "May be incorrect, please check. From the ISBN's country: Syria.",
+      )
+      expect(screen.getByLabelText('Publisher')).toHaveValue('')
+    })
+
+    it('shows a suggested value as text, never as markup (scriptInASuggestedTitleIsShownAsText)', async () => {
+      const hostile = '<img src=x onerror="window.hacked=1">'
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [SUGGESTIONS]: () =>
+            json(200, {
+              publisher: { value: hostile, from: 'yourBooks', country: null },
+              publicationPlace: null,
+              language: null,
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+
+      expect(await screen.findByDisplayValue(hostile)).toBeInTheDocument()
+      expect(document.querySelector('img[src="x"]')).toBeNull()
+      expect((window as unknown as { hacked?: number }).hacked).toBeUndefined()
+    })
+
+    it('ignores an answer in the wrong shape, and a failed one', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [SUGGESTIONS]: () =>
+            json(200, {
+              publisher: { value: 42, from: 'yourBooks' },
+              publicationPlace: 'دمشق',
+              language: { value: 'ar', from: 'elsewhere' },
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+      await new Promise((resolve) => setTimeout(resolve, 450))
+
+      expect(screen.getByLabelText('Publisher')).toHaveValue('')
+      expect(screen.getByLabelText('Place of publication')).toHaveValue('')
+      expect(screen.getByLabelText('Language')).toHaveValue('')
+    })
+
+    it('fills nothing when you open a saved book, only once you change its ISBN', async () => {
+      const other = '9789933685034'
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/editions/e1': () => json(200, { ...EDITION, isbn: ISBN, publisher: null, publicationPlace: null }),
+          '/api/v1/works/w1': () => json(200, { ...WORK, version: 2 }),
+          [`/api/v1/editions/suggestions?isbn=${other}&excludeId=e1`]: () => json(200, fromYourBooks),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/e1/edit')
+      const asked = () => api.mock.calls.some(([path]) => String(path).startsWith('/api/v1/editions/suggestions'))
+
+      await screen.findByLabelText('Title in English')
+      await new Promise((resolve) => setTimeout(resolve, 450))
+      expect(asked()).toBe(false)
+      expect(screen.getByLabelText('Publisher')).toHaveValue('')
+
+      await user.clear(screen.getByLabelText('ISBN'))
+      await user.type(screen.getByLabelText('ISBN'), other)
+      expect(await screen.findByDisplayValue('دار الغوثاني')).toBeInTheDocument()
+    })
+
+    it('says it in Arabic, naming the country in Arabic', async () => {
+      await i18n.changeLanguage('ar')
+      fakeApi(
+        {
+          '/api/v1/sciences?sort=ar': sciences,
+          '/api/v1/library-settings': settings,
+          [SUGGESTIONS]: () =>
+            json(200, {
+              publisher: null,
+              publicationPlace: null,
+              language: { value: 'ar', from: 'country', country: 'SY' },
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('ردمك (ISBN)'), ISBN)
+
+      await waitFor(() =>
+        expect(screen.getByText(/قد يكون هذا غير صحيح، يُرجى التحقق منه\. من بلد الردمك: سوريا\./)).toBeInTheDocument(),
+      )
+    })
+  })
 })

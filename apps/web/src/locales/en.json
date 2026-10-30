@@ -448,6 +448,13 @@
         "unavailable": "The camera can't be used here. Type the ISBN instead."
       }
     },
+    "suggest": {
+      "check": "May be incorrect, please check.",
+      "fromYourBooks": "From your books by the same publisher.",
+      "fromCountry": "From the ISBN's country: {{country}}.",
+      "fromLanguageArea": "From the ISBN's language area.",
+      "filled": "Some fields were filled in for you, each saying where it came from. Please check them."
+    },
     "aboutCopy": "About this copy",
     "allDetails": "All details"
   },

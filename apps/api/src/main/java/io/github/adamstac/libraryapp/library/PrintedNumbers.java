@@ -69,6 +69,11 @@ final class PrintedNumbers {
         return List.of(isbn);
     }
 
+    /** The ISBN-13 form of an ISBN already checked by {@link #isbn}: an ISBN-10 becomes its 978 ISBN-13. */
+    static String isbn13(String isbn) {
+        return isbn.length() == 13 ? isbn : isbnForms(isbn).get(1);
+    }
+
     /** A legal deposit number: digits, "/", "-" and spaces only (for example ٢٠٠٥/١٢٣٤٥). Null when blank. */
     static String legalDeposit(String value) {
         if (value == null || value.isBlank()) {

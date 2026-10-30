@@ -25,6 +25,15 @@ export const COMMON_LANGUAGES = [
   'ru',
 ]
 
+/** A country's name in the page's language, such as "Syria" or "سوريا"; the code itself if the browser can't say. */
+export function regionName(code: string, language: string): string {
+  try {
+    return new Intl.DisplayNames([language], { type: 'region' }).of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
 /** A language's name in the page's language, such as "Urdu" or "الأردية"; the code itself if the browser can't say. */
 export function languageName(code: string, language: string): string {
   try {

@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "size": "node scripts/check-bundle-size.mjs",
     "e2e": "playwright test",
+    "e2e:ranges": "node scripts/load-sample-ranges.mjs",
     "visual": "playwright test -c playwright.visual.config.ts",
     "visual:docker": "node scripts/visual-docker.mjs"
   },
