@@ -9,7 +9,8 @@ library settings (slice 13b), bookmarks (slice 14), benefits (slice 15), search 
 (slice 16b) are built: the whole library backend. Test names marked *(planned, slice N)* are written in that slice, and this file is updated
 as each slice is built. API tests are in `AuthorTests`, `PlaceTests`, `ScienceTests`, `WorkTests` and
 `EditionTests`, `BookmarkTests`, `BenefitTests`, `SearchTests`, `HomeTests`, `BinTests` and `TimelineTests` unless
-another class is named. Links between works, export and the external lookups get their own threat models.
+another class is named. Links between works and export get their own threat models. Filling in books from outside sources (ADR 0010)
+has `book-lookup.md`.
 **ASVS 5.0 (Level 2) chapters:** V8 Authorization, V2 Validation and Business Logic, V1 Encoding and
 Sanitization, V4 API and Web Service, V14 Data Protection, V16 Security Logging and Error Handling.
 **Personal data:** everything a user enters is personal data, and a library of religious books can
