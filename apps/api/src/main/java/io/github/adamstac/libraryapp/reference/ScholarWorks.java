@@ -22,4 +22,16 @@ public interface ScholarWorks {
      * typo or a variant spelling; whole matches first. The text is matched literally: % and _ are not wildcards.
      */
     List<Work> search(String text, int limit);
+
+    /** A scholar on the general timeline: when they died, and how many of their works are in the catalogue. */
+    record DatedScholar(String id, String nameAr, String nameEn, Integer deathHijri, Integer deathCe, int works) {}
+
+    /** Every scholar whose year of death is known, for the general timeline; the same for every reader. */
+    List<DatedScholar> dated();
+
+    /**
+     * A scholar's works in the catalogue, at most {@code limit}, each title once. Oldest Wikidata entry first, which
+     * puts a scholar's best-known works first (صحيح البخاري before his other books).
+     */
+    List<Work> byScholar(String scholarId, int limit);
 }

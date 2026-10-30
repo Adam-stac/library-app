@@ -52,7 +52,9 @@ class AuthorController {
             YearInput death,
             UUID birthPlaceId,
             UUID deathPlaceId,
-            String biography) {}
+            String biography,
+            /** The scholar this author is, in the reference data (such as Q9546); optional, and never removed by an edit */
+            String wikidataId) {}
 
     public record YearInput(Integer hijri, Integer ce, Boolean approximate) {}
 

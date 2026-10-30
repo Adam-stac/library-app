@@ -39,6 +39,9 @@ export default function TimelineDial(props: TimelineViewProps) {
   }
   const lines = [...new Set(placed.map((author) => author.year))].filter((year) => Math.abs(year - under) <= seen)
   const pinnedYears = new Set(pins.map((index) => placed[index].year))
+  // With the catalogue's scholars shown (T2): your own authors' years green, the scholars' faint
+  const mixing = placed.some((author) => author.scholar)
+  const ownYears = new Set(placed.filter((author) => !author.scholar).map((author) => author.year))
 
   const died = formatYear(
     { hijri: focused.deathHijri, ce: focused.deathCe, approximate: focused.approximate },
@@ -110,7 +113,13 @@ export default function TimelineDial(props: TimelineViewProps) {
             <span
               key={year}
               className={`absolute bottom-0 ${drag ? '' : 'timeline-move'} ${
-                pinnedYears.has(year) ? 'h-12 w-0.5 bg-accent' : 'h-7 w-px bg-muted/40'
+                pinnedYears.has(year)
+                  ? 'h-12 w-0.5 bg-accent'
+                  : !mixing
+                    ? 'h-7 w-px bg-muted/40'
+                    : ownYears.has(year)
+                      ? 'h-9 w-px bg-accent'
+                      : 'h-4 w-px bg-muted/30'
               }`}
               style={{ insetInlineStart: at(year) }}
             />

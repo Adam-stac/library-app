@@ -22,7 +22,8 @@ export async function expectAccessible(page: Page, what = '') {
  * Even with reduced motion, every colour moves to the new theme through a transition of 0.01ms (index.css), and a
  * transition only ends on a later frame. Checking before then can read a card's old background behind text already in
  * the new colour (seen on the authors timeline in CI). So: wait two frames for the transitions to start, then for all
- * of them to end.
+ * of them to end. A transition inside a closed <details> is never drawn, and Chromium then never settles its `finished`
+ * promise (seen on the timeline with every scholar on it), so each frame asks the transitions how they stand instead.
  */
 async function themeChangeFinished(page: Page) {
   await page.evaluate(async () => {
@@ -30,6 +31,8 @@ async function themeChangeFinished(page: Page) {
     await frame()
     await frame()
     const running = document.getAnimations().filter((animation) => animation instanceof CSSTransition)
-    await Promise.all(running.map((transition) => transition.finished.catch(() => undefined)))
+    while (running.some((transition) => transition.playState === 'running' || transition.playState === 'paused')) {
+      await frame()
+    }
   })
 }
