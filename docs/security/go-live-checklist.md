@@ -16,6 +16,7 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 - [ ] **Bot protection on registration and password reset.** Per-IP and per-address limits don't stop a botnet from making us email thousands of strangers (which gets the domain blacklisted). Add Cloudflare Turnstile to those forms.
 - [ ] **Backups, encrypted and restore-tested.** Database backups encrypted at rest, kept off the server, with one test restore done before go-live.
 - [ ] **Monitoring and alerts.** Uptime checks, plus alerts on spikes in failed sign-ins, lockouts and 5xx errors.
+- [ ] **Terms of every book-data source re-read.** The licence table in ADR 0010 was read on 30 October 2026 and terms change. Before go-live, read each source in use again (Usul, Harvard, Library of Congress, BnF, Open Library, Google Books) and confirm the credits on the About page. Google Books must be reviewed again before anyone is charged. *Check:* the table shows a new date for every source in use, and a source whose terms can't be confirmed is switched off.
 
 ## Accepted for now (recorded in the threat models)
 

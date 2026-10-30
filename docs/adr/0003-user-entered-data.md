@@ -1,6 +1,6 @@
 # 0003. Users enter their own library data, with optional ISBN lookup
 
-- **Status:** Accepted
+- **Status:** Accepted. The "look up by ISBN" decision is replaced by 0010; the rest stands.
 - **Date:** 2026-10-21
 
 ## Context
