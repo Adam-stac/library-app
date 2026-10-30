@@ -34,4 +34,13 @@ public interface Authors {
 
     /** How many authors the user has. */
     long count(UUID ownerId);
+
+    /**
+     * One of the user's authors with the year they died, as entered: in the Hijri or the Common Era calendar, or
+     * both, or neither when it isn't known.
+     */
+    record Death(UUID id, String nameAr, String nameEn, Integer hijri, Integer ce, boolean approximate) {}
+
+    /** Every one of the user's authors (at most 2,000), with when they died, for the timeline. */
+    List<Death> deaths(UUID ownerId);
 }

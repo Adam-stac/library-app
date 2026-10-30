@@ -129,6 +129,24 @@ class AuthorService implements Authors {
     }
 
     @Override
+    public List<Death> deaths(UUID ownerId) {
+        return jdbc.sql("""
+                        SELECT id, name_ar, name_en, death_year_hijri, death_year_ce, death_approximate
+                        FROM authors WHERE owner_id = :owner
+                        ORDER BY library_sort_key(coalesce(name_ar, name_en)), id
+                        """)
+                .param("owner", ownerId)
+                .query((rs, rowNum) -> new Death(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("name_ar"),
+                        rs.getString("name_en"),
+                        rs.getObject("death_year_hijri", Integer.class),
+                        rs.getObject("death_year_ce", Integer.class),
+                        rs.getBoolean("death_approximate")))
+                .list();
+    }
+
+    @Override
     public long count(UUID ownerId) {
         return jdbc.sql("SELECT count(*) FROM authors WHERE owner_id = :owner")
                 .param("owner", ownerId)

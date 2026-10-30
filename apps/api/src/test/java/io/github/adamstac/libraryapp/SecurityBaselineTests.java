@@ -49,6 +49,7 @@ class SecurityBaselineTests {
         assertThat(get("/api/v1/search").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/home").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/bin").statusCode()).isEqualTo(401); // signed-in accounts only
+        assertThat(get("/api/v1/timeline").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/anything-else").statusCode()).isEqualTo(401); // not listed: denied
         assertThat(get("/actuator/env").statusCode()).isEqualTo(401);
     }

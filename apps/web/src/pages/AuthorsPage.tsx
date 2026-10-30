@@ -5,6 +5,7 @@ import { getJson } from '../api'
 import { useAuth } from '../auth/context'
 import { type AuthorPage, formatNumber } from '../authors'
 import AuthorIndex from '../components/AuthorIndex'
+import AuthorTabs from '../components/AuthorTabs'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
 import Loading from '../components/Loading'
@@ -58,6 +59,7 @@ export default function AuthorsPage() {
           {t('authors.add')}
         </Link>
       </header>
+      <AuthorTabs current="list" />
 
       {notice && (
         <p role="status" className="notice mt-8">
