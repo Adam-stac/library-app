@@ -36,6 +36,14 @@ A feature is finished only when every relevant layer below is tested and CI is g
 - The shared starter list of places is loaded by a migration, so it is in every test database. Tests find a shared
   place by its English name (for example `Makkah`) and never change the list.
 
+## Browser tests against the full stack (`apps/web/e2e/`)
+- Start the stack, load the made-up sample ISBN ranges, then run the tests:
+  `docker compose up -d --build --wait && pnpm --filter @library-app/web e2e:ranges && pnpm --filter @library-app/web e2e`.
+- `e2e:ranges` loads `apps/api/src/test/resources/isbn/sample-ranges.xml` through the same import command an
+  administrator runs with the real file (docs/operations/isbn-ranges.md), so CI proves the command works too. It
+  replaces whatever ranges that database had; the real file is never in the repository.
+- The API tests load the same sample with `SampleIsbnRanges.load(context)` before each test that needs it.
+
 ## No dead ends
 - **`src/noDeadEnds.test.ts`** (web) reads every page and component and fails on a link to an address with no page,
   a button that does nothing, a "coming soon" text, or a text missing from Arabic or English (ADR 0008). It runs

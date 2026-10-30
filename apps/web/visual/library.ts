@@ -563,6 +563,7 @@ function answer(url: URL): unknown {
   if (path === '/api/v1/home') return home
   if (path === '/api/v1/editions') return page(url.searchParams.get('workId') ? editions.slice(2, 3) : editions)
   if (path === '/api/v1/editions/by-isbn') return { items: [] } // no other copy of the ISBN in the field
+  if (path === '/api/v1/editions/suggestions') return { publisher: null, publicationPlace: null, language: null }
   if (path.startsWith('/api/v1/editions/')) return edition
   if (path === '/api/v1/works') return page(works.slice(0, 2), 100)
   if (path.startsWith('/api/v1/works/')) return { ...works[1], version: 2 }

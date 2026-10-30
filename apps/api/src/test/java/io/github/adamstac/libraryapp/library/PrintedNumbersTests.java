@@ -35,6 +35,13 @@ class PrintedNumbersTests {
     }
 
     @Test
+    void everyIsbnHasAnIsbn13Form() {
+        assertThat(PrintedNumbers.isbn13("0306406152")).isEqualTo("9780306406157");
+        assertThat(PrintedNumbers.isbn13("080442957X")).isEqualTo("9780804429573");
+        assertThat(PrintedNumbers.isbn13("9791090636071")).isEqualTo("9791090636071");
+    }
+
+    @Test
     void anIsbnWithAWrongCheckDigitOrShapeIsRefused() {
         for (String wrong : new String[] {
             "978-0-306-40615-6", // wrong check digit

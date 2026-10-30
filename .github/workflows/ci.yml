@@ -42,6 +42,9 @@ jobs:
           fi
       - name: Build and test (real Postgres via Testcontainers)
         run: ./mvnw -B -ntp verify
+      - name: Name the failed tests on the pull request
+        if: failure()
+        run: python3 ../../.github/scripts/name-failed-tests.py
 
   web:
     name: web
@@ -145,6 +148,9 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Install Chromium for Playwright
         run: pnpm --filter @library-app/web exec playwright install --with-deps chromium
+      - name: Load the made-up sample ISBN ranges through the import command
+        # The real file is never in the repository (docs/operations/isbn-ranges.md); this also proves the command works
+        run: pnpm --filter @library-app/web e2e:ranges
       - name: End-to-end tests (Arabic and English, desktop and mobile, accessibility)
         run: pnpm --filter @library-app/web e2e
       - name: OWASP ZAP baseline scan of the running app

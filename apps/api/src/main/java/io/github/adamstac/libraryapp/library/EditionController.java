@@ -38,9 +38,11 @@ class EditionController {
     static final int MAX_PAGE_SIZE = 100;
 
     private final EditionService editions;
+    private final EditionSuggestionService suggestions;
 
-    EditionController(EditionService editions) {
+    EditionController(EditionService editions, EditionSuggestionService suggestions) {
         this.editions = editions;
+        this.suggestions = suggestions;
     }
 
     /**
@@ -102,6 +104,18 @@ class EditionController {
             @RequestParam(required = false) UUID excludeId,
             Authentication authentication) {
         return new IsbnMatches(editions.withIsbn(SignedInUser.id(authentication), isbn, excludeId));
+    }
+
+    /**
+     * What can be filled in for a copy with this ISBN, from the signed-in user's own books and the ISBN itself
+     * (ADR 0010, layer 1). Nothing is looked up anywhere else, and nothing is saved.
+     */
+    @GetMapping("/suggestions")
+    EditionSuggestionService.Suggestions suggestions(
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) UUID excludeId,
+            Authentication authentication) {
+        return suggestions.suggest(SignedInUser.id(authentication), isbn, excludeId);
     }
 
     @PostMapping

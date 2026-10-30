@@ -11,6 +11,10 @@
 id_rsa*
 id_ed25519*
 
+# --- The ISBN Agency's range file: used, never republished (docs/operations/isbn-ranges.md) ---
+RangeMessage*.xml
+export_rangemessage*.xml
+
 # --- OS ---
 .DS_Store
 Thumbs.db

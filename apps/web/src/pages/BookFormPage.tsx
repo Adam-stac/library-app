@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { type ApiResult, postJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
-import { COMMON_LANGUAGES, currencies, currencyName, languageName, today } from '../books'
+import { COMMON_LANGUAGES, currencies, currencyName, languageName, regionName, today } from '../books'
 import { cameraCanBeUsed } from '../camera'
 import AuthorsPicker from '../components/AuthorsPicker'
-import FormField from '../components/FormField'
+import FormField, { CheckNote } from '../components/FormField'
 import Icon from '../components/Icon'
 import IsbnScanner from '../components/IsbnScanner'
 import Loading from '../components/Loading'
@@ -30,6 +30,16 @@ import {
   type WorkSummary,
   workTitle,
 } from '../library'
+import { readIsbn } from '../isbn'
+import {
+  type Fillable,
+  type Filled,
+  fillIn,
+  stillFilled,
+  type Suggested,
+  type Suggestions,
+  useIsbnSuggestions,
+} from '../suggestions'
 import { useCopiesWithIsbn } from '../useCopiesWithIsbn'
 import { useLoad } from '../useLoad'
 
@@ -171,6 +181,35 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const checks = useFormChecks(setErrors)
   // "You already have this": the reader's own copies of the ISBN in the field, other than the one being edited
   const copies = useCopiesWithIsbn(draft.isbn, editing ? editing.id : null)
+  // Filling in from the ISBN (ADR 0010, layer 1): only empty fields, each with its "please check" note until edited.
+  // On the edit page only once the ISBN has been changed, so opening a saved book never fills anything by itself.
+  const suggestFor = !editing || readIsbn(draft.isbn) !== readIsbn(editing.isbn ?? '')
+  const suggestions = useIsbnSuggestions(suggestFor ? draft.isbn : '', editing ? editing.id : null)
+  const [fill, setFill] = useState<{ base: string; applied: Suggestions | undefined; filled: Filled }>({
+    base,
+    applied: undefined,
+    filled: {},
+  })
+  const filled = fill.base === base ? fill.filled : {}
+  if (suggestions !== undefined && (fill.base !== base || fill.applied !== suggestions)) {
+    // A new answer: applied once, while rendering, so the fields and their notes change together
+    const next = fillIn(draft, filled, suggestions)
+    setFill({ base, applied: suggestions, filled: next.filled })
+    if (next.draft !== draft) setDraft(next.draft)
+  }
+  const noteFor = (suggested: Suggested) =>
+    `${t('books.suggest.check')} ${
+      suggested.from === 'country' && suggested.country
+        ? t('books.suggest.fromCountry', { country: regionName(suggested.country, language) })
+        : suggested.from === 'languageArea'
+          ? t('books.suggest.fromLanguageArea')
+          : t('books.suggest.fromYourBooks')
+    }`
+  const checkNote = (field: Fillable) => {
+    const suggested = stillFilled(draft, filled, field)
+    return suggested ? noteFor(suggested) : undefined
+  }
+  const anyFilled = (['publisher', 'publicationPlace', 'language'] as const).some((field) => checkNote(field))
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
@@ -480,6 +519,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.language}
               onChange={(event) => set('language')(event.target.value)}
               aria-invalid={error('language') ? true : undefined}
+              aria-describedby={checkNote('language') ? 'language-note' : undefined}
               className="field"
             >
               <option value="">{t('books.form.noLanguage')}</option>
@@ -489,6 +529,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                 </option>
               ))}
             </select>
+            {checkNote('language') && <CheckNote id="language-note" text={checkNote('language') ?? ''} />}
           </div>
         </Group>
 
@@ -520,6 +561,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publisher}
               onChange={set('publisher')}
               error={error('publisher')}
+              note={checkNote('publisher')}
               maxLength={200}
               dir="auto"
               book
@@ -530,6 +572,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publicationPlace}
               onChange={set('publicationPlace')}
               error={error('publicationPlace')}
+              note={checkNote('publicationPlace')}
               maxLength={200}
               dir="auto"
               book
@@ -570,6 +613,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               />
               {cameraCanBeUsed() && <IsbnScanner onFound={(isbn) => setDraft({ ...draft, isbn })} />}
               <div aria-live="polite">
+                {anyFilled && <p className="sr-only">{t('books.suggest.filled')}</p>}
                 {copies.length > 0 && (
                   <div className="notice">
                     <Icon name="bookOpen" className="mt-px size-4 text-accent" />
