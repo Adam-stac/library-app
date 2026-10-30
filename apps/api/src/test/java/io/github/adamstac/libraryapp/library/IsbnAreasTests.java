@@ -27,9 +27,9 @@ class IsbnAreasTests {
 
     @Test
     void theLanguageAreasHaveNoCountry() {
-        assertThat(IsbnAreas.of("9780306406157")).hasValue(new Area("9780", null, "en"));
+        assertThat(IsbnAreas.of("9780306406157")).hasValue(new Area("9780", null, "en", false));
         assertThat(IsbnAreas.of("9782070360024")).hasValueSatisfying(area -> assertThat(area.language()).isEqualTo("fr"));
-        assertThat(IsbnAreas.of("9791090636071")).hasValue(new Area("97910", "FR", "fr"));
+        assertThat(IsbnAreas.of("9791090636071")).hasValue(new Area("97910", "FR", "fr", false));
     }
 
     @Test
@@ -60,6 +60,24 @@ class IsbnAreasTests {
             if (area.country() != null) {
                 assertThat(area.country()).as(area.toString()).isIn(countries);
             }
+        }
+    }
+
+    @Test
+    void anArabicPublisherOnAnotherCountrysCodeSuggestsArabic() {
+        // Dar al-Kutub al-Ilmiyya, Beirut, on France's code: Sharh Ibn Battal (2003)
+        assertThat(IsbnAreas.of("9782745135100")).hasValue(new Area("9782745", "LB", "ar", true));
+        // Dar al-Lubab, Istanbul: Ibn Jama'a's Mukhtasar Sahih al-Bukhari (2018)
+        assertThat(IsbnAreas.of("9786052279007")).hasValue(new Area("9786052279", "TR", "ar", true));
+        // The rest of those codes keep their language
+        assertThat(IsbnAreas.of("9782070360024").orElseThrow().language()).isEqualTo("fr");
+        assertThat(IsbnAreas.of("9786051234567").orElseThrow().language()).isEqualTo("tr");
+        for (Area publisher : IsbnAreas.arabicPublishersAbroad()) {
+            assertThat(publisher.language()).isEqualTo("ar");
+            assertThat(publisher.publisher()).isTrue();
+            assertThat(publisher.prefix()).matches("97[89][0-9]{4,7}");
+            // Each sits inside a code on the main list, whose language it overrides
+            assertThat(IsbnAreas.all()).anyMatch(area -> publisher.prefix().startsWith(area.prefix()));
         }
     }
 

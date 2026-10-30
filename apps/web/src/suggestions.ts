@@ -12,9 +12,12 @@ export const FILLABLE = ['publisher', 'publicationPlace', 'language'] as const
 export type Fillable = (typeof FILLABLE)[number]
 
 /** Where a value came from, so the note beside the field can say. */
-export type SuggestedFrom = 'yourBooks' | 'country' | 'languageArea'
+export type SuggestedFrom = 'yourBooks' | 'country' | 'languageArea' | 'publisher'
 
-/** One suggested value; {@code country} (ISO 3166) is set when it came from the ISBN's country. */
+/**
+ * One suggested value; {@code country} (ISO 3166) is set when it came from the ISBN's country, or is where the publisher
+ * works when it came from an Arabic publisher's own code on another country's ISBN.
+ */
 export type Suggested = { value: string; from: SuggestedFrom; country: string | null }
 
 export type Suggestions = Record<Fillable, Suggested | null>
@@ -25,7 +28,7 @@ export const NO_SUGGESTIONS: Suggestions = { publisher: null, publicationPlace: 
 /** How long typing must pause before asking */
 const PAUSE_MS = 300
 
-const FROM: readonly string[] = ['yourBooks', 'country', 'languageArea']
+const FROM: readonly string[] = ['yourBooks', 'country', 'languageArea', 'publisher']
 
 /** One field of the API's answer, or null if it is missing or not the expected shape (it is then simply not used). */
 function suggested(value: unknown): Suggested | null {

@@ -16,9 +16,10 @@ final class IsbnAreas {
 
     /**
      * An area: the digits an ISBN-13 starts with, the country (ISO 3166, or null for a language area such as
-     * "English language"), and the language (ISO 639-1).
+     * "English language"), and the language (ISO 639-1). {@code publisher} marks one Arabic publisher's own code,
+     * whose country is where the publisher works rather than the ISBN's.
      */
-    record Area(String prefix, String country, String language) {}
+    record Area(String prefix, String country, String language, boolean publisher) {}
 
     private static final List<Area> AREAS = List.of(
             // Arabic
@@ -54,14 +55,32 @@ final class IsbnAreas {
             area("97888", "IT", "it"), area("97912", "IT", "it"),
             area("97911", "KR", "ko"));
 
+    /**
+     * Arabic publishers whose ISBNs come from another country's or language's code, so their area would suggest the
+     * wrong language: by the publisher's own code, which comes first. Found in a sample of classical books from a
+     * large Arabic bookshop on 30 October 2026, where Dar al-Kutub al-Ilmiyya (Beirut, on France's code) made up
+     * seven of eighteen. Its country is where the publisher works.
+     */
+    private static final List<Area> ARABIC_PUBLISHERS_ABROAD = List.of(
+            new Area("9782745", "LB", "ar", true), // Dar al-Kutub al-Ilmiyya, Beirut
+            new Area("9786052279", "TR", "ar", true)); // Dar al-Lubab, Istanbul
+
     private IsbnAreas() {}
 
     /**
-     * The area an ISBN-13 belongs to, if it is on the list. The ISBN system's codes are prefix-free (no code starts
-     * another), so at most one area matches.
+     * The area an ISBN-13 belongs to, if it is on the list: an Arabic publisher abroad first, then the country or
+     * language code. The ISBN system's codes are prefix-free (no code starts another), so at most one area matches.
      */
     static Optional<Area> of(String isbn13) {
-        return AREAS.stream().filter(area -> isbn13.startsWith(area.prefix())).findFirst();
+        return ARABIC_PUBLISHERS_ABROAD.stream()
+                .filter(publisher -> isbn13.startsWith(publisher.prefix()))
+                .findFirst()
+                .or(() -> AREAS.stream().filter(area -> isbn13.startsWith(area.prefix())).findFirst());
+    }
+
+    /** The Arabic publishers abroad, for the test that checks them. */
+    static List<Area> arabicPublishersAbroad() {
+        return ARABIC_PUBLISHERS_ABROAD;
     }
 
     /** Every area on the list, for the test that checks it. */
@@ -70,6 +89,6 @@ final class IsbnAreas {
     }
 
     private static Area area(String prefix, String country, String language) {
-        return new Area(prefix, country, language);
+        return new Area(prefix, country, language, false);
     }
 }

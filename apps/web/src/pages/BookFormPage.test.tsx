@@ -425,6 +425,30 @@ describe('BookFormPage', () => {
       expect(screen.getByLabelText('Publisher')).toHaveValue('')
     })
 
+    it("says when the language comes from an Arabic publisher on another country's code", async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [SUGGESTIONS]: () =>
+            json(200, {
+              publisher: null,
+              publicationPlace: null,
+              language: { value: 'ar', from: 'publisher', country: 'LB' },
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await typeIsbn(user)
+
+      await waitFor(() => expect(screen.getByLabelText('Language')).toHaveValue('ar'))
+      expect(screen.getByLabelText('Language')).toHaveAccessibleDescription(
+        "May be incorrect, please check. From the ISBN's publisher, an Arabic publisher in Lebanon.",
+      )
+    })
+
     it('shows a suggested value as text, never as markup (scriptInASuggestedTitleIsShownAsText)', async () => {
       const hostile = '<img src=x onerror="window.hacked=1">'
       fakeApi(
