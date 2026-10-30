@@ -7,6 +7,7 @@ import { bookmarkText, formatDate, formatPrice } from '../books'
 import BenefitCard from '../components/BenefitCard'
 import EmptyState from '../components/EmptyState'
 import Icon from '../components/Icon'
+import LandingTimeline from '../components/LandingTimeline'
 import Loading from '../components/Loading'
 import { indexLetter, sortKey } from '../indexLetter'
 import { authorsOf, bookTitle, type HomeSummary, nameOf, type PlacedBookmark, type ShelfBook } from '../library'
@@ -138,6 +139,8 @@ function Welcome() {
           </div>
         </figure>
       </section>
+
+      <LandingTimeline />
 
       <section aria-labelledby="what-you-can-do" className="mt-24 sm:mt-32">
         <h2 id="what-you-can-do" className="font-display text-title leading-display font-semibold sm:text-title-lg">

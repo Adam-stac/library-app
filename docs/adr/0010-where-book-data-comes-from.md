@@ -142,7 +142,10 @@ elsewhere.
 - **Importing OpenITI directly instead of Usul:** larger and more work; Usul already carries the metadata we need as
   JSON, under MIT. (Superseded in L3: Usul's data was withdrawn, and OpenITI is non-commercial and share-alike, so
   Wikidata was chosen. Wikidata covered 712 of OpenITI's 3,386 authors through its OpenITI IDs, nearly all of those
-  who died by 300 AH, and reaches later scholars through its Shamela IDs: 1,723 scholars in all.)
+  who died by 300 AH, and reaches later scholars through its Shamela IDs: 1,723 people in all. Writers who weren't Muslims were left out on 30
+  October 2026, as the timelines are of Muslim scholars: Western writers whose books Shamela carries in translation,
+  and Christian, Jewish and other writers. That leaves 1,692 scholars; the 31 left out, and how they were found, are
+  listed in `tools/wikidata/scholars_snapshot.py`.)
 
 ## Consequences
 
@@ -160,5 +163,8 @@ elsewhere.
 - T2 matches a reader's author to a scholar by an optional plain Wikidata ID on the author (no foreign key, so a new
   snapshot can't break a reader's records), set when the author is added from the timeline; one author per scholar in
   each account. Authors added before T2 are matched by name and year of death instead, so a scholar isn't shown twice.
+- T3 shows the same list on the landing page, to anyone, from one public endpoint (`/api/v1/public/scholars`): CC0
+  reference data only, rate-limited per address, kept by the visitor's browser. A scholar's works stay for signed-in
+  readers.
 - Left for later slices: mapping a suggested science to one in the reader's own list by name, and the numbers for limits and the
   agreement count in L6.

@@ -96,7 +96,12 @@
     "kicker": "For the books you own · Arabic and English",
     "private": "Your library is private: other accounts can never see it.",
     "startTitle": "Start with one book",
-    "startText": "Add the book beside you now, with its author. The rest of your shelves can follow, a book at a time."
+    "startText": "Add the book beside you now, with its author. The rest of your shelves can follow, a book at a time.",
+    "timelineTitle": "Fourteen centuries of scholars",
+    "timelineLede": "Every scholar in our catalogue, at the year they died.",
+    "timelineFailed": "The timeline couldn't load. Try again later.",
+    "timelineCount_one": "{{number}} scholar on the timeline",
+    "timelineCount_other": "{{number}} scholars on the timeline"
   },
   "settings": {
     "title": "Settings",

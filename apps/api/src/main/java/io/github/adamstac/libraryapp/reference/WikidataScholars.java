@@ -35,7 +35,7 @@ import tools.jackson.databind.json.JsonMapper;
 class WikidataScholars {
 
     /** The checksum of reference/wikidata-scholars.json.gz, printed by the script that makes it. */
-    static final String SHA256 = "1f40a8567866bd72455dc8868d25417eadc0a2a70a4d0ead325a729b9d7b0419";
+    static final String SHA256 = "865fd6ad44dfd46748deb57f4347a2850e78d8b764d5f6bc4a81663a424b2c58";
 
     static final String RESOURCE = "reference/wikidata-scholars.json.gz";
     static final String SOURCE = "wikidata-scholars";

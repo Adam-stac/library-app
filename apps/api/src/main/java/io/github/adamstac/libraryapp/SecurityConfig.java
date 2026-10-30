@@ -89,6 +89,10 @@ class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me")
                         .permitAll() // 204 when nobody is signed in
+                        // The landing page's timeline: reference data only, the same for everyone, rate-limited per
+                        // address (PublicReadFilter)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/public/scholars")
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, SIGNED_IN_POSTS)
                         .authenticated()
                         .requestMatchers(

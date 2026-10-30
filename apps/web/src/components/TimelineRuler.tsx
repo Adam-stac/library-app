@@ -54,6 +54,10 @@ export default function TimelineRuler(props: TimelineViewProps) {
     at: x(focused.year),
     width: textWidth(nameOf(focused), arabic ? 24 : 16, arabic),
   }
+  // Centred over its line, but held inside the ruler: a long name near either end (a scholar's full name, on the
+  // landing page) would otherwise run past the card's edge. Estimated at the name's own size (text-2xl), generously
+  const half = textWidth(focusName.text, 24, arabic) / 2
+  const focusAnchor = Math.min(Math.max(focusName.at * width, half), Math.max(half, width - half))
   const others = showAll
     ? placed
         .filter((_, index) => index !== focus)
@@ -126,7 +130,7 @@ export default function TimelineRuler(props: TimelineViewProps) {
       <div aria-hidden="true" className={`relative ${showAll ? 'h-24' : 'h-12'}`}>
         <span
           className="timeline-move font-book absolute bottom-0 text-2xl font-semibold whitespace-nowrap text-accent"
-          style={{ insetInlineStart: pct(focusName.at), transform: `translateX(${labelShift(focusName.at, rtl)})` }}
+          style={{ insetInlineStart: `${focusAnchor}px`, transform: `translateX(${rtl ? '50%' : '-50%'})` }}
         >
           {focusName.text}
         </span>

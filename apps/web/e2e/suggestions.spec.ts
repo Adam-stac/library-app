@@ -41,6 +41,10 @@ test.describe('Filling in a book from its ISBN', () => {
     await page.getByLabel('ISBN').fill('9789933685010')
     await page.getByLabel('Publisher').fill('دار الغوثاني')
     await page.getByLabel('Place of publication').fill('دمشق')
+    // The country fills in the language here too; the reader clears it, so this book has none. Without waiting for
+    // that, Save could win or lose the race with the suggestion, and the next book's language came from either
+    await expect(page.getByLabel('Language')).toHaveValue('ar')
+    await page.getByLabel('Language').selectOption('')
     await page.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByRole('status')).toHaveText('Book added.')
 
