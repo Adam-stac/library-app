@@ -1,11 +1,14 @@
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Navigate, useNavigate, useParams } from 'react-router'
+import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { type ApiResult, postJson, putJson } from '../api'
 import { useAuth } from '../auth/context'
 import { COMMON_LANGUAGES, currencies, currencyName, languageName, today } from '../books'
+import { cameraCanBeUsed } from '../camera'
 import AuthorsPicker from '../components/AuthorsPicker'
 import FormField from '../components/FormField'
+import Icon from '../components/Icon'
+import IsbnScanner from '../components/IsbnScanner'
 import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import SearchPicker, { Picked } from '../components/SearchPicker'
@@ -27,6 +30,7 @@ import {
   type WorkSummary,
   workTitle,
 } from '../library'
+import { useCopiesWithIsbn } from '../useCopiesWithIsbn'
 import { useLoad } from '../useLoad'
 
 type Draft = {
@@ -165,6 +169,8 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const checks = useFormChecks(setErrors)
+  // "You already have this": the reader's own copies of the ISBN in the field, other than the one being edited
+  const copies = useCopiesWithIsbn(draft.isbn, editing ? editing.id : null)
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
@@ -552,14 +558,37 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               error={error('editionNumber')}
               maxLength={6}
             />
-            <FormField
-              id="isbn"
-              label={t('books.fields.isbn')}
-              value={draft.isbn}
-              onChange={set('isbn')}
-              error={error('isbn')}
-              maxLength={40}
-            />
+            <div className="flex flex-col gap-3">
+              <FormField
+                id="isbn"
+                label={t('books.fields.isbn')}
+                hint={cameraCanBeUsed() ? t('books.isbn.hintScan') : t('books.isbn.hint')}
+                value={draft.isbn}
+                onChange={set('isbn')}
+                error={error('isbn')}
+                maxLength={40}
+              />
+              {cameraCanBeUsed() && <IsbnScanner onFound={(isbn) => setDraft({ ...draft, isbn })} />}
+              <div aria-live="polite">
+                {copies.length > 0 && (
+                  <div className="notice">
+                    <Icon name="bookOpen" className="mt-px size-4 text-accent" />
+                    <div className="min-w-0">
+                      <p>{t('books.isbn.have')}</p>
+                      <ul className="mt-1 flex flex-col gap-0.5">
+                        {copies.map((copy) => (
+                          <li key={copy.id}>
+                            <Link to={`/books/${encodeURIComponent(copy.id)}`} className="link">
+                              <bdi>{bookTitle(copy, language)}</bdi>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <FormField
               id="legalDeposit"
               label={t('books.fields.legalDeposit')}

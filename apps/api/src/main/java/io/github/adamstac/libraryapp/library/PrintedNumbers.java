@@ -1,6 +1,7 @@
 package io.github.adamstac.libraryapp.library;
 
 import io.github.adamstac.libraryapp.FieldValidationException;
+import java.util.List;
 
 /**
  * Numbers copied from a book's imprint page: an ISBN and a legal deposit number (رقم الإيداع). Arabic books often
@@ -51,6 +52,23 @@ final class PrintedNumbers {
         return isbn;
     }
 
+    /**
+     * Every way the same book's ISBN can be stored: an ISBN-10 and the ISBN-13 that starts 978 are one number written
+     * two ways, so a book entered with one is found by the other. Takes an ISBN already checked by {@link #isbn}.
+     * An ISBN-13 starting 979 has no ISBN-10 form.
+     */
+    static List<String> isbnForms(String isbn) {
+        if (isbn.length() == 10) {
+            String body = "978" + isbn.substring(0, 9);
+            return List.of(isbn, body + isbn13CheckDigit(body));
+        }
+        if (isbn.startsWith("978")) {
+            String body = isbn.substring(3, 12);
+            return List.of(isbn, body + isbn10CheckDigit(body));
+        }
+        return List.of(isbn);
+    }
+
     /** A legal deposit number: digits, "/", "-" and spaces only (for example ٢٠٠٥/١٢٣٤٥). Null when blank. */
     static String legalDeposit(String value) {
         if (value == null || value.isBlank()) {
@@ -87,6 +105,25 @@ final class PrintedNumbers {
             sum += value * (10 - i);
         }
         return sum % 11 == 0;
+    }
+
+    /** The last digit of an ISBN-13, from its first twelve. */
+    private static char isbn13CheckDigit(String twelve) {
+        int sum = 0;
+        for (int i = 0; i < 12; i++) {
+            sum += (twelve.charAt(i) - '0') * (i % 2 == 0 ? 1 : 3);
+        }
+        return (char) ('0' + (10 - sum % 10) % 10);
+    }
+
+    /** The last character of an ISBN-10 (a digit, or X for ten), from its first nine. */
+    private static char isbn10CheckDigit(String nine) {
+        int sum = 0;
+        for (int i = 0; i < 9; i++) {
+            sum += (nine.charAt(i) - '0') * (10 - i);
+        }
+        int check = (11 - sum % 11) % 11;
+        return check == 10 ? 'X' : (char) ('0' + check);
     }
 
     private static boolean isbn13CheckDigitIsRight(String isbn) {

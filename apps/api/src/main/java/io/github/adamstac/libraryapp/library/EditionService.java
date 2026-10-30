@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 class EditionService {
 
     static final int MAX_EDITIONS_PER_ACCOUNT = 10_000;
+    /** How many copies "you already have this" names; more than this is not a useful answer. */
+    static final int MAX_ISBN_MATCHES = 5;
     static final int MAX_TITLE = 500;
     static final int MAX_TRANSLATOR = 200;
     static final int MAX_MUHAQQIQ = 300;
@@ -168,8 +170,37 @@ class EditionService {
         }
         long total = count.query(Long.class).single();
         List<Row> rows = select.query(EditionService::row).list();
+        return new Page(summaries(ownerId, rows), page, size, total);
+    }
+
+    /**
+     * The owner's own copies of the book with this ISBN, for "you already have this" (ADR 0010). An ISBN-10 and its
+     * ISBN-13 are the same book, so both forms are looked for. Only this owner's editions are looked at, and a copy
+     * in the bin is not one (the bin takes it out of the table). {@code excludeId} leaves out the copy being edited.
+     */
+    List<EditionSummary> withIsbn(UUID ownerId, String isbnText, UUID excludeId) {
+        String isbn = PrintedNumbers.isbn(isbnText);
+        if (isbn == null) {
+            throw new FieldValidationException("isbn", "required");
+        }
+        // Built only from fixed strings in this class, never from user input; the values are parameters
+        JdbcClient.StatementSpec select = jdbc.sql("SELECT " + COLUMNS
+                        + " FROM editions e JOIN works w ON w.id = e.work_id" + WITH_BOOKMARK
+                        + " WHERE e.owner_id = :owner AND e.isbn IN (:isbns)"
+                        + (excludeId == null ? "" : " AND e.id <> :exclude")
+                        + " ORDER BY e.created_at, e.id LIMIT :limit")
+                .param("owner", ownerId)
+                .param("isbns", PrintedNumbers.isbnForms(isbn))
+                .param("limit", MAX_ISBN_MATCHES);
+        if (excludeId != null) {
+            select = select.param("exclude", excludeId);
+        }
+        return summaries(ownerId, select.query(EditionService::row).list());
+    }
+
+    private List<EditionSummary> summaries(UUID ownerId, List<Row> rows) {
         Map<UUID, WorkSummary> workSummaries = works.summaries(ownerId, rows.stream().map(Row::workId).distinct().toList());
-        List<EditionSummary> items = rows.stream()
+        return rows.stream()
                 .map(row -> {
                     Edition edition = row.edition();
                     return new EditionSummary(
@@ -182,7 +213,6 @@ class EditionService {
                             edition.bookmark());
                 })
                 .toList();
-        return new Page(items, page, size, total);
     }
 
     Edition get(UUID ownerId, UUID id) {

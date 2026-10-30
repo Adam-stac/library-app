@@ -562,6 +562,7 @@ function answer(url: URL): unknown {
   const page = (items: unknown[], size = 50) => ({ items, page: 0, size, total: items.length })
   if (path === '/api/v1/home') return home
   if (path === '/api/v1/editions') return page(url.searchParams.get('workId') ? editions.slice(2, 3) : editions)
+  if (path === '/api/v1/editions/by-isbn') return { items: [] } // no other copy of the ISBN in the field
   if (path.startsWith('/api/v1/editions/')) return edition
   if (path === '/api/v1/works') return page(works.slice(0, 2), 100)
   if (path.startsWith('/api/v1/works/')) return { ...works[1], version: 2 }

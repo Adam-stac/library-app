@@ -240,4 +240,94 @@ describe('BookFormPage', () => {
       '/api/v1/editions/e1',
     ])
   })
+  describe('"You already have this"', () => {
+    const copy = {
+      id: 'e1',
+      work: WORK,
+      title: null,
+      volumes: 9,
+      purchasedOn: null,
+      status: 'not_started',
+      bookmark: null,
+    }
+    const BY_ISBN = '/api/v1/editions/by-isbn?isbn=9780306406157'
+    const settings = () => json(200, { defaultCurrency: null })
+
+    it('names the copies you have of the ISBN you type, with a link to each', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [BY_ISBN]: () => json(200, { items: [copy] }) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('ISBN'), 'ISBN 978-0-306-40615-7')
+
+      expect(await screen.findByText('You already have this book:')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Sahih al-Bukhari' })).toHaveAttribute('href', '/books/e1')
+    })
+
+    it('asks nothing until the ISBN is whole and correct, and says nothing when you have no copy', async () => {
+      const api = fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [BY_ISBN]: () => json(200, { items: [] }) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+      const asked = () => api.mock.calls.some(([path]) => String(path).startsWith('/api/v1/editions/by-isbn'))
+
+      await user.type(await screen.findByLabelText('ISBN'), '978030640615')
+      await user.clear(screen.getByLabelText('ISBN'))
+      await user.type(screen.getByLabelText('ISBN'), '978-0-306-40615-6') // wrong check digit
+      await new Promise((resolve) => setTimeout(resolve, 450))
+      expect(asked()).toBe(false)
+
+      await user.clear(screen.getByLabelText('ISBN'))
+      await user.type(screen.getByLabelText('ISBN'), '9780306406157')
+      await waitFor(() => expect(asked()).toBe(true))
+      expect(screen.queryByText('You already have this book:')).not.toBeInTheDocument()
+    })
+
+    it('reads Arabic digits, and the notice goes when the ISBN is changed', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [BY_ISBN]: () => json(200, { items: [copy] }) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('ISBN'), 'ردمك ٩٧٨٠٣٠٦٤٠٦١٥٧')
+      expect(await screen.findByText('You already have this book:')).toBeInTheDocument()
+      await user.type(screen.getByLabelText('ISBN'), '1')
+      await waitFor(() => expect(screen.queryByText('You already have this book:')).not.toBeInTheDocument())
+    })
+
+    it("leaves out the copy being edited, so a book is never told it's a duplicate of itself", async () => {
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/editions/e1': () => json(200, { ...EDITION, isbn: '9780306406157' }),
+          '/api/v1/works/w1': () => json(200, { ...WORK, version: 2 }),
+          [`${BY_ISBN}&excludeId=e1`]: () => json(200, { items: [] }),
+        },
+        'r@example.com',
+      )
+      renderPage('/books/e1/edit')
+
+      await screen.findByLabelText('Title in English')
+      await waitFor(() => expect(api.mock.calls.map(([path]) => path)).toContain(`${BY_ISBN}&excludeId=e1`))
+      expect(screen.queryByText('You already have this book:')).not.toBeInTheDocument()
+    })
+
+    it('keeps quiet when the check fails: it is a help, not a gate', async () => {
+      fakeApi(
+        { [SCIENCES]: sciences, '/api/v1/library-settings': settings, [BY_ISBN]: () => json(500) },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('ISBN'), '9780306406157')
+      await new Promise((resolve) => setTimeout(resolve, 450))
+
+      expect(screen.queryByText('You already have this book:')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled()
+    })
+  })
 })

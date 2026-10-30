@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.adamstac.libraryapp.ApiBrowser;
 import io.github.adamstac.libraryapp.CrossUserAccess;
 import io.github.adamstac.libraryapp.TestcontainersConfiguration;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +41,9 @@ class EditionTests {
     static final String WORKS = "/api/v1/works";
     static final String AUTHORS = "/api/v1/authors";
     static final String SETTINGS = "/api/v1/library-settings";
+    static final String BY_ISBN = "/api/v1/editions/by-isbn?isbn=";
+    /** An edition in a list starts with its own ID and then its work, which tells it from the IDs inside the work. */
+    private static final Pattern EDITION_ID = Pattern.compile("\\{\"id\":\"([0-9a-f-]{36})\",\"work\":");
 
     @Value("${local.server.port}")
     private int port;
@@ -55,6 +62,7 @@ class EditionTests {
         String path = EDITIONS + "/" + UUID.randomUUID();
 
         assertThat(nobody.get(EDITIONS).statusCode()).isEqualTo(401);
+        assertThat(nobody.get(BY_ISBN + "9780306406157").statusCode()).isEqualTo(401);
         assertThat(nobody.get(path).statusCode()).isEqualTo(401);
         assertThat(nobody.post(EDITIONS, "{}").statusCode()).isEqualTo(401);
         assertThat(nobody.put(path, "{}", "\"0\"").statusCode()).isEqualTo(401);
@@ -515,6 +523,95 @@ class EditionTests {
                 .isZero();
     }
 
+    // ---- "You already have this" (ADR 0010, slice L1) ---------------------------------------------------------
+
+    @Test
+    void youAlreadyHaveThisOnlyLooksAtYourOwnBooks() throws Exception {
+        ApiBrowser reader = newAccount();
+        ApiBrowser other = newAccount();
+        String mine = idFrom(addEdition(reader, edition(workId(reader), ",\"isbn\":\"978-0-306-40615-7\"")));
+        String theirs = idFrom(addEdition(other, edition(workId(other), ",\"isbn\":\"9780306406157\"")));
+
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157"))).containsExactly(mine);
+        assertThat(idsIn(other.get(BY_ISBN + "9780306406157"))).containsExactly(theirs);
+        assertThat(idsIn(reader.get(BY_ISBN + "9780804429573"))).as("another book").isEmpty();
+        assertThat(idsIn(newAccount().get(BY_ISBN + "9780306406157"))).as("a third account").isEmpty();
+    }
+
+    @Test
+    void anIsbn10AndItsIsbn13AreFoundAsTheSameBook() throws Exception {
+        ApiBrowser reader = newAccount();
+        String work = workId(reader);
+        String ten = idFrom(addEdition(reader, edition(work, ",\"isbn\":\"0-306-40615-2\"")));
+        String thirteen = idFrom(addEdition(reader, edition(work, ",\"isbn\":\"9780306406157\"")));
+
+        // Both copies, oldest first, whichever way the ISBN is typed or scanned
+        for (String typed : new String[] {"9780306406157", "0306406152", "ISBN 978-0-306-40615-7", "ردمك ٩٧٨٠٣٠٦٤٠٦١٥٧"}) {
+            assertThat(idsIn(reader.get(BY_ISBN + URLEncoder.encode(typed, StandardCharsets.UTF_8))))
+                    .as(typed)
+                    .containsExactly(ten, thirteen);
+        }
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157&excludeId=" + ten)))
+                .as("the copy being edited is left out")
+                .containsExactly(thirteen);
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157&excludeId=" + UUID.randomUUID())))
+                .as("an ID that isn't a copy of this book leaves out nothing")
+                .containsExactly(ten, thirteen);
+    }
+
+    @Test
+    void aBookInTheBinIsNotAlreadyYours() throws Exception {
+        ApiBrowser reader = newAccount();
+        String path = addEdition(reader, edition(workId(reader), ",\"isbn\":\"9780306406157\""));
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157"))).hasSize(1);
+
+        assertThat(reader.delete(path).statusCode()).isEqualTo(204);
+
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157"))).isEmpty();
+    }
+
+    @Test
+    void youAlreadyHaveThisNamesNoMoreThanFiveCopies() throws Exception {
+        ApiBrowser reader = newAccount();
+        String work = workId(reader);
+        for (int i = 0; i < 7; i++) {
+            addEdition(reader, edition(work, ",\"isbn\":\"9780306406157\""));
+        }
+
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157"))).hasSize(5);
+    }
+
+    @Test
+    void theIsbnCheckIsCheckedAndNeverEchoesWhatWasTyped() throws Exception {
+        ApiBrowser reader = newAccount();
+        String marker = "PrivateNote";
+
+        assertFieldError(reader.get(EDITIONS + "/by-isbn"), "isbn", "required");
+        assertFieldError(reader.get(BY_ISBN), "isbn", "required");
+        assertFieldError(reader.get(BY_ISBN + "%20%20"), "isbn", "required");
+        assertFieldError(reader.get(BY_ISBN + "978-0-306-40615-6"), "isbn", "invalid_isbn");
+        assertFieldError(reader.get(BY_ISBN + "9".repeat(41)), "isbn", "invalid_isbn");
+        assertFieldError(reader.get(BY_ISBN + marker), "isbn", "invalid_isbn");
+        assertFieldError(reader.get(BY_ISBN + "9780306406157&excludeId=" + marker), "excludeId", "invalid");
+        for (HttpResponse<String> response : List.of(
+                reader.get(BY_ISBN + marker),
+                reader.get(BY_ISBN + "9780306406157&excludeId=" + marker),
+                reader.get(BY_ISBN + "%3Cscript%3E" + marker + "%3C%2Fscript%3E"))) {
+            assertThat(response.body()).doesNotContain(marker).doesNotContainIgnoringCase("exception");
+        }
+    }
+
+    @Test
+    void theIsbnCheckTakesNoOwnerOrOtherFieldsFromTheRequest() throws Exception {
+        ApiBrowser reader = newAccount();
+        ApiBrowser other = newAccount();
+        addEdition(other, edition(workId(other), ",\"isbn\":\"9780306406157\""));
+
+        // Whatever else is sent, the answer is about the signed-in account's own shelf
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157&ownerId=" + other.accountId()))).isEmpty();
+        assertThat(idsIn(reader.get(BY_ISBN + "9780306406157&owner_id=" + other.accountId()))).isEmpty();
+    }
+
     // ---- Helpers -----------------------------------------------------------------------------------------------
 
     private ApiBrowser newAccount() throws Exception {
@@ -544,6 +641,17 @@ class EditionTests {
     private static String created(HttpResponse<String> response) {
         assertThat(response.statusCode()).as(response.body()).isEqualTo(201);
         return response.headers().firstValue("Location").orElseThrow();
+    }
+
+    /** The IDs of the editions in an answer from the ISBN check, in the order given. */
+    private static List<String> idsIn(HttpResponse<String> response) {
+        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+        List<String> ids = new ArrayList<>();
+        Matcher matcher = EDITION_ID.matcher(response.body());
+        while (matcher.find()) {
+            ids.add(matcher.group(1));
+        }
+        return ids;
     }
 
     private static String idFrom(String path) {
