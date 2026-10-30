@@ -13,6 +13,7 @@ const BUDGET = {
   styles: 12,
   preloadedFonts: 90, // fonts are sent compressed already, so these are their file sizes
   largestPage: 20, // any one page's own file, fetched when it is first opened
+  barcodeReader: 130, // the reader for browsers that can't scan by themselves, fetched only when Scan is pressed
 }
 
 const KB = 1024
@@ -34,6 +35,11 @@ const pages = readdirSync(join(DIST, 'assets'))
   .map((name) => `assets/${name}`)
   .filter((file) => !firstVisit.includes(file))
 
+// The barcode reader is its own file (ADR 0010), named after its source, and loaded only on pressing Scan
+const reader = readdirSync(join(DIST, 'assets'))
+  .filter((name) => /^zxingDecoder-[\w-]+\.js$/.test(name))
+  .map((name) => `assets/${name}`)
+
 const sum = (files, size) => files.reduce((total, file) => total + size(file), 0)
 const largest = pages.map((file) => [file, gzipped(file)]).sort((a, b) => b[1] - a[1])[0] ?? ['none', 0]
 
@@ -43,6 +49,9 @@ const rows = [
   ['Fonts preloaded', sum(fonts, plain), BUDGET.preloadedFonts, `${fonts.length} files`],
   ['Largest page', largest[1], BUDGET.largestPage, largest[0].replace(/^assets\//, '')],
 ]
+if (reader.length > 0) {
+  rows.push(['Barcode reader', sum(reader, gzipped), BUDGET.barcodeReader, reader[0].replace(/^assets\//, '')])
+}
 
 let over = false
 for (const [name, size, budget, note] of rows) {

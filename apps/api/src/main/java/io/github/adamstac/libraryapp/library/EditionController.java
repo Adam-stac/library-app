@@ -8,6 +8,7 @@ import io.github.adamstac.libraryapp.library.WorkController.WorkInput;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
@@ -90,6 +91,17 @@ class EditionController {
         };
         int pageSize = Math.max(1, Math.min(size, MAX_PAGE_SIZE));
         return editions.list(SignedInUser.id(authentication), workId, order, page, pageSize);
+    }
+
+    /** The copies of this ISBN the signed-in user already has (ADR 0010); nothing is looked up anywhere else. */
+    public record IsbnMatches(List<EditionService.EditionSummary> items) {}
+
+    @GetMapping("/by-isbn")
+    IsbnMatches byIsbn(
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) UUID excludeId,
+            Authentication authentication) {
+        return new IsbnMatches(editions.withIsbn(SignedInUser.id(authentication), isbn, excludeId));
     }
 
     @PostMapping

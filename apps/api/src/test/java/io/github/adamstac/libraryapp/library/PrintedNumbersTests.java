@@ -23,6 +23,18 @@ class PrintedNumbersTests {
     }
 
     @Test
+    void anIsbn10AndItsIsbn13AreTheSameBook() {
+        assertThat(PrintedNumbers.isbnForms("0306406152")).containsExactly("0306406152", "9780306406157");
+        assertThat(PrintedNumbers.isbnForms("9780306406157")).containsExactly("9780306406157", "0306406152");
+        assertThat(PrintedNumbers.isbnForms("080442957X")).containsExactly("080442957X", "9780804429573");
+        assertThat(PrintedNumbers.isbnForms("9780804429573")).as("a check character of X is worked out").containsExactly("9780804429573", "080442957X");
+        assertThat(PrintedNumbers.isbnForms("9791090636071")).as("979 has no ISBN-10").containsExactly("9791090636071");
+        for (String form : PrintedNumbers.isbnForms("0306406152")) {
+            assertThat(PrintedNumbers.isbn(form)).as("each form is itself a valid ISBN").isEqualTo(form);
+        }
+    }
+
+    @Test
     void anIsbnWithAWrongCheckDigitOrShapeIsRefused() {
         for (String wrong : new String[] {
             "978-0-306-40615-6", // wrong check digit
