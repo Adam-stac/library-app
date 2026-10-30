@@ -4,7 +4,8 @@
 from the reader's own library, from imported reference data (Usul, then Harvard and Library of Congress records) and
 from live services (BnF, Open Library, Google Books), the ⓘ check note, and the imports themselves; and the
 timelines of scholars built on the reference data (T2 for readers, T3 on the landing page). Test names marked
-*(planned, slice N)* are written in that slice, and this file is updated as each slice is built. The lookup endpoints
+*(planned, slice N)* are written in that slice; L4, L5 and L6 are deferred (ADR 0010, amended 30 October 2026),
+so their planned rows describe what must hold if they return, and nothing they cover is built, and this file is updated as each slice is built. The lookup endpoints
 are named in L1, L3 and L5, and each is added to the `LIBRARY` paths in `SecurityConfig` and to `SecurityBaselineTests`.
 One endpoint is public: `GET /api/v1/public/scholars` (T3), the reference list of dated scholars, opened on its own in
 `SecurityConfig`; everything else under `/api/v1/public` is refused.

@@ -30,9 +30,18 @@ layer wins and nothing the reader typed is ever replaced.
 | --- | --- | --- | --- |
 | 1. Your own library | L1, L2 | "You already have this"; publisher and place from the ISBN's publisher code and your own books; language from the country block | No |
 | 2. Imported classical data | L3, T2 | Wikidata's classical scholars and their works (CC0), chosen in L3 after Usul's data was withdrawn | No |
-| 3. Imported library records | L4 | Arabic-language records from Harvard (CC0) and the Library of Congress, after measuring coverage | No |
-| 4. Shared reader catalogue | L6 | Public facts of a book, shared between readers, if it is ever built (point 7) | No |
-| 5. Live fallbacks | L5 | BnF, Open Library, Google Books, asked from the server | **Yes** |
+| 3. Imported library records | L4 | Arabic-language records from Harvard (CC0) and the Library of Congress, after measuring coverage. **Deferred** | No |
+| 4. Shared reader catalogue | L6 | Public facts of a book, shared between readers, if it is ever built (point 7). **Deferred** | No |
+| 5. Live fallbacks | L5 | BnF, Open Library, Google Books, asked from the server. **Deferred** | **Yes** |
+
+*Amended 30 October 2026 (Adam's decision):* layers 3 to 5 are deferred, and Phase B3 ends with layers 1 and 2. What
+they leave is mostly the publisher, place and year of a reader's first book from a publisher, which takes seconds to
+type, while layer 5 would bring the app's first outside calls on a reader's behalf. A sample of 20 classical titles
+from an Arabic bookshop found two with no ISBN at all, and the sources' Arabic coverage couldn't be measured from here
+(Harvard's API refuses cloud requests; loc.gov's search covers only digitised items). The shared catalogue only helps
+once other readers have entered books. The design below stands if any layer returns, for instance if readers find
+adding books slow; the BnF's catalogue data was confirmed to be under the Licence Ouverte (free use, commercial use
+included, with credit and the retrieval date).
 
 Layers 1 to 4 are searched on our own database, so they can answer as you type. Layer 5 is the only one that sends
 anything out, and it is last. The order is by trust, then cost: catalogued records come before what readers entered
@@ -102,7 +111,7 @@ re-read before go-live, which the go-live checklist now says):
 | Harvard Library | CC0 with community norms (not binding): credit Harvard Library, OCLC and the Library of Congress where feasible; share improvements on the same terms. WorldCat records follow the WorldCat Rights and Responsibilities; study and research use fits, other uses need a review | Import the Arabic subset in L4 (the full set is 12.7 million records, which we neither need nor want). Credit them. Review the WorldCat terms before shipping |
 | Library of Congress | Not yet checked | Check the terms in L4 before importing |
 | Open Library | No licence stated on the developer pages we read. Asks that the API is not used for bulk downloads (use the monthly dumps), that requests are cached, and that the app identifies itself | Live single lookups only, cached, identified. Dumps are an L4 question, after reading their licensing and terms |
-| BnF (SRU) | Open without sign-in, supports ISBN search. Licence and limits not stated on the pages we read | Live fallback only. Confirm licence and limits before L5 ships |
+| BnF (SRU) | Open without sign-in, supports ISBN search. Its catalogue data is under the French State's Licence Ouverte since 2014: free use, keeping the source and retrieval date (read 30 October 2026). Rate limits not stated | Live fallback only, if L5 returns |
 | Google Books | The Books terms say the app may not charge users without Google's agreement; the Google API terms bar building databases or permanent copies of content and limit caching to the cache header | Last fallback, off by default, never stored in a reference table or the shared catalogue, cached only as the header allows. **Review before the app charges anyone** (the roadmap expects paying readers one day) |
 
 **7. What may be shared between readers (the boundary for L6, whose own ADR and threat model decide the rest).**
