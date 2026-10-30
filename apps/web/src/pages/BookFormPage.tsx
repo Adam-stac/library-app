@@ -9,6 +9,7 @@ import AuthorsPicker from '../components/AuthorsPicker'
 import FormField, { CheckNote } from '../components/FormField'
 import Icon from '../components/Icon'
 import IsbnScanner from '../components/IsbnScanner'
+import { CatalogueOffers, ScholarAuthor } from '../components/ScholarWorks'
 import Loading from '../components/Loading'
 import PageHeader from '../components/PageHeader'
 import SearchPicker, { Picked } from '../components/SearchPicker'
@@ -31,6 +32,7 @@ import {
   workTitle,
 } from '../library'
 import { readIsbn } from '../isbn'
+import type { Scholar, ScholarWork } from '../scholarWorks'
 import {
   type Fillable,
   type Filled,
@@ -210,6 +212,29 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
     return suggested ? noteFor(suggested) : undefined
   }
   const anyFilled = (['publisher', 'publicationPlace', 'language'] as const).some((field) => checkNote(field))
+  // A classical work chosen from the scholars' catalogue (ADR 0010, layer 2): its titles as filled in, and its
+  // authors still to be matched to the reader's own or added, one press each
+  const [catalogue, setCatalogue] = useState<{
+    base: string
+    titleAr: string
+    titleEn: string | null
+    pending: Scholar[]
+  } | null>(null)
+  const chosen = catalogue?.base === base ? catalogue : null
+  const fromCatalogue = `${t('books.suggest.check')} ${t('books.catalogue.from')}`
+  const pickWork = (work: ScholarWork) => {
+    const englishIsOurs = chosen?.titleEn != null && draft.titleEn === chosen.titleEn
+    const titleEn = work.titleEn && (draft.titleEn === '' || englishIsOurs) ? work.titleEn : null
+    setDraft({ ...draft, titleAr: work.titleAr, titleEn: titleEn ?? (englishIsOurs ? '' : draft.titleEn) })
+    setCatalogue({ base, titleAr: work.titleAr, titleEn, pending: work.authors })
+  }
+  const authorChosen = (scholar: Scholar, author: Named) => {
+    setDraft({
+      ...draft,
+      authors: draft.authors.some((other) => other.id === author.id) ? draft.authors : [...draft.authors, author],
+    })
+    if (chosen) setCatalogue({ ...chosen, pending: chosen.pending.filter((other) => other.id !== scholar.id) })
+  }
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
@@ -429,6 +454,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   value={draft.titleAr}
                   onChange={set('titleAr')}
                   error={error('work.titleAr')}
+                  note={chosen && draft.titleAr === chosen.titleAr ? fromCatalogue : undefined}
                   maxLength={500}
                   dir="auto"
                   book
@@ -439,11 +465,18 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   value={draft.titleEn}
                   onChange={set('titleEn')}
                   error={error('work.titleEn')}
+                  note={chosen?.titleEn && draft.titleEn === chosen.titleEn ? fromCatalogue : undefined}
                   maxLength={500}
                   dir="auto"
                   book
                 />
               </div>
+              {!editing && !(chosen && draft.titleAr === chosen.titleAr) && (
+                <CatalogueOffers typed={draft.titleAr || draft.titleEn} onPick={pickWork} />
+              )}
+              <p aria-live="polite" className="sr-only">
+                {chosen && draft.titleAr === chosen.titleAr ? t('books.catalogue.filled') : ''}
+              </p>
               <AuthorsPicker
                 id="authors"
                 label={t('books.form.authors')}
@@ -451,6 +484,13 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                 onChange={(authors) => setDraft({ ...draft, authors })}
                 error={error('work.authorIds')}
               />
+              {chosen?.pending.map((scholar) => (
+                <ScholarAuthor
+                  key={scholar.id}
+                  scholar={scholar}
+                  onChosen={(author) => authorChosen(scholar, author)}
+                />
+              ))}
               <div className="flex flex-col gap-2">
                 <label htmlFor="science" className="label">
                   {t('books.fields.science')}

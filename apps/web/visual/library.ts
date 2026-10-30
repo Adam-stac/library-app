@@ -564,6 +564,7 @@ function answer(url: URL): unknown {
   if (path === '/api/v1/editions') return page(url.searchParams.get('workId') ? editions.slice(2, 3) : editions)
   if (path === '/api/v1/editions/by-isbn') return { items: [] } // no other copy of the ISBN in the field
   if (path === '/api/v1/editions/suggestions') return { publisher: null, publicationPlace: null, language: null }
+  if (path === '/api/v1/reference/works') return { items: [] }
   if (path.startsWith('/api/v1/editions/')) return edition
   if (path === '/api/v1/works') return page(works.slice(0, 2), 100)
   if (path.startsWith('/api/v1/works/')) return { ...works[1], version: 2 }
@@ -638,6 +639,7 @@ export const PAGES: { name: string; path: string; signedIn: boolean }[] = [
 /** More pages checked for reflow only: mostly forms, whose look the screenshots above already cover */
 export const MORE_PAGES: { name: string; path: string; signedIn: boolean }[] = [
   { name: 'forgot-password', path: '/forgot-password', signedIn: false },
+  { name: 'about-data', path: '/about/data', signedIn: false },
   { name: 'benefit', path: '/benefits/b1', signedIn: true },
   { name: 'place', path: '/places/p4', signedIn: true },
   { name: 'place-form', path: '/places/new', signedIn: true },

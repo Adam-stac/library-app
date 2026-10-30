@@ -521,4 +521,148 @@ describe('BookFormPage', () => {
       )
     })
   })
+  describe("From the scholars' catalogue", () => {
+    const TYPED = 'صحيج البخاري'
+    const CATALOGUE = `/api/v1/reference/works?q=${encodeURIComponent(TYPED)}&limit=5`
+    const settings = () => json(200, { defaultCurrency: null })
+    const bukhari = {
+      id: 'Q38190',
+      nameAr: 'محمد بن إسماعيل البخاري',
+      nameEn: 'Muhammad al-Bukhari',
+      deathHijri: 256,
+      deathCe: 870,
+    }
+    const sahih = { id: 'Q209017', titleAr: 'صحيح البخاري', titleEn: 'Sahih al-Bukhari', authors: [bukhari] }
+    const yours = { id: 'a9', nameAr: 'البخاري', nameEn: null }
+    const searchFor = (q: string) => `/api/v1/search?q=${encodeURIComponent(q)}&limit=5`
+    const noAuthors = () => json(200, { authors: { items: [], total: 0 } })
+    const CHECK = "May be incorrect, please check. From the scholars' catalogue (Wikidata)."
+
+    it('offers classical works as you type a title, and choosing one fills the titles with a note to check', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [CATALOGUE]: () => json(200, { items: [sahih] }),
+          [searchFor(bukhari.nameAr)]: noAuthors,
+          [searchFor(bukhari.nameEn)]: noAuthors,
+          [searchFor('البخاري')]: noAuthors,
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('Title in Arabic'), TYPED)
+      const offers = await screen.findByRole('region', { name: "From the scholars' catalogue" })
+      expect(within(offers).getByRole('link', { name: 'About the data' })).toHaveAttribute('href', '/about/data')
+      await user.click(within(offers).getByRole('button', { name: /صحيح البخاري/ }))
+
+      expect(screen.getByLabelText('Title in Arabic')).toHaveValue('صحيح البخاري')
+      expect(screen.getByLabelText('Title in English')).toHaveValue('Sahih al-Bukhari')
+      expect(screen.getByLabelText('Title in Arabic')).toHaveAccessibleDescription(CHECK)
+      expect(screen.getByLabelText('Title in English')).toHaveAccessibleDescription(CHECK)
+      expect(screen.queryByRole('region', { name: "From the scholars' catalogue" })).not.toBeInTheDocument()
+      expect(screen.getByText('Author in the catalogue: Muhammad al-Bukhari (d. 256 AH)')).toBeInTheDocument()
+
+      // Editing a filled title makes it yours, and its note goes
+      await user.type(screen.getByLabelText('Title in English'), ' (Beirut)')
+      expect(screen.getByLabelText('Title in English')).not.toHaveAccessibleDescription(
+        expect.stringContaining('check'),
+      )
+    })
+
+    it('offers your own author who may be the scholar, and uses them on one press', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [CATALOGUE]: () => json(200, { items: [sahih] }),
+          [searchFor(bukhari.nameAr)]: noAuthors,
+          [searchFor(bukhari.nameEn)]: noAuthors,
+          [searchFor('البخاري')]: () => json(200, { authors: { items: [yours], total: 1 } }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('Title in Arabic'), TYPED)
+      await user.click(await screen.findByRole('button', { name: /صحيح البخاري/ }))
+      await user.click(await screen.findByRole('button', { name: 'Use your author البخاري' }))
+
+      expect(within(screen.getByRole('list', { name: 'Authors' })).getByText('البخاري')).toBeInTheDocument()
+      expect(screen.queryByText(/Author in the catalogue/)).not.toBeInTheDocument()
+    })
+
+    it('adds the scholar as a new author with their death year, on one press', async () => {
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [CATALOGUE]: () => json(200, { items: [sahih] }),
+          [searchFor(bukhari.nameAr)]: noAuthors,
+          [searchFor(bukhari.nameEn)]: noAuthors,
+          [searchFor('البخاري')]: noAuthors,
+          '/api/v1/authors': () => json(201, { id: 'a10', nameAr: bukhari.nameAr, nameEn: bukhari.nameEn }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('Title in Arabic'), TYPED)
+      await user.click(await screen.findByRole('button', { name: /صحيح البخاري/ }))
+      await user.click(screen.getByRole('button', { name: 'Add Muhammad al-Bukhari as a new author' }))
+
+      await waitFor(() =>
+        expect(
+          within(screen.getByRole('list', { name: 'Authors' })).getByText('Muhammad al-Bukhari'),
+        ).toBeInTheDocument(),
+      )
+      expect(JSON.parse(String(callTo(api, '/api/v1/authors').body))).toEqual({
+        nameAr: bukhari.nameAr,
+        nameEn: bukhari.nameEn,
+        death: { hijri: 256, ce: 870, approximate: false },
+      })
+    })
+
+    it('ignores an answer in the wrong shape', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [CATALOGUE]: () =>
+            json(200, {
+              items: [
+                { id: 'not a QID', titleAr: 'x', authors: [bukhari] },
+                { ...sahih, authors: [{ id: 'Q1' }] },
+              ],
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('Title in Arabic'), TYPED)
+      await new Promise((resolve) => setTimeout(resolve, 450))
+
+      expect(screen.queryByRole('region', { name: "From the scholars' catalogue" })).not.toBeInTheDocument()
+    })
+
+    it('offers nothing on the edit page', async () => {
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/editions/e1': () => json(200, EDITION),
+          '/api/v1/works/w1': () => json(200, { ...WORK, version: 2 }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/e1/edit')
+
+      await user.clear(await screen.findByLabelText('Title in Arabic'))
+      await user.type(screen.getByLabelText('Title in Arabic'), TYPED)
+      await new Promise((resolve) => setTimeout(resolve, 450))
+
+      expect(api.mock.calls.some(([path]) => String(path).startsWith('/api/v1/reference/works'))).toBe(false)
+    })
+  })
 })
