@@ -160,5 +160,8 @@ elsewhere.
 - T2 matches a reader's author to a scholar by an optional plain Wikidata ID on the author (no foreign key, so a new
   snapshot can't break a reader's records), set when the author is added from the timeline; one author per scholar in
   each account. Authors added before T2 are matched by name and year of death instead, so a scholar isn't shown twice.
+- T3 shows the same list on the landing page, to anyone, from one public endpoint (`/api/v1/public/scholars`): CC0
+  reference data only, rate-limited per address, kept by the visitor's browser. A scholar's works stay for signed-in
+  readers.
 - Left for later slices: mapping a suggested science to one in the reader's own list by name, and the numbers for limits and the
   agreement count in L6.

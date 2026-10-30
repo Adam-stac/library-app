@@ -7,3 +7,5 @@ services:
       # The browser tests make many sign-in requests from one address within a minute.
       # Production keeps the default of 10 per minute from application.yml; CI checks it stays that way.
       APP_RATE_LIMIT_AUTH_REQUESTS_PER_MINUTE: "100"
+      # The browser tests open the landing page, and its timeline, many times from one address
+      APP_RATE_LIMIT_PUBLIC_REQUESTS_PER_MINUTE: "1000"

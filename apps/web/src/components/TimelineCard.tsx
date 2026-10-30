@@ -19,6 +19,8 @@ type Props = {
   offset?: number
   /** A scholar from the catalogue was added to your library, as this new author */
   onAdded?: (author: Named) => void
+  /** On the landing page, for someone not signed in (T3): scholars only, nothing to add or open; the name is an h4 under the section's h2 and h3 */
+  visitor?: boolean
 }
 
 /** A catalogue scholar's best-known works, for their card (the first three) */
@@ -44,9 +46,21 @@ function useScholarTitles(scholarId: string | null): TimelineTitle[] {
 }
 
 /** The author the timeline is resting on: who they were, when they died, and what of theirs is on your shelves */
-export default function TimelineCard({ author, sameYear, now, pinned, compareWith, onPin, offset, onAdded }: Props) {
+export default function TimelineCard({
+  author,
+  sameYear,
+  now,
+  pinned,
+  compareWith,
+  onPin,
+  offset,
+  onAdded,
+  visitor = false,
+}: Props) {
   const { t, i18n } = useTranslation()
-  const scholarTitles = useScholarTitles(author.scholar ? author.id : null)
+  // A scholar's works are for signed-in readers; a visitor's card says how many there are
+  const scholarTitles = useScholarTitles(author.scholar && !visitor ? author.id : null)
+  const Heading = visitor ? 'h4' : 'h2'
   const [adding, setAdding] = useState(false)
   const [problem, setProblem] = useState<{ id: string; text: string } | null>(null)
   const language = i18n.language === 'ar' ? 'ar' : 'en'
@@ -106,7 +120,7 @@ export default function TimelineCard({ author, sameYear, now, pinned, compareWit
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-book text-2xl leading-snug font-semibold break-words">
+          <Heading className="font-book text-2xl leading-snug font-semibold break-words">
             {author.scholar ? (
               <bdi>{displayName(author, language)}</bdi>
             ) : (
@@ -114,7 +128,7 @@ export default function TimelineCard({ author, sameYear, now, pinned, compareWit
                 <bdi>{displayName(author, language)}</bdi>
               </Link>
             )}
-          </h2>
+          </Heading>
           {other && (
             <p className="text-sm text-muted">
               <bdi>{other}</bdi>
@@ -170,7 +184,7 @@ export default function TimelineCard({ author, sameYear, now, pinned, compareWit
               ? t('timeline.compareWith', { name: displayName(compareWith, language) })
               : t('timeline.pin')}
         </button>
-        {author.scholar ? (
+        {visitor ? null : author.scholar ? (
           <button
             type="button"
             className="btn btn-primary"

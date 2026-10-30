@@ -200,6 +200,43 @@ const bin = {
   keptDays: 30,
 }
 
+/** The landing page's timeline (T3): a sample of the catalogue's scholars, al-Bukhārī among them */
+const publicScholars = {
+  scholars: [
+    { id: 'Q5670', nameAr: 'أبو نواس', nameEn: 'Abu Nuwas', deathHijri: null, deathCe: 814, works: 0 },
+    { id: 'Q241026', nameAr: 'محمد بن إسماعيل البخاري', nameEn: 'Muḥammad ibn Ismaeel al-Bukhārī', deathHijri: null, deathCe: 870, works: 10 },
+    { id: 'Q282523', nameAr: 'ماريو باي', nameEn: 'Mario Pei', deathHijri: 1398, deathCe: 1978, works: 0 },
+    { id: 'Q334847', nameAr: 'ابن إسحاق', nameEn: 'Ibn Ishaq', deathHijri: null, deathCe: 768, works: 1 },
+    { id: 'Q508501', nameAr: 'ابن عذاري', nameEn: 'Ibn Idhari', deathHijri: null, deathCe: 1295, works: 1 },
+    { id: 'Q1046622', nameAr: 'قدامة بن جعفر', nameEn: "Qudama ibn Ja'far", deathHijri: null, deathCe: 948, works: 2 },
+    { id: 'Q2584074', nameAr: 'أبو المعالي الجويني', nameEn: 'Al-Juwayni', deathHijri: 478, deathCe: 1085, works: 9 },
+    { id: 'Q3123742', nameAr: 'محمد كرد علي', nameEn: 'Muhammad Kurd Ali', deathHijri: 1372, deathCe: 1953, works: 7 },
+    { id: 'Q3777031', nameAr: 'ابن القوطية', nameEn: 'Ibn al-Qūṭiyya', deathHijri: null, deathCe: 977, works: 1 },
+    { id: 'Q4670215', nameAr: 'أبو هلال العسكري', nameEn: 'Abu Hilal al-Askari', deathHijri: null, deathCe: 1005, works: 3 },
+    { id: 'Q5984157', nameAr: 'ابن أبي عاصم', nameEn: 'Ibn Abi Asim', deathHijri: null, deathCe: 900, works: 2 },
+    { id: 'Q6534150', nameAr: 'ابن العماد الحنبلي', nameEn: "İbnü'l-İmad", deathHijri: null, deathCe: 1679, works: 2 },
+    { id: 'Q6820252', nameAr: 'أبو بكر الجصاص', nameEn: 'Al-Jaṣṣās', deathHijri: 370, deathCe: 981, works: 1 },
+    { id: 'Q11903899', nameAr: 'أبو إسحاق الإلبيري', nameEn: 'Abu-Ishaq al-Ilbirí', deathHijri: null, deathCe: 1068, works: 0 },
+    { id: 'Q12178249', nameAr: 'أبو يعلى الزواوي', nameEn: 'al-Saʻīd ibn Muḥammad Sharīf', deathHijri: null, deathCe: 1952, works: 0 },
+    { id: 'Q12189173', nameAr: 'عبد الله عبد الجبار', nameEn: 'ʻAbd Allāh ʻAbd al-Jabbār', deathHijri: 1432, deathCe: 2011, works: 1 },
+    { id: 'Q12222153', nameAr: 'عاتق البلادي', nameEn: 'ʻĀtiq ibn Ghayth Bilādī', deathHijri: 1431, deathCe: 2010, works: 5 },
+    { id: 'Q12228408', nameAr: 'عمر بن الحسين الخرقي', nameEn: 'ʿUmar ibn Ḥusayn al-Khiraqī', deathHijri: null, deathCe: 945, works: 1 },
+    { id: 'Q12241070', nameAr: 'محمد نسيب الرفاعي', nameEn: null, deathHijri: null, deathCe: 1992, works: 0 },
+    { id: 'Q16119811', nameAr: 'محمد خليفة التونسي', nameEn: null, deathHijri: 1408, deathCe: 1988, works: 0 },
+    { id: 'Q20385547', nameAr: 'أبو العباس أحمد بن عمر القرطبي', nameEn: 'Aḥmad ibn ʿUmar Qurṭubī', deathHijri: null, deathCe: 1258, works: 2 },
+    { id: 'Q22690845', nameAr: 'يموت بن المزرع', nameEn: 'Yamūt ibn al-Muzarraʿ', deathHijri: null, deathCe: 916, works: 0 },
+    { id: 'Q28714755', nameAr: 'حماد الأنصاري', nameEn: 'Hamad al-Ansari', deathHijri: null, deathCe: 1998, works: 0 },
+    { id: 'Q54875385', nameAr: 'ابن ظافر الأزدي', nameEn: 'Ibn Zafir al-Azdi', deathHijri: 613, deathCe: 1216, works: 1 },
+    { id: 'Q98139803', nameAr: 'جعفر بن منصور (اليمن)', nameEn: "Ja'far ibn Mansur al-Yaman", deathHijri: null, deathCe: 957, works: 0 },
+    { id: 'Q108309481', nameAr: 'علي بن حرب', nameEn: 'ʻAli ibn Harb', deathHijri: null, deathCe: 878, works: 0 },
+    { id: 'Q124476356', nameAr: 'البحيري', nameEn: 'al-Buḥayrī', deathHijri: 451, deathCe: 1059, works: 0 },
+    { id: 'Q125098789', nameAr: 'علي بن خليل الطرابلسي', nameEn: 'Alṭaarābulusy', deathHijri: null, deathCe: 1440, works: 0 },
+    { id: 'Q136325265', nameAr: 'محمد بن عطية الشامي', nameEn: null, deathHijri: null, deathCe: 864, works: 0 },
+    { id: 'Q136709754', nameAr: 'الحميري', nameEn: null, deathHijri: null, deathCe: 935, works: 0 },
+    { id: 'Q136709824', nameAr: 'عبد الجبار الخولاني', nameEn: null, deathHijri: null, deathCe: 971, works: 0 },
+  ],
+}
+
 /** The authors timeline: 26 classical authors, one without a date */
 const timeline = {
   authors: [
@@ -583,6 +620,7 @@ function answer(url: URL): unknown {
   if (path === '/api/v1/library-settings') return { defaultCurrency: 'SAR' }
   if (path === '/api/v1/bin') return bin
   if (path === '/api/v1/timeline') return timeline
+  if (path === '/api/v1/public/scholars') return publicScholars
   if (path === '/api/v1/search') {
     return {
       authors: { items: authors.slice(1, 2), total: 1 },
@@ -656,6 +694,10 @@ export const MORE_PAGES: { name: string; path: string; signedIn: boolean }[] = [
 /** Waits until the page has drawn what it loaded, in its own fonts */
 export async function settled(page: Page) {
   await page.waitForLoadState('networkidle')
+  // Down to the end and back, so anything loaded as the reader scrolls (the landing page's timeline) is there
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.waitForLoadState('networkidle')
+  await page.evaluate(() => window.scrollTo(0, 0))
   await page.evaluate(() => document.fonts.ready)
   // Placeholders wait a quarter of a second before showing; by now the data is there, so none are left
   await page.waitForFunction(() => document.querySelector('[aria-busy="true"]') === null)

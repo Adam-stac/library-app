@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -72,6 +72,14 @@ function renderPage() {
   )
 }
 
+const SCHOLARS = {
+  scholars: [
+    { id: 'Q9441', nameAr: 'مالك بن أنس', nameEn: 'Malik ibn Anas', deathHijri: 179, deathCe: null, works: 2 },
+    { id: 'Q241026', nameAr: 'البخاري', nameEn: 'al-Bukhari', deathHijri: null, deathCe: 870, works: 9 },
+    { id: 'Q468432', nameAr: 'السيوطي', nameEn: 'al-Suyuti', deathHijri: 911, deathCe: 1505, works: 67 },
+  ],
+}
+
 describe('HomePage', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('en')
@@ -82,7 +90,7 @@ describe('HomePage', () => {
   })
 
   it('signed out: says what the app is, with creating an account and signing in', async () => {
-    fakeApi({})
+    fakeApi({ '/api/v1/public/scholars': () => json(200, SCHOLARS) })
     renderPage()
 
     expect(await screen.findByRole('heading', { name: 'The index of your library', level: 1 })).toBeInTheDocument()
@@ -213,5 +221,63 @@ describe('HomePage', () => {
     renderPage()
 
     expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't load this")
+  })
+
+  describe('the timeline of scholars (T3)', () => {
+    it('shows every scholar in the catalogue, opening on al-Bukhari, with nothing to add or open', async () => {
+      const api = fakeApi({ '/api/v1/public/scholars': () => json(200, SCHOLARS) })
+      renderPage()
+
+      const section = within(await screen.findByRole('region', { name: 'Fourteen centuries of scholars' }))
+      expect(await section.findByRole('heading', { name: '3 scholars on the timeline' })).toBeInTheDocument()
+      const ruler = section.getByRole('slider', { name: 'Timeline of authors' })
+      expect(ruler).toHaveAttribute('aria-valuenow', '256')
+      const card = within(section.getByRole('article'))
+      expect(card.getByRole('heading', { name: 'al-Bukhari', level: 4 })).toBeInTheDocument()
+      expect(card.getByText(/9 works in the catalogue/)).toBeInTheDocument()
+      expect(card.getByRole('link', { name: 'About the data' })).toHaveAttribute('href', '/about/data')
+      expect(card.queryByRole('button', { name: 'Add to my library' })).not.toBeInTheDocument()
+      expect(card.queryByRole('link', { name: 'Open author' })).not.toBeInTheDocument()
+      // A scholar's works are for signed-in readers, so a visitor's card asks for nothing more
+      expect(api.mock.calls.map(([path]) => path)).not.toContain(
+        '/api/v1/reference/works?scholar=Q241026&limit=3',
+      )
+
+      fireEvent.keyDown(ruler, { key: 'End' })
+      expect(ruler).toHaveAttribute('aria-valuenow', '911')
+      expect(card.getByRole('heading', { name: 'al-Suyuti' })).toBeInTheDocument()
+      fireEvent.click(card.getByRole('button', { name: 'Pin to compare' }))
+      expect(section.getByText(/al-Suyuti: 911 years after the Hijra/)).toBeInTheDocument()
+    })
+
+    it('loads only when the visitor scrolls near it', async () => {
+      let seen: ((entries: { isIntersecting: boolean }[]) => void) | undefined
+      vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+          constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+            seen = callback
+          }
+          observe() {}
+          disconnect() {}
+        },
+      )
+      const api = fakeApi({ '/api/v1/public/scholars': () => json(200, SCHOLARS) })
+      renderPage()
+      await screen.findByRole('heading', { name: 'Fourteen centuries of scholars' })
+      expect(api.mock.calls.map(([path]) => path)).not.toContain('/api/v1/public/scholars')
+
+      act(() => seen?.([{ isIntersecting: true }]))
+
+      expect(await screen.findByRole('heading', { name: '3 scholars on the timeline' })).toBeInTheDocument()
+    })
+
+    it('says so when the timeline could not be loaded, and the rest of the page stands', async () => {
+      fakeApi({ '/api/v1/public/scholars': () => json(429, { status: 429, code: 'rate_limited' }) })
+      renderPage()
+
+      expect(await screen.findByText("The timeline couldn't load. Try again later.")).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'What you can do', level: 2 })).toBeInTheDocument()
+    })
   })
 })

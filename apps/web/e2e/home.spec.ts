@@ -19,6 +19,22 @@ test.describe('Home page', () => {
     expect(errors).toEqual([])
   })
 
+  test('shows the timeline of scholars to anyone, from the public list, with nothing to add', async ({ page }) => {
+    await page.goto('/')
+
+    const section = page.getByRole('region', { name: 'أربعة عشر قرنًا من العلماء' })
+    await section.scrollIntoViewIfNeeded()
+    await expect(section.getByRole('heading', { name: /عالمًا على الخط الزمني|عالم على الخط الزمني/ })).toBeVisible()
+    const ruler = section.getByRole('slider', { name: 'الخط الزمني للمؤلفين' })
+    await expect(ruler).toHaveAttribute('aria-valuenow', '256') // al-Bukhari, whose Sahih is the example above
+    await expect(section.getByRole('article').getByRole('heading', { name: /البخاري/ })).toBeVisible()
+    await expect(section.getByRole('button', { name: 'أضفه إلى مكتبتي' })).toHaveCount(0)
+    await ruler.focus()
+    await page.keyboard.press('End')
+    await expect(ruler).not.toHaveAttribute('aria-valuenow', '256')
+    await expectAccessible(page, 'the landing page with its timeline')
+  })
+
   test('nothing moves while the page and its fonts load', async ({ page }) => {
     await watchLayoutShift(page)
     await page.goto('/')
