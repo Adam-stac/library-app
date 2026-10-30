@@ -29,7 +29,7 @@ layer wins and nothing the reader typed is ever replaced.
 | Layer | Slice | What it is | Leaves our servers? |
 | --- | --- | --- | --- |
 | 1. Your own library | L1, L2 | "You already have this"; publisher and place from the ISBN's publisher code and your own books; language from the country block | No |
-| 2. Imported classical data | L3, T2 | Usul's open data for classical works and scholars | No |
+| 2. Imported classical data | L3, T2 | Wikidata's classical scholars and their works (CC0), chosen in L3 after Usul's data was withdrawn | No |
 | 3. Imported library records | L4 | Arabic-language records from Harvard (CC0) and the Library of Congress, after measuring coverage | No |
 | 4. Shared reader catalogue | L6 | Public facts of a book, shared between readers, if it is ever built (point 7) | No |
 | 5. Live fallbacks | L5 | BnF, Open Library, Google Books, asked from the server | **Yes** |
@@ -46,7 +46,7 @@ is the reader's own. An ISBN is matched exactly (after its check digit passes); 
 
 **3. Reference data and personal data stay apart.**
 
-- *Reference data* is facts about published books and scholars that belong to nobody: the Usul and library-record
+- *Reference data* is facts about published books and scholars that belong to nobody: the Wikidata, ISBN-range and library-record
   imports. It lives in tables with no owner, readable by every signed-in account and writable by no endpoint (as the
   shared list of places is). It is not personal data.
 - *Personal data* is everything a reader enters, scoped to its owner as in ADR 0006. In L1 to L5 none of it is ever
@@ -58,6 +58,13 @@ schema) against a named release and a recorded checksum. The import validates ev
 reader input (NFC, no control or direction characters, length limits), loads in one transaction, and reports counts.
 Running it again replaces the earlier snapshot. The licence notice travels with the data, and an "About the data"
 page credits every source in use.
+
+*Amended in L3 (30 October 2026):* data whose licence allows republishing (CC0, such as Wikidata) may instead ship
+with the app as a snapshot in the repository, made by a script kept beside it (`tools/wikidata/`). Its SHA-256 is
+pinned in the code, so only the snapshot reviewed in a pull request can load; the API loads it when it starts, only if
+that checksum isn't already loaded, checking every value like reader input, in one transaction. Nothing is fetched
+while the app runs. Data whose licence forbids republishing (the ISBN Agency's ranges) keeps the administrator's
+import.
 
 **5. Live lookups are narrow, on request, and from the server only.**
 
@@ -87,9 +94,11 @@ re-read before go-live, which the go-live checklist now says):
 
 | Source | Terms found | What we do |
 | --- | --- | --- |
-| Usul data | MIT: use, change and share, including commercially, if the licence and copyright notice are kept. Credits OpenITI and Turath.io (Shamela data) | Import (L3, T2). Keep the notice; credit all three on the About page |
+| Wikidata | CC0 1.0: no rights reserved, any use, no credit required. Read on 30 October 2026 | The source for L3 and T2: classical scholars linked to OpenITI (P13870) or al-Maktaba al-Shamela (P12435), and their works. A snapshot ships in the repository (point 4, amended). Credited on the About page all the same |
+| Usul data | MIT: use, change and share, including commercially, if the licence and copyright notice are kept. Credits OpenITI and Turath.io (Shamela data). **Withdrawn:** on 30 October 2026 its repository (seemorg/usul-data) and Usul's own app repository were no longer public | Not used. A copy obtained from Usul with its licence would still be usable; a copy from an unofficial mirror would not, as it can't be shown to be unaltered. Was: import (L3, T2). Keep the notice; credit all three on the About page |
 | ISBN Agency range file | Offered by the International ISBN Agency for use from its own site; its page says the material must not be republished without written permission, and it licenses no one to reproduce the file. Read on 30 October 2026 | Used, never republished: the administrator downloads it and imports it into the database (L2, `docs/operations/isbn-ranges.md`); it is never in this public repository, which ignores its usual file names. Tests use a made-up sample. The ISBN country codes behind the language suggestion are a short hand-made list of public facts, not a copy of the file |
-| OpenITI directly | Not reviewed | Used only through Usul. A direct import needs its own review |
+| OpenITI directly | Its releases are CC BY-NC-SA 4.0 (Zenodo, read 30 October 2026); the daily metadata repository states no licence | Not imported: no commercial use and share-alike duties. Used only as a yardstick for Wikidata's coverage in L3 |
+| al-Maktaba al-Shamela, and Turath (built on it) | Shamela's terms give no right to reuse content beyond its service and forbid rebuilding its index; Turath states "all rights reserved". Copies on Hugging Face are re-uploads whose labels their uploaders can't grant (read 30 October 2026) | Not imported. Linking to their pages is fine. Written permission from either would be recorded here |
 | Harvard Library | CC0 with community norms (not binding): credit Harvard Library, OCLC and the Library of Congress where feasible; share improvements on the same terms. WorldCat records follow the WorldCat Rights and Responsibilities; study and research use fits, other uses need a review | Import the Arabic subset in L4 (the full set is 12.7 million records, which we neither need nor want). Credit them. Review the WorldCat terms before shipping |
 | Library of Congress | Not yet checked | Check the terms in L4 before importing |
 | Open Library | No licence stated on the developer pages we read. Asks that the API is not used for bulk downloads (use the monthly dumps), that requests are cached, and that the app identifies itself | Live single lookups only, cached, identified. Dumps are an L4 question, after reading their licensing and terms |
@@ -131,7 +140,9 @@ elsewhere.
 - **A paid ISBN data service:** costs money, and such terms often forbid keeping the data. It can be revisited if the
   layers above prove too thin.
 - **Importing OpenITI directly instead of Usul:** larger and more work; Usul already carries the metadata we need as
-  JSON, under MIT.
+  JSON, under MIT. (Superseded in L3: Usul's data was withdrawn, and OpenITI is non-commercial and share-alike, so
+  Wikidata was chosen. Wikidata covered 712 of OpenITI's 3,386 authors through its OpenITI IDs, nearly all of those
+  who died by 300 AH, and reaches later scholars through its Shamela IDs: 1,723 scholars in all.)
 
 ## Consequences
 
@@ -146,7 +157,7 @@ elsewhere.
 - ADR 0003's lookup paragraph is replaced by this one (its status says so). Its other decisions stand.
 - If a bundled barcode decoder needs WebAssembly, the CSP would need `'wasm-unsafe-eval'`. L1 decides that, with the
   smallest scope it can.
-- Left for later slices: the matching of a reader's author to a scholar in the Usul data (needed for "your authors in
+- Left for later slices: the matching of a reader's author to a scholar in the Wikidata data (needed for "your authors in
   green" in T2; likely an optional plain public ID with no foreign key, so a new import can't break a reader's
   records), mapping a suggested science to one in the reader's own list by name, and the numbers for limits and the
   agreement count in L6.
