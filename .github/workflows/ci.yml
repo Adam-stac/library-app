@@ -42,6 +42,9 @@ jobs:
           fi
       - name: Build and test (real Postgres via Testcontainers)
         run: ./mvnw -B -ntp verify
+      - name: Name the failed tests on the pull request
+        if: failure()
+        run: python3 ../../.github/scripts/name-failed-tests.py
 
   web:
     name: web
