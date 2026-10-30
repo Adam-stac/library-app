@@ -18,6 +18,9 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 - [ ] **Monitoring and alerts.** Uptime checks, plus alerts on spikes in failed sign-ins, lockouts and 5xx errors.
 - [ ] **Terms of every book-data source re-read.** The licence table in ADR 0010 was read on 30 October 2026 and terms change. Before go-live, read each source in use again (Usul, Harvard, Library of Congress, BnF, Open Library, Google Books) and confirm the credits on the About page. Google Books must be reviewed again before anyone is charged. *Check:* the table shows a new date for every source in use, and a source whose terms can't be confirmed is switched off.
 
+- [ ] **No query strings in the edge's logs either.** Our nginx log drops them (search text and ISBN checks travel there), but Coolify's proxy and Cloudflare, if used, keep logs of their own. *Check:* their access logs are off, drop the query string, or are kept for a short, stated time that the privacy notice names.
+- [ ] **Barcode scanning on real phones.** A laptop webcam is too low-resolution and fixed-focus to read ISBN barcodes, so scanning was tested with a fake camera only. *Check:* on the live site, scanning a book's barcode fills in the ISBN on an iPhone (Safari) and an Android phone (Chrome), and the camera light goes off when the dialog closes.
+
 ## Accepted for now (recorded in the threat models)
 
 - The breached-password check fails open if Have I Been Pwned is unreachable.
@@ -25,4 +28,5 @@ Items come from the threat models in `docs/security/threat-models/` and the revi
 - An email change can't be undone by the owner alone; they're told at both steps and must contact the administrator.
 - New-device emails go by device type ("Chrome on Windows"), which can be faked.
 - Authenticator codes can be phished in real time; passkeys (slice 5) fix that.
+- nginx's error log writes the full request line, query string included, when a request fails (for example while the API is down). Its format can't be changed, and hiding errors would make failures harder to fix. The access log, which has a line for every request, keeps no query strings.
 - The rate limiter is in memory: it resets on restart and assumes a single API instance.

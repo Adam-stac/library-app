@@ -16,6 +16,7 @@ A feature is finished only when every relevant layer below is tested and CI is g
 | Accessibility | WCAG 2.2 AA | axe-core; reflow and text-spacing checks; by hand ([checklist](testing/manual-checklist.md)) |
 | Visual | Nothing changes how a page looks by accident | Playwright screenshots, in Playwright's Linux image |
 | Dynamic security | The running app resists common attacks | OWASP ZAP |
+| Logs | No query string (search text, an ISBN) reaches the web server's access log | A CI step over the web container's log, after the browser tests and the ZAP scan |
 
 ## Rules
 - **No automatic retries.** A flaky test is fixed straight away, never retried until it passes.
