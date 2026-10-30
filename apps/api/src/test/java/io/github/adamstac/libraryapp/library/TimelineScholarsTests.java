@@ -81,7 +81,7 @@ class TimelineScholarsTests {
     void theScholarIsCheckedAndNeverEchoed() throws Exception {
         ApiBrowser reader = newAccount();
 
-        for (String bad : new String[] {"Q0", "nope", "Q1%25", "<b>"}) {
+        for (String bad : new String[] {"Q0", "nope", "Q1%25", "%3Cb%3E"}) {
             HttpResponse<String> answer = reader.get("/api/v1/reference/works?scholar=" + bad);
             assertThat(answer.statusCode()).as(bad).isEqualTo(400);
             assertThat(answer.body()).doesNotContain("nope", "<b>");
