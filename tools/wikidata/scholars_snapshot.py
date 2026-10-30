@@ -33,7 +33,8 @@ OUT = pathlib.Path('apps/api/src/main/resources/reference/wikidata-scholars.json
 # - everyone with a citizenship in Europe, the Americas or Oceania and no Islamic religion (73 people: the rest were
 #   Muslims of the Umayyad and Ottoman states and al-Andalus, kept);
 # and a search of the names for Christian and Jewish writers whose religion Wikidata doesn't give.
-# Pre-Islamic poets whose religion Wikidata doesn't give are still in.
+# Pre-Islamic poets whose religion Wikidata doesn't give (Imru' al-Qays, Zuhayr, 'Antara) stay, as part of the
+# Arabic heritage the scholars worked on (Adam's decision).
 LEFT_OUT = {
     # Western writers whose books al-Maktaba al-Shamela carries in Arabic translation
     'Q71564': 'Sigrid Hunke',
