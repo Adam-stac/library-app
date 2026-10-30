@@ -205,7 +205,6 @@ const publicScholars = {
   scholars: [
     { id: 'Q5670', nameAr: 'أبو نواس', nameEn: 'Abu Nuwas', deathHijri: null, deathCe: 814, works: 0 },
     { id: 'Q241026', nameAr: 'محمد بن إسماعيل البخاري', nameEn: 'Muḥammad ibn Ismaeel al-Bukhārī', deathHijri: null, deathCe: 870, works: 10 },
-    { id: 'Q282523', nameAr: 'ماريو باي', nameEn: 'Mario Pei', deathHijri: 1398, deathCe: 1978, works: 0 },
     { id: 'Q334847', nameAr: 'ابن إسحاق', nameEn: 'Ibn Ishaq', deathHijri: null, deathCe: 768, works: 1 },
     { id: 'Q508501', nameAr: 'ابن عذاري', nameEn: 'Ibn Idhari', deathHijri: null, deathCe: 1295, works: 1 },
     { id: 'Q1046622', nameAr: 'قدامة بن جعفر', nameEn: "Qudama ibn Ja'far", deathHijri: null, deathCe: 948, works: 2 },
@@ -694,10 +693,18 @@ export const MORE_PAGES: { name: string; path: string; signedIn: boolean }[] = [
 /** Waits until the page has drawn what it loaded, in its own fonts */
 export async function settled(page: Page) {
   await page.waitForLoadState('networkidle')
-  // Down to the end and back, so anything loaded as the reader scrolls (the landing page's timeline) is there
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  // Down the page a screen at a time and back, as a reader would scroll, so anything loaded on the way (the landing
+  // page's timeline) is there. A single jump to the end would pass it by unseen.
+  await page.evaluate(async () => {
+    const frame = () => new Promise((done) => requestAnimationFrame(done))
+    for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight) {
+      window.scrollTo(0, y)
+      await frame()
+      await frame()
+    }
+    window.scrollTo(0, 0)
+  })
   await page.waitForLoadState('networkidle')
-  await page.evaluate(() => window.scrollTo(0, 0))
   await page.evaluate(() => document.fonts.ready)
   // Placeholders wait a quarter of a second before showing; by now the data is there, so none are left
   await page.waitForFunction(() => document.querySelector('[aria-busy="true"]') === null)
