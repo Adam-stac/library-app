@@ -5,7 +5,7 @@ Run it from the repository root when the snapshot should be refreshed:
     python3 tools/wikidata/scholars_snapshot.py
 
 It asks Wikidata's query service for every person linked to OpenITI (P13870) or al-Maktaba al-Shamela (P12435), and
-the works whose author (P50) is one of them, leaving out the few people in LEFT_OUT. It writes
+the works whose author (P50) is one of them, leaving out the writers in LEFT_OUT, who weren't Muslims. It writes
 apps/api/src/main/resources/reference/wikidata-scholars.json.gz and prints the file's SHA-256, which must then be
 copied into WikidataScholars.java: the API refuses a snapshot whose checksum isn't the one in the code. After a change
 to LEFT_OUT alone, `--left-out-only` applies it to the snapshot already in the repository without asking Wikidata. Everything is
@@ -27,12 +27,15 @@ ENDPOINT = 'https://query.wikidata.org/sparql'
 USER_AGENT = 'Khizana-reference-snapshot/1 (https://github.com/Adam-stac/library-app)'
 OUT = pathlib.Path('apps/api/src/main/resources/reference/wikidata-scholars.json.gz')
 
-# Non-Muslim Western writers whose books al-Maktaba al-Shamela carries in Arabic translation. The timelines are of
-# Muslim scholars, so they are left out (Adam's decision, 30 October 2026). Found by asking Wikidata for every linked
-# person with a citizenship in Europe, the Americas or Oceania and no Islamic religion, then read one by one: the
-# rest of that list were Muslims of the Umayyad and Ottoman states and al-Andalus, kept. Arab Christian and medieval
-# Jewish writers of the Islamic world aren't Western and stay. A work left with none of its authors goes too.
+# The timelines are of Muslim scholars, so writers who weren't Muslims are left out (Adam's decisions, 30 October
+# 2026), with any work that then has none of its authors. Found two ways, then read one by one:
+# - everyone whose religion on Wikidata isn't Islam or a branch of it;
+# - everyone with a citizenship in Europe, the Americas or Oceania and no Islamic religion (73 people: the rest were
+#   Muslims of the Umayyad and Ottoman states and al-Andalus, kept);
+# and a search of the names for Christian and Jewish writers whose religion Wikidata doesn't give.
+# Pre-Islamic poets whose religion Wikidata doesn't give are still in.
 LEFT_OUT = {
+    # Western writers whose books al-Maktaba al-Shamela carries in Arabic translation
     'Q71564': 'Sigrid Hunke',
     'Q282523': 'Mario Pei',
     'Q333911': 'Will Durant',
@@ -40,6 +43,33 @@ LEFT_OUT = {
     'Q979086': 'Joseph Vendryes',
     'Q1386146': 'Albert Hourani',
     'Q5621562': 'Gustavus Hindman Miller',
+    # Christian writers
+    'Q2385789': 'al-Akhtal',
+    'Q1047131': 'Tarafa (Nestorian, by Wikidata)',
+    'Q1291511': 'Yuhanna ibn Masawayh',
+    'Q5984235': "Ibn Na'ima al-Himsi",
+    'Q503130': 'Hunayn ibn Ishaq',
+    'Q3561501': 'Ishaq ibn Hunayn',
+    'Q1621474': 'Qusta ibn Luqa',
+    'Q2822077': 'Abu Bishr Matta ibn Yunus',
+    'Q3571334': 'Yahya ibn Adi',
+    'Q3147466': "Ibn Zur'a",
+    'Q929187': 'Ibn Butlan',
+    'Q380295': 'Bar Hebraeus',
+    'Q1399375': 'Ibrahim al-Yaziji',
+    'Q1871590': 'Louis Cheikho',
+    'Q3184898': 'Joseph Elian Sarkis',
+    'Q4751824': 'Anastase-Marie al-Karmali',
+    'Q12180851': 'Anton Gemayel',
+    'Q12252145': 'Yusuf Karam',
+    # Jewish writers
+    'Q2920519': "al-Samaw'al ibn 'Adiya",
+    'Q536837': 'Isaac Israeli',
+    'Q127398': 'Maimonides',
+    'Q318820': 'Benjamin of Tudela',
+    # A Sabian, and a pagan who died opposing the Prophet
+    'Q250568': 'Thabit ibn Qurra',
+    'Q18351755': "'Amir ibn al-Tufayl",
 }
 
 SCHOLARS = '''
@@ -132,7 +162,7 @@ def leave_out(snapshot):
         if authors:
             works.append({**work, 'authors': authors})
     selection = 'People with an OpenITI author ID (P13870) or a Shamela author ID (P12435), and their works (P50)'
-    selection += f', except {len(LEFT_OUT)} non-Muslim Western writers'
+    selection += f', except {len(LEFT_OUT)} writers who were not Muslims'
     return {**snapshot, 'selection': selection, 'scholars': scholars, 'works': works}
 
 
