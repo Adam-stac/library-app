@@ -25,12 +25,14 @@ class EditionSuggestionService {
     enum From {
         yourBooks,
         country,
-        languageArea
+        languageArea,
+        /** An Arabic publisher whose ISBNs come from another country's code (IsbnAreas); the country is theirs */
+        publisher
     }
 
     /**
-     * One suggested value. {@code country} is the ISBN's country (ISO 3166) when the value came from it, so the note
-     * can name it; otherwise null.
+     * One suggested value. {@code country} is the ISBN's country (ISO 3166) when the value came from it, or the
+     * publisher's when it came from an Arabic publisher's own code, so the note can name it; otherwise null.
      */
     public record Suggested(String value, From from, String country) {}
 
@@ -82,7 +84,9 @@ class EditionSuggestionService {
         if (language == null) {
             language = IsbnAreas.of(isbn13)
                     .map(area -> new Suggested(
-                            area.language(), area.country() == null ? From.languageArea : From.country, area.country()))
+                            area.language(),
+                            area.publisher() ? From.publisher : area.country() == null ? From.languageArea : From.country,
+                            area.country()))
                     .orElse(null);
         }
         return new Suggestions(publisher, place, language);

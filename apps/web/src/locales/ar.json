@@ -490,6 +490,7 @@
       "fromYourBooks": "من كتبك من الناشر نفسه.",
       "fromCountry": "من بلد الردمك: {{country}}.",
       "fromLanguageArea": "من منطقة لغة الردمك.",
+      "fromPublisher": "من ناشر الردمك، وهو ناشر عربي في {{country}}.",
       "filled": "مُلئت بعض الحقول لك، وبجانب كلٍّ منها مصدره. يُرجى التحقق منها."
     },
     "catalogue": {

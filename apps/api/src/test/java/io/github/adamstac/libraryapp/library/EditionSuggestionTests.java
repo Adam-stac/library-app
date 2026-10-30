@@ -160,6 +160,18 @@ class EditionSuggestionTests {
     }
 
     @Test
+    void anArabicPublisherOnAnotherCountrysCodeGivesArabicNotThatCountrysLanguage() throws Exception {
+        ApiBrowser reader = newAccount();
+
+        // Dar al-Kutub al-Ilmiyya, Beirut, whose ISBNs are on France's code (Sharh Ibn Battal, 2003)
+        assertThat(suggestions(reader, "9782745135100"))
+                .contains("\"language\":{\"value\":\"ar\",\"from\":\"publisher\",\"country\":\"LB\"}");
+        // Another publisher on France's code is still French
+        assertThat(suggestions(reader, "9782070360024"))
+                .contains("\"language\":{\"value\":\"fr\",\"from\":\"languageArea\",\"country\":null}");
+    }
+
+    @Test
     void withoutTheImportedRangesOnlyTheLanguageIsSuggested() throws Exception {
         ApiBrowser reader = newAccount();
         addEdition(reader, workId(reader), SYRIA_685_A, "دار الغوثاني", "دمشق", "ar");

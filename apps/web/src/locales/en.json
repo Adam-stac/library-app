@@ -458,6 +458,7 @@
       "fromYourBooks": "From your books by the same publisher.",
       "fromCountry": "From the ISBN's country: {{country}}.",
       "fromLanguageArea": "From the ISBN's language area.",
+      "fromPublisher": "From the ISBN's publisher, an Arabic publisher in {{country}}.",
       "filled": "Some fields were filled in for you, each saying where it came from. Please check them."
     },
     "catalogue": {

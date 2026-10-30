@@ -203,9 +203,11 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
     `${t('books.suggest.check')} ${
       suggested.from === 'country' && suggested.country
         ? t('books.suggest.fromCountry', { country: regionName(suggested.country, language) })
-        : suggested.from === 'languageArea'
-          ? t('books.suggest.fromLanguageArea')
-          : t('books.suggest.fromYourBooks')
+        : suggested.from === 'publisher' && suggested.country
+          ? t('books.suggest.fromPublisher', { country: regionName(suggested.country, language) })
+          : suggested.from === 'languageArea'
+            ? t('books.suggest.fromLanguageArea')
+            : t('books.suggest.fromYourBooks')
     }`
   const checkNote = (field: Fillable) => {
     const suggested = stillFilled(draft, filled, field)
