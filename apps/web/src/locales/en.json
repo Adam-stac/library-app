@@ -455,6 +455,16 @@
       "fromLanguageArea": "From the ISBN's language area.",
       "filled": "Some fields were filled in for you, each saying where it came from. Please check them."
     },
+    "catalogue": {
+      "title": "From the scholars' catalogue",
+      "about": "About the data",
+      "and": ", ",
+      "from": "From the scholars' catalogue (Wikidata).",
+      "author": "Author in the catalogue: {{name}}",
+      "useYours": "Use your author {{name}}",
+      "addNew": "Add {{name}} as a new author",
+      "filled": "The titles were filled in from the scholars' catalogue. Please check them, then choose the authors below."
+    },
     "aboutCopy": "About this copy",
     "allDetails": "All details"
   },
@@ -814,5 +824,17 @@
     "undated_other": "{{number}} authors without a date of death",
     "undatedHint": "Add the year they died to place them on the timeline.",
     "empty": "Add the year an author died, and they will appear here."
+  },
+  "aboutData": {
+    "title": "About the data",
+    "lede": "Where the details the app fills in for you come from. Each one is marked \"May be incorrect, please check\" until you check or change it.",
+    "scholarsTitle": "Classical scholars and their works",
+    "scholarsBody": "From Wikidata, which anyone may use freely (CC0). The app keeps its own copy of the scholars Wikidata links to OpenITI or al-Maktaba al-Shāmila, and their works, so your searches never leave the app.",
+    "scholarsLink": "Wikidata",
+    "isbnTitle": "ISBN country and publisher codes",
+    "isbnBody": "Where an ISBN's publisher code ends comes from the International ISBN Agency's range file, used under its terms and never republished.",
+    "isbnLink": "International ISBN Agency",
+    "yoursTitle": "Your own books",
+    "yoursBody": "The publisher, place and language suggested for a new book come from the books you have already added. Nothing you enter is shared with anyone."
   }
 }

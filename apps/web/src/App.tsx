@@ -30,6 +30,7 @@ function usePreloadPages() {
   }, [])
 }
 
+const AboutDataPage = page(() => import('./pages/AboutDataPage'))
 const AccountDeletedPage = page(() => import('./pages/AccountDeletedPage'))
 const AccountPage = page(() => import('./pages/AccountPage'))
 const AuthorFormPage = page(() => import('./pages/AuthorFormPage'))
@@ -86,6 +87,7 @@ export default function App() {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
             <Route path="/account-deleted" element={<AccountDeletedPage />} />
+            <Route path="/about/data" element={<AboutDataPage />} />
             <Route path="/authors" element={<AuthorsPage />} />
             <Route path="/authors/new" element={<AuthorFormPage mode="add" />} />
             <Route path="/authors/timeline" element={<AuthorTimelinePage />} />
