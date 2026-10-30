@@ -823,7 +823,19 @@
     "undated_one": "{{number}} author without a date of death",
     "undated_other": "{{number}} authors without a date of death",
     "undatedHint": "Add the year they died to place them on the timeline.",
-    "empty": "Add the year an author died, and they will appear here."
+    "empty": "Add the year an author died, and they will appear here.",
+    "mode": {
+      "label": "Show",
+      "yours": "Your authors",
+      "all": "All scholars"
+    },
+    "countAll_one": "{{number}} author or scholar on the timeline",
+    "countAll_other": "{{number}} authors and scholars on the timeline",
+    "inCatalogue_zero": "No works in the catalogue",
+    "inCatalogue_one": "{{number}} work in the catalogue",
+    "inCatalogue_other": "{{number}} works in the catalogue",
+    "addToLibrary": "Add to my library",
+    "added": "{{name}} was added to your library."
   },
   "aboutData": {
     "title": "About the data",

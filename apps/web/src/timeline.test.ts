@@ -10,6 +10,8 @@ import {
   placeAuthors,
   step,
   type TimelineAuthor,
+  nameKey,
+  scholarsBeside,
 } from './timeline'
 
 const author = (id: string, hijri: number | null, ce: number | null = null): TimelineAuthor => ({
@@ -37,7 +39,10 @@ describe('the timeline', () => {
   })
 
   it('puts authors in order of death, leaving out any after today', () => {
-    const placed = placeAuthors([author('b', 676), author('a', 256), author('c', null, 1999), author('later', 1500)], 1448)
+    const placed = placeAuthors(
+      [author('b', 676), author('a', 256), author('c', null, 1999), author('later', 1500)],
+      1448,
+    )
     expect(placed.map((a) => [a.id, a.year])).toEqual([
       ['a', 256],
       ['b', 676],
@@ -82,5 +87,60 @@ describe('the timeline', () => {
     expect(labelBox(0, 100, 1000)).toEqual([0, 100])
     expect(labelBox(1, 100, 1000)).toEqual([900, 1000])
     expect(labelBox(0.5, 100, 1000)).toEqual([450, 550])
+  })
+})
+
+describe('the general timeline (T2)', () => {
+  const yours = (
+    id: string,
+    nameAr: string,
+    hijri: number | null,
+    ce: number | null,
+    wikidataId: string | null = null,
+  ) => ({
+    ...author(id, hijri, ce),
+    nameAr,
+    nameEn: null,
+    wikidataId,
+  })
+  const scholar = (id: string, nameAr: string, hijri: number | null, ce: number | null) => ({
+    id,
+    nameAr,
+    nameEn: null,
+    deathHijri: hijri,
+    deathCe: ce,
+    works: 2,
+  })
+
+  it('reads names the Arabic-aware way', () => {
+    expect(nameKey('مُحَمَّد بنُ إسماعيلَ البُخَارِيّ')).toBe('محمد بن اسماعيل البخاري')
+    expect(nameKey('Muḥammad ibn Ismāʿīl al-Bukhārī')).toBe('muhammad ibn ismail al-bukhari')
+    expect(nameKey('ابن تيميّة')).toBe('ابن تيميه')
+    expect(nameKey(null)).toBe('')
+  })
+
+  it('shows each scholar once: never beside the same scholar among your authors', () => {
+    const own = [
+      yours('a1', 'صاحب الصحيح', 256, null, 'Q241026'), // linked by Wikidata ID, whatever its name
+      yours('a2', 'البخاري', 256, null), // your short name for a scholar who died the same year
+      yours('a3', 'النووي', 676, null),
+    ]
+    const beside = scholarsBeside(own, [
+      scholar('Q241026', 'محمد بن إسماعيل البخاري', null, 870),
+      scholar('Q2', 'أبو عبد الله البخاري', null, 870), // named like a2 and died within a year of it
+      scholar('Q3', 'يحيى بن شرف النووي', 676, null), // named like a3, same year
+      scholar('Q4', 'النووي الصغير', 900, null), // named alike but two centuries apart: someone else
+      scholar('Q5', 'ابن حجر العسقلاني', 852, null),
+    ])
+
+    expect(beside.map((s) => s.id)).toEqual(['Q4', 'Q5'])
+    expect(beside.every((s) => s.scholar && s.books === 0 && s.wikidataId === s.id)).toBe(true)
+  })
+
+  it("doesn't take a short shared word for the same person", () => {
+    for (const name of ['ابن', 'محمد', 'عبد']) {
+      const beside = scholarsBeside([yours('a1', name, 256, null)], [scholar('Q6', `${name} المبارك`, 256, null)])
+      expect(beside).toHaveLength(1) // too common to match on alone
+    }
   })
 })

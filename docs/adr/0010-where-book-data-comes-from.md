@@ -157,7 +157,8 @@ elsewhere.
 - ADR 0003's lookup paragraph is replaced by this one (its status says so). Its other decisions stand.
 - If a bundled barcode decoder needs WebAssembly, the CSP would need `'wasm-unsafe-eval'`. L1 decides that, with the
   smallest scope it can.
-- Left for later slices: the matching of a reader's author to a scholar in the Wikidata data (needed for "your authors in
-  green" in T2; likely an optional plain public ID with no foreign key, so a new import can't break a reader's
-  records), mapping a suggested science to one in the reader's own list by name, and the numbers for limits and the
+- T2 matches a reader's author to a scholar by an optional plain Wikidata ID on the author (no foreign key, so a new
+  snapshot can't break a reader's records), set when the author is added from the timeline; one author per scholar in
+  each account. Authors added before T2 are matched by name and year of death instead, so a scholar isn't shown twice.
+- Left for later slices: mapping a suggested science to one in the reader's own list by name, and the numbers for limits and the
   agreement count in L6.

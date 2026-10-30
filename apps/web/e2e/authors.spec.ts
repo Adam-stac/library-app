@@ -85,6 +85,18 @@ test.describe('Authors', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByText(/بعد الهجرة بـ٢٥٦ سنة/)).toBeVisible()
     await expectAccessible(page, 'the timeline')
+
+    // All scholars: the catalogue's scholars beside yours; al-Bukhari is yours already, so he is there once
+    await page.getByRole('button', { name: 'كل العلماء' }).click()
+    await expect(page.getByRole('heading', { name: /من مؤلفيك والعلماء على الخط الزمني/ })).toBeVisible()
+    await expect(ruler).toHaveAttribute('aria-valuenow', '256')
+    await expect(page.getByRole('article').getByRole('link', { name: 'البخاري', exact: true })).toBeVisible()
+    await ruler.focus()
+    await page.keyboard.press('End')
+    await expect(page.getByRole('article').getByRole('button', { name: 'أضفه إلى مكتبتي' })).toBeVisible()
+    await expectAccessible(page, 'the timeline of all scholars')
+    await page.getByRole('button', { name: 'مؤلفوك' }).click()
+    await expect(page.getByText('مؤلف واحد على الخط الزمني')).toBeVisible()
     await page.getByRole('link', { name: 'القائمة', exact: true }).click()
 
     // Delete it

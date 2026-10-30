@@ -906,7 +906,26 @@
     "undated_many": "{{number}} مؤلفًا بلا تاريخ وفاة",
     "undated_other": "{{number}} مؤلف بلا تاريخ وفاة",
     "undatedHint": "أضف سنة وفاتهم لتظهر مواضعهم على الخط الزمني.",
-    "empty": "أضف سنة وفاة المؤلف ليظهر هنا."
+    "empty": "أضف سنة وفاة المؤلف ليظهر هنا.",
+    "mode": {
+      "label": "اعرض",
+      "yours": "مؤلفوك",
+      "all": "كل العلماء"
+    },
+    "countAll_zero": "لا أحد على الخط الزمني",
+    "countAll_one": "{{number}} من مؤلفيك والعلماء على الخط الزمني",
+    "countAll_two": "{{number}} من مؤلفيك والعلماء على الخط الزمني",
+    "countAll_few": "{{number}} من مؤلفيك والعلماء على الخط الزمني",
+    "countAll_many": "{{number}} من مؤلفيك والعلماء على الخط الزمني",
+    "countAll_other": "{{number}} من مؤلفيك والعلماء على الخط الزمني",
+    "inCatalogue_zero": "لا كتب له في الفهرس",
+    "inCatalogue_one": "كتاب واحد في الفهرس",
+    "inCatalogue_two": "كتابان في الفهرس",
+    "inCatalogue_few": "{{number}} كتب في الفهرس",
+    "inCatalogue_many": "{{number}} كتابًا في الفهرس",
+    "inCatalogue_other": "{{number}} كتاب في الفهرس",
+    "addToLibrary": "أضفه إلى مكتبتي",
+    "added": "أُضيف {{name}} إلى مكتبتك."
   },
   "aboutData": {
     "title": "عن مصادر البيانات",

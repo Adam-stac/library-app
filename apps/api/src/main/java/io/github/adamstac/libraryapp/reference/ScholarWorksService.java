@@ -27,6 +27,42 @@ class ScholarWorksService implements ScholarWorks {
     }
 
     @Override
+    public List<DatedScholar> dated() {
+        return jdbc.sql("""
+                        SELECT s.id, s.name_ar, s.name_en, s.death_year_hijri, s.death_year_ce,
+                               (SELECT count(*) FROM reference_work_authors wa WHERE wa.scholar_id = s.id) AS works
+                        FROM reference_scholars s
+                        WHERE s.death_year_hijri IS NOT NULL OR s.death_year_ce IS NOT NULL
+                        ORDER BY s.id""")
+                .query((rs, row) -> new DatedScholar(
+                        rs.getString("id"),
+                        rs.getString("name_ar"),
+                        rs.getString("name_en"),
+                        rs.getObject("death_year_hijri", Integer.class),
+                        rs.getObject("death_year_ce", Integer.class),
+                        rs.getInt("works")))
+                .list();
+    }
+
+    @Override
+    public List<Work> byScholar(String scholarId, int limit) {
+        List<Found> found = jdbc.sql("""
+                        SELECT id, title_ar, title_en FROM (
+                            SELECT DISTINCT ON (w.title_ar) w.id, w.title_ar, w.title_en
+                            FROM reference_work_authors wa JOIN reference_works w ON w.id = wa.work_id
+                            WHERE wa.scholar_id = :scholar
+                            ORDER BY w.title_ar, char_length(w.id), w.id
+                        ) works
+                        ORDER BY char_length(id), id
+                        LIMIT :limit""")
+                .param("scholar", scholarId)
+                .param("limit", limit)
+                .query((rs, row) -> new Found(rs.getString("id"), rs.getString("title_ar"), rs.getString("title_en")))
+                .list();
+        return withAuthors(found);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Work> search(String text, int limit) {
         // For this transaction only: how alike counts as a match (for the <% operator), and use the trigram index.
@@ -49,6 +85,11 @@ class ScholarWorksService implements ScholarWorks {
                 .param("limit", limit)
                 .query((rs, row) -> new Found(rs.getString("id"), rs.getString("title_ar"), rs.getString("title_en")))
                 .list();
+        return withAuthors(found);
+    }
+
+    /** The works with their authors, in the order the books name them. */
+    private List<Work> withAuthors(List<Found> found) {
         if (found.isEmpty()) {
             return List.of();
         }

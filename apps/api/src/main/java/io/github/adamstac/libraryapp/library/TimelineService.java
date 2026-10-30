@@ -39,7 +39,8 @@ class TimelineService {
             int books,
             int works,
             List<Title> titles,
-            ScienceName science) {}
+            ScienceName science,
+            String wikidataId) {}
 
     public record Undated(UUID id, String nameAr, String nameEn) {}
 
@@ -112,7 +113,7 @@ class TimelineService {
             }
             Counts c = counts.getOrDefault(d.id(), new Counts(0, 0));
             placed.add(new Entry(d.id(), d.nameAr(), d.nameEn(), d.hijri(), d.ce(), d.approximate(), c.books(),
-                    c.works(), titles.getOrDefault(d.id(), List.of()), sciences.get(d.id())));
+                    c.works(), titles.getOrDefault(d.id(), List.of()), sciences.get(d.id()), d.wikidataId()));
         }
         return new Timeline(placed, undated);
     }

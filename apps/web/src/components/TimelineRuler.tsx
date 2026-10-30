@@ -33,14 +33,15 @@ export default function TimelineRuler(props: TimelineViewProps) {
   const ticks: { key: string; at: number; century: boolean }[] = []
   for (let year = 10; year < now; year += 10) ticks.push({ key: `y${year}`, at: x(year), century: year % 100 === 0 })
 
-  // Authors: one line per year of death; colour only for the one you're on and the pinned ones
-  const lines = new Map<number, { at: number; state: 'focus' | 'pinned' | 'plain' }>()
+  // Authors: one line per year of death; colour for the one you're on and the pinned ones. With the catalogue's
+  // scholars shown (T2), they are faint short lines and your own authors green ones; a year keeps its strongest line
+  const mixing = placed.some((author) => author.scholar)
+  const strength = { scholar: 0, plain: 1, pinned: 2, focus: 3 } as const
+  const lines = new Map<number, { at: number; state: keyof typeof strength }>()
   placed.forEach((author, index) => {
-    const state = index === focus ? 'focus' : pins.includes(index) ? 'pinned' : 'plain'
+    const state = index === focus ? 'focus' : pins.includes(index) ? 'pinned' : author.scholar ? 'scholar' : 'plain'
     const current = lines.get(author.year)
-    if (!current || (current.state === 'plain' && state !== 'plain') || state === 'focus') {
-      lines.set(author.year, { at: x(author.year), state })
-    }
+    if (!current || strength[state] > strength[current.state]) lines.set(author.year, { at: x(author.year), state })
   })
 
   // Names: the one you're on, always; every other name too in a small library, where each fits
@@ -176,15 +177,19 @@ export default function TimelineRuler(props: TimelineViewProps) {
           <span
             key={year}
             className={`timeline-move absolute bottom-0 ${
-              line.state === 'plain'
-                ? 'h-6 w-px bg-muted/40'
-                : line.state === 'pinned'
-                  ? 'h-12 w-0.5 bg-accent'
-                  : 'h-16 w-0.5 bg-accent'
+              line.state === 'scholar'
+                ? 'h-4 w-px bg-muted/30'
+                : line.state === 'plain'
+                  ? mixing
+                    ? 'h-8 w-px bg-accent'
+                    : 'h-6 w-px bg-muted/40'
+                  : line.state === 'pinned'
+                    ? 'h-12 w-0.5 bg-accent'
+                    : 'h-16 w-0.5 bg-accent'
             }`}
             style={{ insetInlineStart: pct(line.at) }}
           >
-            {line.state !== 'plain' && (
+            {(line.state === 'pinned' || line.state === 'focus') && (
               <span className="absolute -top-1 start-1/2 size-2 -translate-x-1/2 rounded-full bg-accent rtl:translate-x-1/2" />
             )}
           </span>

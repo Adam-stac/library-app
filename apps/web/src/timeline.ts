@@ -17,7 +17,14 @@ export type TimelineAuthor = Named & {
   works: number
   titles: TimelineTitle[]
   science: Named | null
+  /** The scholar this author is in the catalogue (a Wikidata ID), when known */
+  wikidataId?: string | null
+  /** True for a scholar from the catalogue who isn't one of your authors (the general timeline, T2) */
+  scholar?: boolean
 }
+
+/** A scholar from GET /api/v1/timeline/scholars: the same for every reader */
+export type DatedScholar = Named & { deathHijri: number | null; deathCe: number | null; works: number }
 
 export type TimelineData = { authors: TimelineAuthor[]; undated: Named[] }
 
@@ -59,6 +66,89 @@ export function placeAuthors(authors: TimelineAuthor[], now: number): Placed[] {
     .map((author) => ({ ...author, year: author.deathHijri ?? hijriOfCe(author.deathCe ?? 0) }))
     .filter((author) => author.year >= 1 && author.year <= now)
     .sort((a, b) => a.year - b.year || (a.nameEn ?? a.nameAr ?? '').localeCompare(b.nameEn ?? b.nameAr ?? ''))
+}
+
+/**
+ * A name made comparable the Arabic-aware way the API uses (V16): small letters; vowel marks and the tatweel gone; the
+ * forms of alif as ا, ى as ي, ة as ه, ؤ as و, ئ as ي; transliteration marks gone (al-Bukhārī as al-bukhari).
+ */
+export function nameKey(name: string | null): string {
+  if (!name) return ''
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}|\u0640/gu, '') // vowel marks, combining accents and the tatweel
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ى/g, 'ي')
+    .replace(/ة/g, 'ه')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/[ʿʾ'’‘`ʻʼ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Words too common in names to tell two people apart on their own */
+const COMMON_WORDS = new Set([
+  'ابن',
+  'بن',
+  'ابو',
+  'ام',
+  'بنت',
+  'عبد',
+  'محمد',
+  'احمد',
+  'علي',
+  'ibn',
+  'abu',
+  'al',
+  'muhammad',
+  'ahmad',
+])
+
+/** Whether one name is the other, or holds it as whole words (your "البخاري" in "محمد بن إسماعيل البخاري") */
+function namesMatch(a: string | null, b: string | null): boolean {
+  const [x, y] = [nameKey(a), nameKey(b)]
+  if (!x || !y) return false
+  if (x === y) return true
+  const [short, long] = x.length < y.length ? [x, y] : [y, x]
+  return short.length >= 4 && !COMMON_WORDS.has(short) && ` ${long} `.includes(` ${short} `)
+}
+
+/**
+ * The catalogue's scholars as timeline entries, leaving out any who is already one of your authors: linked by
+ * Wikidata ID, or named alike and dying within a year of each other. Yours are shown as yours, never twice.
+ */
+export function scholarsBeside(own: TimelineAuthor[], scholars: DatedScholar[]): TimelineAuthor[] {
+  const linked = new Set(own.map((author) => author.wikidataId).filter(Boolean))
+  const yearOf = (author: { deathHijri: number | null; deathCe: number | null }) =>
+    author.deathHijri ?? (author.deathCe !== null ? hijriOfCe(author.deathCe) : null)
+  return scholars
+    .filter((scholar) => !linked.has(scholar.id))
+    .filter((scholar) => {
+      const year = yearOf(scholar)
+      return !own.some((author) => {
+        const theirs = yearOf(author)
+        return (
+          (year === null || theirs === null || Math.abs(year - theirs) <= 1) &&
+          (namesMatch(author.nameAr, scholar.nameAr) || namesMatch(author.nameEn, scholar.nameEn))
+        )
+      })
+    })
+    .map((scholar) => ({
+      id: scholar.id,
+      nameAr: scholar.nameAr,
+      nameEn: scholar.nameEn,
+      deathHijri: scholar.deathHijri,
+      deathCe: scholar.deathCe,
+      approximate: false,
+      books: 0,
+      works: scholar.works,
+      titles: [],
+      science: null,
+      wikidataId: scholar.id,
+      scholar: true,
+    }))
 }
 
 /** Where a year sits along the ruler, from 0 (the first year of the Hijra) to 1 (today) */

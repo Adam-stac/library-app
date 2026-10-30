@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AuthProvider from '../auth/AuthProvider'
 import i18n from '../i18n'
-import { fakeApi, json } from '../test/fakeApi'
+import { callTo, fakeApi, json } from '../test/fakeApi'
 import type { TimelineAuthor } from '../timeline'
 import AuthorTimelinePage from './AuthorTimelinePage'
 
@@ -137,5 +137,102 @@ describe('AuthorTimelinePage', () => {
     fakeApi({ '/api/v1/timeline': () => json(200, { authors: [], undated: [] }) }, 'r@example.com')
     renderPage()
     expect(await screen.findByText('Add the year an author died, and they will appear here.')).toBeInTheDocument()
+  })
+  describe('All scholars (the general timeline)', () => {
+    const SCHOLARS = {
+      scholars: [
+        {
+          id: 'Q241026',
+          nameAr: 'محمد بن إسماعيل البخاري',
+          nameEn: 'Muhammad al-Bukhari',
+          deathHijri: null,
+          deathCe: 870,
+          works: 9,
+        },
+        { id: 'Q468432', nameAr: 'جلال الدين السيوطي', nameEn: 'al-Suyuti', deathHijri: 911, deathCe: 1505, works: 67 },
+      ],
+    }
+    const SUYUTI_WORKS = '/api/v1/reference/works?scholar=Q468432&limit=3'
+
+    it('shows the scholars beside your authors, and a scholar is added to your library on one press', async () => {
+      let timelines = 0
+      const api = fakeApi(
+        {
+          '/api/v1/timeline': () => {
+            timelines++
+            return json(
+              200,
+              timelines === 1
+                ? TIMELINE
+                : {
+                    ...TIMELINE,
+                    authors: [
+                      ...TIMELINE.authors,
+                      author('a10', 'al-Suyuti', 'جلال الدين السيوطي', 911, {
+                        books: 0,
+                        works: 0,
+                        wikidataId: 'Q468432',
+                      }),
+                    ],
+                  },
+            )
+          },
+          '/api/v1/timeline/scholars': () => json(200, SCHOLARS),
+          [SUYUTI_WORKS]: () =>
+            json(200, { items: [{ id: 'Q1', titleAr: 'تفسير الجلالين', titleEn: 'Tafsir al-Jalalayn', authors: [] }] }),
+          '/api/v1/authors': () => json(201, { id: 'a10', nameAr: 'جلال الدين السيوطي', nameEn: 'al-Suyuti' }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage()
+      await screen.findByRole('heading', { name: '4 authors on the timeline' })
+      expect(api.mock.calls.some(([path]) => path === '/api/v1/timeline/scholars')).toBe(false)
+
+      await user.click(screen.getByRole('button', { name: 'All scholars' }))
+
+      // Muhammad al-Bukhari is your al-Bukhari (same name, same year), so only al-Suyuti joins
+      expect(await screen.findByRole('heading', { name: '5 authors and scholars on the timeline' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'All scholars' })).toHaveAttribute('aria-pressed', 'true')
+      const ruler = screen.getByRole('slider', { name: 'Timeline of authors' })
+      expect(ruler).toHaveAttribute('aria-valuenow', '256') // still on your al-Bukhari
+      fireEvent.keyDown(ruler, { key: 'End' })
+      expect(ruler).toHaveAttribute('aria-valuenow', '911')
+
+      const card = within(screen.getByRole('article'))
+      expect(card.getByRole('heading', { name: 'al-Suyuti' })).toBeInTheDocument()
+      expect(card.queryByRole('link', { name: 'al-Suyuti' })).not.toBeInTheDocument()
+      expect(card.getByText(/67 works in the catalogue/)).toBeInTheDocument()
+      expect(await card.findByText(/Tafsir al-Jalalayn/)).toBeInTheDocument()
+      expect(card.queryByRole('link', { name: 'Open author' })).not.toBeInTheDocument()
+
+      await user.click(card.getByRole('button', { name: 'Add to my library' }))
+
+      expect(JSON.parse(String(callTo(api, '/api/v1/authors').body))).toEqual({
+        nameAr: 'جلال الدين السيوطي',
+        nameEn: 'al-Suyuti',
+        death: { hijri: 911, ce: 1505, approximate: false },
+        wikidataId: 'Q468432',
+      })
+      // Now yours: the timeline stays on them, with their author page
+      expect(await screen.findByText('al-Suyuti was added to your library.')).toBeInTheDocument()
+      const yours = within(await screen.findByRole('article'))
+      expect(await yours.findByRole('link', { name: 'Open author' })).toHaveAttribute('href', '/authors/a10')
+      expect(screen.getByRole('slider', { name: 'Timeline of authors' })).toHaveAttribute('aria-valuenow', '911')
+    })
+
+    it('goes back to your authors only', async () => {
+      fakeApi(
+        { '/api/v1/timeline': () => json(200, TIMELINE), '/api/v1/timeline/scholars': () => json(200, SCHOLARS) },
+        'r@example.com',
+      )
+      const user = renderPage()
+      await screen.findByRole('heading', { name: '4 authors on the timeline' })
+
+      await user.click(screen.getByRole('button', { name: 'All scholars' }))
+      await screen.findByRole('heading', { name: '5 authors and scholars on the timeline' })
+      await user.click(screen.getByRole('button', { name: 'Your authors' }))
+
+      expect(screen.getByRole('heading', { name: '4 authors on the timeline' })).toBeInTheDocument()
+    })
   })
 })

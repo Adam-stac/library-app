@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ class AuthorService implements Authors {
             PlaceName birthPlace,
             PlaceName deathPlace,
             String biography,
+            String wikidataId,
             int version,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt) {}
@@ -82,12 +84,16 @@ class AuthorService implements Authors {
             Year death,
             UUID birthPlaceId,
             UUID deathPlaceId,
-            String biography) {}
+            String biography,
+            String wikidataId) {}
+
+    /** A Wikidata ID, such as Q9546 */
+    private static final Pattern WIKIDATA_ID = Pattern.compile("Q[1-9][0-9]{0,11}");
 
     private static final String COLUMNS = """
             id, name_ar, name_en, full_name, ism, kunya, laqab, nisba,
             birth_year_hijri, birth_year_ce, birth_approximate, death_year_hijri, death_year_ce, death_approximate,
-            birth_place_id, death_place_id, biography, version, created_at, updated_at
+            birth_place_id, death_place_id, biography, wikidata_id, version, created_at, updated_at
             """;
 
     private final JdbcClient jdbc;
@@ -131,7 +137,7 @@ class AuthorService implements Authors {
     @Override
     public List<Death> deaths(UUID ownerId) {
         return jdbc.sql("""
-                        SELECT id, name_ar, name_en, death_year_hijri, death_year_ce, death_approximate
+                        SELECT id, name_ar, name_en, death_year_hijri, death_year_ce, death_approximate, wikidata_id
                         FROM authors WHERE owner_id = :owner
                         ORDER BY library_sort_key(coalesce(name_ar, name_en)), id
                         """)
@@ -142,7 +148,8 @@ class AuthorService implements Authors {
                         rs.getString("name_en"),
                         rs.getObject("death_year_hijri", Integer.class),
                         rs.getObject("death_year_ce", Integer.class),
-                        rs.getBoolean("death_approximate")))
+                        rs.getBoolean("death_approximate"),
+                        rs.getString("wikidata_id")))
                 .list();
     }
 
@@ -245,6 +252,7 @@ class AuthorService implements Authors {
                 author.birthPlace() == null ? null : names.get(author.birthPlace().id()),
                 author.deathPlace() == null ? null : names.get(author.deathPlace().id()),
                 author.biography(),
+                author.wikidataId(),
                 author.version(),
                 author.createdAt(),
                 author.updatedAt());
@@ -269,16 +277,17 @@ class AuthorService implements Authors {
         if (count >= MAX_AUTHORS_PER_ACCOUNT) {
             throw new ConflictException("limit_reached");
         }
+        checkWikidataFree(ownerId, fields.wikidataId(), null);
         UUID id = UUID.randomUUID();
         bind(jdbc.sql("""
                         INSERT INTO authors (id, owner_id, name_ar, name_en, full_name, ism, kunya, laqab, nisba,
                                              birth_year_hijri, birth_year_ce, birth_approximate,
                                              death_year_hijri, death_year_ce, death_approximate,
-                                             birth_place_id, death_place_id, biography)
+                                             birth_place_id, death_place_id, biography, wikidata_id)
                         VALUES (:id, :owner, :nameAr, :nameEn, :fullName, :ism, :kunya, :laqab, :nisba,
                                 :birthHijri, :birthCe, :birthApproximate,
                                 :deathHijri, :deathCe, :deathApproximate,
-                                :birthPlaceId, :deathPlaceId, :biography)
+                                :birthPlaceId, :deathPlaceId, :biography, :wikidataId)
                         """), fields)
                 .param("id", id)
                 .param("owner", ownerId)
@@ -291,6 +300,7 @@ class AuthorService implements Authors {
     Author update(UUID ownerId, UUID id, int expectedVersion, AuthorInput input) {
         Fields fields = validate(input);
         checkPlaces(ownerId, fields);
+        checkWikidataFree(ownerId, fields.wikidataId(), id);
         int changed = bind(jdbc.sql("""
                         UPDATE authors SET name_ar = :nameAr, name_en = :nameEn, full_name = :fullName,
                                ism = :ism, kunya = :kunya, laqab = :laqab, nisba = :nisba,
@@ -299,7 +309,8 @@ class AuthorService implements Authors {
                                death_year_hijri = :deathHijri, death_year_ce = :deathCe,
                                death_approximate = :deathApproximate,
                                birth_place_id = :birthPlaceId, death_place_id = :deathPlaceId,
-                               biography = :biography, version = version + 1, updated_at = now()
+                               biography = :biography, wikidata_id = coalesce(:wikidataId, wikidata_id),
+                               version = version + 1, updated_at = now()
                         WHERE id = :id AND owner_id = :owner AND version = :version
                         """), fields)
                 .param("id", id)
@@ -386,7 +397,35 @@ class AuthorService implements Authors {
                 death,
                 input.birthPlaceId(),
                 input.deathPlaceId(),
-                TextInput.paragraphs("biography", input.biography(), MAX_BIOGRAPHY));
+                TextInput.paragraphs("biography", input.biography(), MAX_BIOGRAPHY),
+                wikidataId(input.wikidataId()));
+    }
+
+    private static String wikidataId(String value) {
+        if (value == null) {
+            return null;
+        }
+        if (!WIKIDATA_ID.matcher(value).matches()) {
+            throw new FieldValidationException("wikidataId", "invalid");
+        }
+        return value;
+    }
+
+    /** One author per scholar per account: the timeline shows each scholar once. */
+    private void checkWikidataFree(UUID ownerId, String wikidataId, UUID except) {
+        if (wikidataId == null) {
+            return;
+        }
+        boolean taken = jdbc.sql("SELECT count(*) FROM authors WHERE owner_id = :owner AND wikidata_id = :wikidataId"
+                        + " AND id <> :except")
+                .param("owner", ownerId)
+                .param("wikidataId", wikidataId)
+                .param("except", except == null ? new UUID(0, 0) : except)
+                .query(Long.class)
+                .single() > 0;
+        if (taken) {
+            throw new ConflictException("already_in_library");
+        }
     }
 
     private static Year year(String field, YearInput input) {
@@ -425,7 +464,8 @@ class AuthorService implements Authors {
                 .param("deathApproximate", fields.death().approximate())
                 .param("birthPlaceId", fields.birthPlaceId(), Types.OTHER)
                 .param("deathPlaceId", fields.deathPlaceId(), Types.OTHER)
-                .param("biography", fields.biography(), Types.VARCHAR);
+                .param("biography", fields.biography(), Types.VARCHAR)
+                .param("wikidataId", fields.wikidataId(), Types.VARCHAR);
     }
 
     private static Author author(ResultSet rs, int rowNum) throws SQLException {
@@ -443,6 +483,7 @@ class AuthorService implements Authors {
                 placeId(rs, "birth_place_id"),
                 placeId(rs, "death_place_id"),
                 rs.getString("biography"),
+                rs.getString("wikidata_id"),
                 rs.getInt("version"),
                 rs.getObject("created_at", OffsetDateTime.class),
                 rs.getObject("updated_at", OffsetDateTime.class));
