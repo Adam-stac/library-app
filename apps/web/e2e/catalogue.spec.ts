@@ -59,6 +59,8 @@ test.describe("Adding a classical work from the scholars' catalogue", () => {
   })
 
   test('the About the data page credits the sources', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => localStorage.setItem('language', 'en'))
     await page.goto('/about/data')
     await expect(page.getByRole('heading', { name: 'About the data', level: 1 })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Wikidata' })).toHaveAttribute('href', 'https://www.wikidata.org/')
