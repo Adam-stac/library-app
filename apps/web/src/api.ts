@@ -122,6 +122,14 @@ export async function deleteJson(path: string): Promise<ApiResult> {
   return change('DELETE', path, undefined, true)
 }
 
+/** POSTs an image, such as a photo of a page to be read, with the CSRF token. */
+export async function postImage<T = unknown>(path: string, image: Blob): Promise<ApiResult<T>> {
+  const token = await csrfToken()
+  const headers: Record<string, string> = { 'Content-Type': image.type || 'image/jpeg' }
+  if (token) headers[CSRF_HEADER] = token
+  return send<T>(path, { method: 'POST', headers, body: image })
+}
+
 async function change<T>(
   method: 'POST' | 'PUT' | 'DELETE',
   path: string,

@@ -11,6 +11,8 @@ import Icon from '../components/Icon'
 import IsbnScanner from '../components/IsbnScanner'
 import { CatalogueOffers, ScholarAuthor } from '../components/ScholarWorks'
 import Loading from '../components/Loading'
+import PageAuthor from '../components/PageAuthor'
+import PageReader from '../components/PageReader'
 import PageHeader from '../components/PageHeader'
 import SearchPicker, { Picked } from '../components/SearchPicker'
 import TextAreaField from '../components/TextAreaField'
@@ -22,6 +24,7 @@ import {
   decimal,
   type Edition,
   errorMessage,
+  isArabic,
   type Named,
   nameOf,
   orNull,
@@ -32,6 +35,7 @@ import {
   workTitle,
 } from '../library'
 import { readIsbn } from '../isbn'
+import { editionNumber, type PageReading } from '../pageReading'
 import type { Scholar, ScholarWork } from '../scholarWorks'
 import {
   type Fillable,
@@ -72,6 +76,19 @@ type Draft = {
   startedOn: string
   finishedOn: string
 }
+
+/** The fields a photo of the cover or title page can fill (ADR 0011) */
+type PhotoField =
+  | 'titleAr'
+  | 'titleEn'
+  | 'title'
+  | 'muhaqqiq'
+  | 'publisher'
+  | 'publicationPlace'
+  | 'publishedHijri'
+  | 'publishedCe'
+  | 'editionNumber'
+  | 'isbn'
 
 const EMPTY: Draft = {
   existingWork: null,
@@ -245,6 +262,54 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
     const titleEn = work.titleEn && (draft.titleEn === '' || englishIsOurs) ? work.titleEn : null
     setDraft({ ...draft, titleAr: work.titleAr, titleEn: titleEn ?? (englishIsOurs ? '' : draft.titleEn) })
     setCatalogue({ base, titleAr: work.titleAr, titleEn, pending: work.authors })
+  }
+  // Read from a photo of the cover or title page (ADR 0011): what filled which field, the authors printed on it still
+  // to be chosen, and every line read, for the reader to move into a field
+  const [photo, setPhoto] = useState<{
+    base: string
+    values: Partial<Record<PhotoField, string>>
+    authors: string[]
+    deathHijri: number | null
+    lines: string[]
+  } | null>(null)
+  const fromPhoto = photo?.base === base ? photo : null
+  const photoNote = (field: PhotoField) =>
+    fromPhoto && draft[field] !== '' && draft[field] === fromPhoto.values[field] ? t('pageReading.check') : undefined
+  const pageRead = (reading: PageReading) => {
+    const f = reading.fields
+    const found: Partial<Record<PhotoField, string>> = {
+      ...(f.title && !draft.existingWork ? { [isArabic(f.title) ? 'titleAr' : 'titleEn']: f.title } : {}),
+      muhaqqiq: f.muhaqqiq ?? undefined,
+      publisher: f.publisher ?? undefined,
+      publicationPlace: f.publicationPlace ?? undefined,
+      publishedHijri: f.publishedHijri === null ? undefined : String(f.publishedHijri),
+      publishedCe: f.publishedCe === null ? undefined : String(f.publishedCe),
+      editionNumber: editionNumber(f.edition) === null ? undefined : String(editionNumber(f.edition)),
+      isbn: f.isbn ?? undefined,
+    }
+    // Only empty fields: nothing the reader typed is replaced
+    const next = { ...draft }
+    const values: Partial<Record<PhotoField, string>> = {}
+    for (const [field, value] of Object.entries(found) as [PhotoField, string | undefined][]) {
+      if (value && next[field] === '') {
+        next[field] = value
+        values[field] = value
+      }
+    }
+    setDraft(next)
+    setPhoto({ base, values, authors: f.authors, deathHijri: f.authorDeathHijri, lines: reading.lines })
+  }
+  const useLine = (line: string, field: PhotoField) => {
+    // The reader's own choice: it may replace what is there
+    setDraft({ ...draft, [field]: line })
+    if (fromPhoto) setPhoto({ ...fromPhoto, values: { ...fromPhoto.values, [field]: line } })
+  }
+  const pageAuthorChosen = (printed: string, author: Named) => {
+    setDraft({
+      ...draft,
+      authors: draft.authors.some((other) => other.id === author.id) ? draft.authors : [...draft.authors, author],
+    })
+    if (fromPhoto) setPhoto({ ...fromPhoto, authors: fromPhoto.authors.filter((name) => name !== printed) })
   }
   const authorChosen = (scholar: Scholar, author: Named) => {
     setDraft({
@@ -432,6 +497,19 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         {...checks.formProps(problems)}
         className="mt-10 flex flex-col gap-7"
       >
+        {!editing && (
+          <PageReader
+            onRead={pageRead}
+            frame={(content) => (
+              <Group title={t('pageReading.title')} hint={t('pageReading.hint')}>
+                {content}
+                {fromPhoto && fromPhoto.lines.length > 0 && (
+                  <PageLines lines={fromPhoto.lines} onUse={useLine} hasWork={Boolean(draft.existingWork)} />
+                )}
+              </Group>
+            )}
+          />
+        )}
         <Group title={t('books.form.isbnGroup')} hint={editing ? undefined : t('books.form.isbnGroupHint')}>
           <div className="flex flex-col gap-3">
             <FormField
@@ -441,6 +519,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.isbn}
               onChange={set('isbn')}
               error={error('isbn')}
+              note={photoNote('isbn')}
               maxLength={40}
             />
             {cameraCanBeUsed() && <IsbnScanner onFound={(isbn) => setDraft({ ...draft, isbn })} />}
@@ -508,7 +587,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   value={draft.titleAr}
                   onChange={set('titleAr')}
                   error={error('work.titleAr')}
-                  note={chosen && draft.titleAr === chosen.titleAr ? fromCatalogue : undefined}
+                  note={chosen && draft.titleAr === chosen.titleAr ? fromCatalogue : photoNote('titleAr')}
                   maxLength={500}
                   dir="auto"
                   book
@@ -519,7 +598,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                   value={draft.titleEn}
                   onChange={set('titleEn')}
                   error={error('work.titleEn')}
-                  note={chosen?.titleEn && draft.titleEn === chosen.titleEn ? fromCatalogue : undefined}
+                  note={chosen?.titleEn && draft.titleEn === chosen.titleEn ? fromCatalogue : photoNote('titleEn')}
                   maxLength={500}
                   dir="auto"
                   book
@@ -538,6 +617,14 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
                 onChange={(authors) => setDraft({ ...draft, authors })}
                 error={error('work.authorIds')}
               />
+              {fromPhoto?.authors.map((printed) => (
+                <PageAuthor
+                  key={printed}
+                  printed={printed}
+                  deathHijri={fromPhoto.deathHijri}
+                  onChosen={(author) => pageAuthorChosen(printed, author)}
+                />
+              ))}
               {chosen?.pending.map((scholar) => (
                 <ScholarAuthor
                   key={scholar.id}
@@ -580,6 +667,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
             value={draft.title}
             onChange={set('title')}
             error={error('title')}
+            note={photoNote('title')}
             maxLength={500}
             dir="auto"
             book
@@ -635,6 +723,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.muhaqqiq}
               onChange={set('muhaqqiq')}
               error={error('muhaqqiq')}
+              note={photoNote('muhaqqiq')}
               maxLength={300}
               dir="auto"
               book
@@ -655,7 +744,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publisher}
               onChange={set('publisher')}
               error={error('publisher')}
-              note={checkNote('publisher')}
+              note={checkNote('publisher') ?? photoNote('publisher')}
               maxLength={200}
               dir="auto"
               book
@@ -666,7 +755,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publicationPlace}
               onChange={set('publicationPlace')}
               error={error('publicationPlace')}
-              note={checkNote('publicationPlace')}
+              note={checkNote('publicationPlace') ?? photoNote('publicationPlace')}
               maxLength={200}
               dir="auto"
               book
@@ -677,6 +766,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publishedHijri}
               onChange={set('publishedHijri')}
               error={error('publishedHijri')}
+              note={photoNote('publishedHijri')}
               maxLength={6}
             />
             <FormField
@@ -685,6 +775,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.publishedCe}
               onChange={set('publishedCe')}
               error={error('publishedCe')}
+              note={photoNote('publishedCe')}
               maxLength={6}
             />
             <FormField
@@ -693,6 +784,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               value={draft.editionNumber}
               onChange={set('editionNumber')}
               error={error('editionNumber')}
+              note={photoNote('editionNumber')}
               maxLength={6}
             />
             <FormField
@@ -791,6 +883,54 @@ function workBodyOf(work: Work) {
     scienceId: work.science?.id ?? null,
     authorIds: work.authors.map((author) => author.id),
   }
+}
+
+/** Every line read from the photo, each of which the reader can put into a field with one choice (ADR 0011) */
+function PageLines({
+  lines,
+  onUse,
+  hasWork,
+}: {
+  lines: string[]
+  onUse: (line: string, field: PhotoField) => void
+  hasWork: boolean
+}) {
+  const { t } = useTranslation()
+  const fields: PhotoField[] = [
+    ...(hasWork ? [] : (['titleAr', 'titleEn'] as const)),
+    'title',
+    'muhaqqiq',
+    'publisher',
+    'publicationPlace',
+  ]
+  return (
+    <details className="rounded-panel border border-line p-4">
+      <summary className="link cursor-pointer text-sm">{t('pageReading.lines', { count: lines.length })}</summary>
+      <p className="mt-2 text-sm text-muted">{t('pageReading.linesHint')}</p>
+      <ol className="mt-3 flex flex-col divide-y divide-line">
+        {lines.map((line, index) => (
+          <li key={`${index}-${line}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2">
+            <bdi className="font-book min-w-0 text-reading">{line}</bdi>
+            <select
+              aria-label={t('pageReading.putIn', { line })}
+              className="field w-auto py-1 text-sm"
+              value=""
+              onChange={(event) => {
+                if (event.target.value) onUse(line, event.target.value as PhotoField)
+              }}
+            >
+              <option value="">{t('pageReading.putInChoose')}</option>
+              {fields.map((field) => (
+                <option key={field} value={field}>
+                  {t(`pageReading.fields.${field}`)}
+                </option>
+              ))}
+            </select>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
 }
 
 function Group({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
