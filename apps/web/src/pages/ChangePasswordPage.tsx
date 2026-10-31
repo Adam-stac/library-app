@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate } from 'react-router'
 import { postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import NewPasswordField from '../components/NewPasswordField'
 import { MIN_PASSWORD_LENGTH, passwordLength } from '../password'
 
@@ -66,6 +67,7 @@ export default function ChangePasswordPage() {
   if (done) {
     return (
       <section role="status" className="max-w-md">
+        <BackToSettings />
         <h1 ref={doneHeadingRef} tabIndex={-1} className="page-title focus:outline-none">
           {t('changePassword.doneTitle')}
         </h1>
@@ -83,6 +85,7 @@ export default function ChangePasswordPage() {
 
   return (
     <section className="max-w-md">
+      <BackToSettings />
       <h1 className="page-title">{t('changePassword.title')}</h1>
       <p className="lede">{t('changePassword.intro')}</p>
 

@@ -56,6 +56,8 @@ describe('TwoFactorPage', () => {
       'reader@example.com',
     )
     const user = renderPage()
+    // A way back to Settings, which lists this page
+    expect(await screen.findByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
 
     expect(await screen.findByText('off')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Turn on' }))

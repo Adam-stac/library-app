@@ -434,7 +434,9 @@
       "priceAmount": "Price paid",
       "priceCurrency": "Currency",
       "noCurrency": "None",
-      "readingHint": "Leave both empty if you have not started it."
+      "readingHint": "Leave both empty if you have not started it.",
+      "isbnGroup": "ISBN",
+      "isbnGroupHint": "Start here if the book has one: the app checks your library and fills in what it can."
     },
     "isbn": {
       "scan": "Scan barcode",
@@ -451,7 +453,10 @@
         "notIsbn": "That barcode isn't an ISBN. Try the one on the back cover.",
         "denied": "The camera is turned off for this site. You can allow it in your browser's settings, or type the ISBN.",
         "unavailable": "The camera can't be used here. Type the ISBN instead."
-      }
+      },
+      "notYours": "Not in your library yet.",
+      "filled": "Filled in from it: {{fields}}.",
+      "next": "Next, type the title below: classical works are offered as you type."
     },
     "suggest": {
       "check": "May be incorrect, please check.",

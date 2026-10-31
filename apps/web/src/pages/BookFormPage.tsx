@@ -182,7 +182,7 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
   const [saving, setSaving] = useState(false)
   const checks = useFormChecks(setErrors)
   // "You already have this": the reader's own copies of the ISBN in the field, other than the one being edited
-  const copies = useCopiesWithIsbn(draft.isbn, editing ? editing.id : null)
+  const { copies, checked: shelfChecked } = useCopiesWithIsbn(draft.isbn, editing ? editing.id : null)
   // Filling in from the ISBN (ADR 0010, layer 1): only empty fields, each with its "please check" note until edited.
   // On the edit page only once the ISBN has been changed, so opening a saved book never fills anything by itself.
   const suggestFor = !editing || readIsbn(draft.isbn) !== readIsbn(editing.isbn ?? '')
@@ -214,6 +214,22 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
     return suggested ? noteFor(suggested) : undefined
   }
   const anyFilled = (['publisher', 'publicationPlace', 'language'] as const).some((field) => checkNote(field))
+  // What the ISBN did, said in words under it: there is no search to press, so the reader sees that it was read
+  const filledNames = (['language', 'publisher', 'publicationPlace'] as const)
+    .filter((field) => checkNote(field))
+    .map((field) => t(`books.fields.${field}`))
+  const isbnStatus =
+    !editing && readIsbn(draft.isbn) && shelfChecked && copies.length === 0
+      ? [
+          t('books.isbn.notYours'),
+          filledNames.length > 0
+            ? t('books.isbn.filled', { fields: filledNames.join(language === 'ar' ? '، ' : ', ') })
+            : '',
+          draft.existingWork || draft.titleAr || draft.titleEn ? '' : t('books.isbn.next'),
+        ]
+          .filter(Boolean)
+          .join(' ')
+      : ''
   // A classical work chosen from the scholars' catalogue (ADR 0010, layer 2): its titles as filled in, and its
   // authors still to be matched to the reader's own or added, one press each
   const [catalogue, setCatalogue] = useState<{
@@ -416,6 +432,42 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
         {...checks.formProps(problems)}
         className="mt-10 flex flex-col gap-7"
       >
+        <Group title={t('books.form.isbnGroup')} hint={editing ? undefined : t('books.form.isbnGroupHint')}>
+          <div className="flex flex-col gap-3">
+            <FormField
+              id="isbn"
+              label={t('books.fields.isbn')}
+              hint={cameraCanBeUsed() ? t('books.isbn.hintScan') : t('books.isbn.hint')}
+              value={draft.isbn}
+              onChange={set('isbn')}
+              error={error('isbn')}
+              maxLength={40}
+            />
+            {cameraCanBeUsed() && <IsbnScanner onFound={(isbn) => setDraft({ ...draft, isbn })} />}
+            <div aria-live="polite">
+              {anyFilled && <p className="sr-only">{t('books.suggest.filled')}</p>}
+              {copies.length > 0 && (
+                <div className="notice">
+                  <Icon name="bookOpen" className="mt-px size-4 text-accent" />
+                  <div className="min-w-0">
+                    <p>{t('books.isbn.have')}</p>
+                    <ul className="mt-1 flex flex-col gap-0.5">
+                      {copies.map((copy) => (
+                        <li key={copy.id}>
+                          <Link to={`/books/${encodeURIComponent(copy.id)}`} className="link">
+                            <bdi>{bookTitle(copy, language)}</bdi>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+              {isbnStatus && <p className="text-sm text-muted">{isbnStatus}</p>}
+            </div>
+          </div>
+        </Group>
+
         <Group title={t('books.form.work')} hint={editing ? t('books.form.workEditHint') : undefined}>
           {!editing && (
             <div className="flex flex-col gap-2">
@@ -643,38 +695,6 @@ export default function BookFormPage({ mode }: { mode: 'add' | 'edit' }) {
               error={error('editionNumber')}
               maxLength={6}
             />
-            <div className="flex flex-col gap-3">
-              <FormField
-                id="isbn"
-                label={t('books.fields.isbn')}
-                hint={cameraCanBeUsed() ? t('books.isbn.hintScan') : t('books.isbn.hint')}
-                value={draft.isbn}
-                onChange={set('isbn')}
-                error={error('isbn')}
-                maxLength={40}
-              />
-              {cameraCanBeUsed() && <IsbnScanner onFound={(isbn) => setDraft({ ...draft, isbn })} />}
-              <div aria-live="polite">
-                {anyFilled && <p className="sr-only">{t('books.suggest.filled')}</p>}
-                {copies.length > 0 && (
-                  <div className="notice">
-                    <Icon name="bookOpen" className="mt-px size-4 text-accent" />
-                    <div className="min-w-0">
-                      <p>{t('books.isbn.have')}</p>
-                      <ul className="mt-1 flex flex-col gap-0.5">
-                        {copies.map((copy) => (
-                          <li key={copy.id}>
-                            <Link to={`/books/${encodeURIComponent(copy.id)}`} className="link">
-                              <bdi>{bookTitle(copy, language)}</bdi>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
             <FormField
               id="legalDeposit"
               label={t('books.fields.legalDeposit')}

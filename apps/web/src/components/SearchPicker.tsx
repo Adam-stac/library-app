@@ -9,6 +9,9 @@ export type SearchKind = 'authors' | 'places' | 'works' | 'editions'
 
 type Option = { primary: string; secondary?: string | null }
 
+/** Something to add from outside the account's records (the scholars' catalogue), offered after them */
+export type CatalogueOption<T> = Option & { key: string; run: () => Promise<T | string> }
+
 type Props<T extends { id: string }> = {
   id: string
   label: string
@@ -26,6 +29,11 @@ type Props<T extends { id: string }> = {
    * (returns the new record, or an error message to show).
    */
   create?: { label: (text: string) => string; run: (text: string) => Promise<T | string> }
+  /**
+   * More to offer for what was typed, after the account's own records and under their own heading: found by
+   * {@code search}, and added by each option's {@code run} (which returns the new record, or an error message)
+   */
+  catalogue?: { heading: string; search: (text: string) => Promise<CatalogueOption<T>[]> }
 }
 
 const SEARCH_DELAY_MS = 250
@@ -45,10 +53,12 @@ export default function SearchPicker<T extends { id: string }>({
   onPick,
   exclude = [],
   create,
+  catalogue,
 }: Props<T>) {
   const { t, i18n } = useTranslation()
   const [text, setText] = useState('')
   const [found, setFound] = useState<{ text: string; items: T[] } | null>(null)
+  const [offered, setOffered] = useState<{ text: string; options: CatalogueOption<T>[] } | null>(null)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const [creating, setCreating] = useState(false)
@@ -57,6 +67,7 @@ export default function SearchPicker<T extends { id: string }>({
   const input = useRef<HTMLInputElement>(null)
   const query = text.trim()
   const searchable = /[\p{L}\p{N}]/u.test(query)
+  const catalogueSearch = catalogue?.search
 
   useEffect(() => {
     if (!searchable) return
@@ -67,16 +78,22 @@ export default function SearchPicker<T extends { id: string }>({
           if (current && response.ok && response.data) setFound({ text: query, items: response.data[kind].items })
         },
       )
+      if (catalogueSearch) {
+        void catalogueSearch(query).then((options) => {
+          if (current) setOffered({ text: query, options })
+        })
+      }
     }, SEARCH_DELAY_MS)
     return () => {
       current = false
       clearTimeout(timer)
     }
-  }, [query, searchable, kind])
+  }, [query, searchable, kind, catalogueSearch])
 
   const items = searchable && found?.text === query ? found.items.filter((item) => !exclude.includes(item.id)) : []
+  const fromCatalogue = searchable && catalogue && offered?.text === query ? offered.options : []
   const offerCreate = Boolean(create) && searchable && found?.text === query
-  const count = items.length + (offerCreate ? 1 : 0)
+  const count = items.length + fromCatalogue.length + (offerCreate ? 1 : 0)
   const showList = open && searchable && count > 0
   const optionId = (index: number) => `${listId}-${index}`
 
@@ -84,6 +101,7 @@ export default function SearchPicker<T extends { id: string }>({
     onPick(item)
     setText('')
     setFound(null)
+    setOffered(null)
     setOpen(false)
     setActive(-1)
     setCreateError(null)
@@ -93,6 +111,13 @@ export default function SearchPicker<T extends { id: string }>({
   async function choose(index: number) {
     if (index < items.length) {
       pick(items[index])
+    } else if (index < items.length + fromCatalogue.length) {
+      setCreating(true)
+      setCreateError(null)
+      const made = await fromCatalogue[index - items.length].run()
+      setCreating(false)
+      if (typeof made === 'string') setCreateError(made)
+      else pick(made)
     } else if (create) {
       setCreating(true)
       setCreateError(null)
@@ -188,16 +213,42 @@ export default function SearchPicker<T extends { id: string }>({
               </li>
             )
           })}
+          {fromCatalogue.length > 0 && catalogue && (
+            <li role="presentation" className="px-3 pt-2 pb-1 text-xs font-medium text-muted">
+              {catalogue.heading}
+            </li>
+          )}
+          {fromCatalogue.map((option, offset) => {
+            const index = items.length + offset
+            return (
+              <li
+                key={option.key}
+                id={optionId(index)}
+                role="option"
+                aria-selected={index === active}
+                aria-disabled={creating || undefined}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => void choose(index)}
+                className={`flex cursor-pointer flex-wrap items-baseline gap-x-3 rounded-lg px-3 py-2 ${
+                  index === active ? 'bg-hover' : 'hover:bg-hover'
+                }`}
+              >
+                <Icon name="plus" className="size-4 self-center text-accent" />
+                <bdi className="font-book text-reading">{option.primary}</bdi>
+                {option.secondary && <bdi className="font-book text-sm text-muted">{option.secondary}</bdi>}
+              </li>
+            )
+          })}
           {offerCreate && create && (
             <li
-              id={optionId(items.length)}
+              id={optionId(count - 1)}
               role="option"
-              aria-selected={active === items.length}
+              aria-selected={active === count - 1}
               aria-disabled={creating || undefined}
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => void choose(items.length)}
+              onClick={() => void choose(count - 1)}
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-accent ${
-                active === items.length ? 'bg-hover' : 'hover:bg-hover'
+                active === count - 1 ? 'bg-hover' : 'hover:bg-hover'
               }`}
             >
               <Icon name="plus" className="size-4" />
@@ -207,7 +258,12 @@ export default function SearchPicker<T extends { id: string }>({
         </ul>
       </div>
       <p className="sr-only" aria-live="polite">
-        {showList ? t('picker.found', { count: items.length, number: formatNumber(items.length, i18n.language) }) : ''}
+        {showList
+          ? t('picker.found', {
+              count: items.length + fromCatalogue.length,
+              number: formatNumber(items.length + fromCatalogue.length, i18n.language),
+            })
+          : ''}
       </p>
       {hint && (
         <p id={`${id}-hint`} className="text-sm text-muted">

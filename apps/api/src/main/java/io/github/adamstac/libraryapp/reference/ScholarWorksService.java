@@ -88,6 +88,34 @@ class ScholarWorksService implements ScholarWorks {
         return withAuthors(found);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Scholar> searchScholars(String text, int limit) {
+        // As in search: the same threshold, and the trigram index (V21) rather than reading every scholar
+        jdbc.sql("SELECT set_config('pg_trgm.word_similarity_threshold', :alike, true),"
+                        + " set_config('enable_seqscan', 'off', true)")
+                .param("alike", Double.toString(ALIKE))
+                .query()
+                .singleRow();
+        return jdbc.sql("""
+                        SELECT s.id, s.name_ar, s.name_en, s.death_year_hijri, s.death_year_ce FROM reference_scholars s
+                        WHERE s.search_key LIKE library_like_pattern(:text)
+                           OR library_search_key(:text) <% s.search_key
+                        ORDER BY (s.search_key LIKE library_like_pattern(:text)) DESC,
+                                 word_similarity(library_search_key(:text), s.search_key) DESC,
+                                 char_length(coalesce(s.name_ar, s.name_en)), s.id
+                        LIMIT :limit""")
+                .param("text", text)
+                .param("limit", limit)
+                .query((rs, row) -> new Scholar(
+                        rs.getString("id"),
+                        rs.getString("name_ar"),
+                        rs.getString("name_en"),
+                        rs.getObject("death_year_hijri", Integer.class),
+                        rs.getObject("death_year_ce", Integer.class)))
+                .list();
+    }
+
     /** The works with their authors, in the order the books name them. */
     private List<Work> withAuthors(List<Found> found) {
         if (found.isEmpty()) {

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router'
 import { type ApiResult, getJson, postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import FormField from '../components/FormField'
 import { type Language, saveLanguage } from '../language'
 
@@ -43,6 +44,7 @@ export default function AccountPage() {
 
   return (
     <section className="max-w-xl">
+      <BackToSettings />
       <h1 className="page-title">{t('account.title')}</h1>
 
       <h2 className="section-title mt-12">{t('account.languageTitle')}</h2>

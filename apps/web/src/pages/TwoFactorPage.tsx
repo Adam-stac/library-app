@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router'
 import { type ApiResult, getJson, postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import FormField from '../components/FormField'
 import QrCode from '../components/QrCode'
 
@@ -186,6 +187,7 @@ export default function TwoFactorPage() {
 
   return (
     <section className="max-w-xl">
+      <BackToSettings />
       {heading(t('twoFactor.title'))}
       <p className="lede">{t('twoFactor.intro')}</p>
       {view.notice && (

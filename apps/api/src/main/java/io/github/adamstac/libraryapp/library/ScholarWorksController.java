@@ -23,6 +23,9 @@ class ScholarWorksController {
     /** The works found, best match first. */
     public record Results(List<ScholarWorks.Work> items) {}
 
+    /** The scholars found, best match first. */
+    public record ScholarResults(List<ScholarWorks.Scholar> items) {}
+
     private final ScholarWorks works;
 
     ScholarWorksController(ScholarWorks works) {
@@ -52,5 +55,18 @@ class ScholarWorksController {
             throw new FieldValidationException("q", "required");
         }
         return new Results(works.search(text, count));
+    }
+
+    /**
+     * Scholars by name, for the author field when a book's title isn't in the catalogue. {@code q} as for works (at
+     * most 100 characters, with at least two letters or digits); {@code limit} at most 10.
+     */
+    @GetMapping("/api/v1/reference/scholars")
+    ScholarResults scholars(@RequestParam(required = false) String q, @RequestParam(defaultValue = "6") int limit) {
+        String text = TextInput.line("q", q, MAX_QUERY);
+        if (text == null || text.codePoints().filter(Character::isLetterOrDigit).count() < 2) {
+            throw new FieldValidationException("q", "required");
+        }
+        return new ScholarResults(works.searchScholars(text, Math.max(1, Math.min(limit, MAX_RESULTS))));
     }
 }

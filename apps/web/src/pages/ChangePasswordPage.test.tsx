@@ -49,6 +49,8 @@ describe('ChangePasswordPage', () => {
   it('changes the password with the CSRF token and confirms it', async () => {
     const api = fakeApi({ '/api/v1/auth/change-password': () => json(204) }, 'reader@example.com')
     const user = renderPage()
+    // A way back to Settings, which lists this page
+    expect(await screen.findByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
 
     await change(user, CURRENT, NEW_PASSWORD)
 

@@ -80,6 +80,8 @@ describe('SecurityPage', () => {
       'reader@example.com',
     )
     renderPage()
+    // A way back to Settings, which lists this page
+    expect(await screen.findByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
 
     expect(await screen.findByText('This device')).toBeInTheDocument()
     const where = screen.getByRole('list', { name: "Where you're signed in" })

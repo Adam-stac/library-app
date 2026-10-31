@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router'
 import { type ApiResult, getJson, postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import FormField from '../components/FormField'
 import { addPasskey, type Passkey, passkeysSupported } from '../passkeys'
 
@@ -48,6 +49,7 @@ export default function PasskeysPage() {
 
   return (
     <section className="max-w-xl">
+      <BackToSettings />
       <h1 className="page-title">{t('passkeys.title')}</h1>
       <p className="lede">{t('passkeys.intro')}</p>
 

@@ -10,9 +10,13 @@ const PAUSE_MS = 300
  * The copies of this ISBN the reader already has ("you already have this", ADR 0010). Nothing is asked until what
  * is typed or scanned is a whole, correct ISBN, and then only this account's own shelf is asked (never anything
  * outside the app). {@code excludeId} leaves out the copy being edited. An answer for an ISBN that has since been
- * changed is dropped, and a failed check says nothing: it is a convenience, not a gate.
+ * changed is dropped, and a failed check says nothing: it is a convenience, not a gate. {@code checked} is true once
+ * the shelf has answered for the ISBN now in the field, so the form can say "not in your library yet".
  */
-export function useCopiesWithIsbn(text: string, excludeId: string | null): EditionSummary[] {
+export function useCopiesWithIsbn(
+  text: string,
+  excludeId: string | null,
+): { copies: EditionSummary[]; checked: boolean } {
   const isbn = readIsbn(text)
   const key = isbn ? `${isbn}|${excludeId ?? ''}` : null
   const [answer, setAnswer] = useState<{ key: string; copies: EditionSummary[] } | null>(null)
@@ -32,5 +36,6 @@ export function useCopiesWithIsbn(text: string, excludeId: string | null): Editi
     }
   }, [isbn, key, excludeId])
 
-  return key !== null && answer?.key === key ? answer.copies : []
+  const answered = key !== null && answer?.key === key
+  return { copies: answered ? answer.copies : [], checked: answered }
 }
