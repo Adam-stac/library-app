@@ -101,6 +101,20 @@ class ApiErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
+    @ExceptionHandler(LimitReachedException.class)
+    ResponseEntity<ProblemDetail> limitReached(LimitReachedException ex) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, "A limit was reached.");
+        body.setProperty("code", ex.code());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
+    }
+
+    @ExceptionHandler(UpstreamException.class)
+    ResponseEntity<ProblemDetail> upstream(UpstreamException ex) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, "Please try again shortly.");
+        body.setProperty("code", ex.code());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+    }
+
     @ExceptionHandler(ServiceBusyException.class)
     ResponseEntity<ProblemDetail> busy() {
         ProblemDetail body = ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, "Please try again shortly.");

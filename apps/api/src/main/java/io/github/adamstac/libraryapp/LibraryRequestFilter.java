@@ -16,7 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Protects every library change (everything under /api/v1 except /api/v1/auth, which has its own filter):
- * request bodies must declare their size and stay under 64 KB, and each signed-in account may make only so many
+ * request bodies must declare their size and stay under 64 KB (a photo of a page to be read, under 4 MB), and each signed-in account may make only so many
  * changes a minute. Runs after Spring Security, so only signed-in requests with a valid CSRF token reach it.
  */
 @Component
@@ -24,6 +24,10 @@ class LibraryRequestFilter extends OncePerRequestFilter {
 
     /** Room for a 10,000-character biography in Arabic (2 bytes a letter) plus every other field. */
     static final int MAX_BODY_BYTES = 64 * 1024;
+
+    /** A photo of a page to be read (ADR 0011): the pages module checks it again, to the byte */
+    static final String PHOTO_PATH = "/api/v1/page-readings";
+    static final int MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 
     private static final Set<String> CHANGES = Set.of("POST", "PUT", "PATCH", "DELETE");
 
@@ -50,7 +54,7 @@ class LibraryRequestFilter extends OncePerRequestFilter {
                 reject(response, HttpServletResponse.SC_LENGTH_REQUIRED, "length_required");
                 return;
             }
-            if (length > MAX_BODY_BYTES) {
+            if (length > (PHOTO_PATH.equals(request.getRequestURI()) ? MAX_PHOTO_BYTES : MAX_BODY_BYTES)) {
                 reject(response, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "request_too_large");
                 return;
             }
