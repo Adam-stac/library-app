@@ -26,19 +26,20 @@ code.
 
 ## Decision
 
-**"Read the title page" becomes the first step of Add a book**, above the ISBN, which stays second; title and author,
+**"Read the cover or title page" becomes the first step of Add a book**, above the ISBN, which stays second; title and author,
 found from the scholars' catalogue as you type, come third. The photo is read by Google Cloud Vision, from our server,
 within a monthly cap. The app sorts the lines into fields by the fixed wording of Arabic title pages. **The printed page
 wins over the catalogue, and the reader confirms everything.**
 
-1. **The flow.** "Photograph the title page" opens the camera (or a photo the reader picks). A second photo, of the
-   copyright page, is optional. What was read fills only the empty fields, each with the note "Please confirm. Read
-   from the title page.", and every line read is listed below the form: a line in the wrong field, or missed, is moved
+1. **The flow.** "Photograph the cover or title page" opens the camera (or a photo the reader picks). Either works: the
+   cover is quicker, and the title page (the first printed page inside) is plainer and often adds the publisher and
+   year. A second photo, of the copyright page, is optional, for the ISBN and the edition details. What was read fills only the empty fields, each with the note "Please confirm. Read
+   from the photo.", and every line read is listed below the form: a line in the wrong field, or missed, is moved
    with a tap. Nothing is saved until the reader presses Save, as with every suggestion (ADR 0010).
 
-2. **What leaves the device, and what doesn't.** In the browser the photo is redrawn at most 2,000 pixels on its long
-   side and re-encoded as a JPEG, which also drops its metadata (where and when it was taken). Only that image goes to
-   our server, and from there only the image goes to Google: no account, email, cookie or session. A line beside the
+2. **What leaves the device, and what doesn't.** A phone's photo carries hidden details: where and when it was taken,
+   and the phone. In the browser, before anything is sent, the photo is redrawn at most 2,000 pixels on its long side
+   and re-encoded as a plain JPEG, which leaves all of that behind. Only that image goes to our server, and from there only the image goes to Google: no account, email, cookie or session. A line beside the
    button says the photo is read by Google. We keep neither the photo nor the text: both are held only while the
    request runs. Google's terms for online requests say the image is processed in memory and not stored, only request
    metadata (time, size) is logged, and the content is not used to train its models (Cloud Vision data usage, read 31
