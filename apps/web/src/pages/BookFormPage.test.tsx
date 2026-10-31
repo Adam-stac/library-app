@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -762,6 +762,196 @@ describe('BookFormPage', () => {
         death: { hijri: null, ce: 1547, approximate: false },
         wikidataId: 'Q16120965',
       })
+    })
+  })
+
+  describe('Photograph the cover or title page (ADR 0011)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks() // the canvas, drawn on in jsdom for these tests only
+    })
+    const settings = () => json(200, { defaultCurrency: null })
+    const STATUS = '/api/v1/page-readings/status'
+    const on = (leftToday = 30) => () => json(200, { enabled: true, leftToday, leftThisMonth: 300, paused: false })
+    const MUTAMMIMA = {
+      fields: {
+        title: 'متممة الآجرومية في علم العربية',
+        authors: ['العلامة شمس الدين محمد بن محمد الرعيني المالكي الشهير بالحطاب'],
+        authorDeathHijri: 954,
+        muhaqqiq: 'مالك بن سالم بن مطر المهذري',
+        publisher: 'دار ابن حزم',
+        publicationPlace: 'بيروت',
+        edition: 'الطبعة الأولى',
+        publishedHijri: 1432,
+        publishedCe: 2011,
+        isbn: null,
+      },
+      lines: [
+        'متممة الآجرومية في علم العربية',
+        'تأليف',
+        'العلامة شمس الدين محمد بن محمد الرعيني المالكي الشهير بالحطاب',
+        '<img src=x onerror="window.hacked=1">',
+        'طبعة مقابلة على نسخ خطية',
+      ],
+    }
+
+    function photoCanBeDrawn() {
+      vi.stubGlobal('createImageBitmap', vi.fn(async () => ({ width: 3000, height: 2000, close: () => {} })))
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        drawImage: () => {},
+      } as unknown as CanvasRenderingContext2D)
+      vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation((callback: BlobCallback) =>
+        callback(new Blob(['jpeg'], { type: 'image/jpeg' })),
+      )
+    }
+
+    function choosePhoto() {
+      const input = document.querySelector('input[type=file]') as HTMLInputElement
+      fireEvent.change(input, { target: { files: [new File(['photo'], 'cover.jpg', { type: 'image/jpeg' })] } })
+    }
+
+    it('fills the empty fields from the photo, each to confirm, and offers the author printed on it', async () => {
+      photoCanBeDrawn()
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [STATUS]: on(),
+          '/api/v1/page-readings': () => json(200, MUTAMMIMA),
+          [`/api/v1/search?q=${encodeURIComponent('الحطاب')}&limit=5`]: () =>
+            json(200, { authors: { items: [], total: 0 } }),
+          [`/api/v1/reference/scholars?q=${encodeURIComponent('الحطاب')}&limit=4`]: () =>
+            json(200, { items: [{ id: 'Q16120965', nameAr: 'الحطاب', nameEn: 'Al-Hattab', deathHijri: null, deathCe: 1547 }] }),
+          '/api/v1/authors': () => json(201, { id: 'a7', nameAr: 'الحطاب', nameEn: 'Al-Hattab' }),
+        },
+        'r@example.com',
+      )
+      renderPage('/books/new')
+
+      // The first thing on the page, saying where the photo goes
+      const take = await screen.findByRole('button', { name: 'Take or choose a photo' })
+      expect(take).toHaveAccessibleDescription(/read by Google; only the picture is sent, without where or when/)
+      choosePhoto()
+
+      expect(await screen.findByText(/^Read\. The fields it filled say/)).toBeInTheDocument()
+      const sent = callTo(api, '/api/v1/page-readings')
+      expect((sent.headers as Record<string, string>)['Content-Type']).toBe('image/jpeg')
+      expect((sent.headers as Record<string, string>)['X-XSRF-TOKEN']).toBe('csrf-123')
+      // everyFieldReadFromThePageCarriesTheNote
+      for (const [label, value] of [
+        ['Title in Arabic', 'متممة الآجرومية في علم العربية'],
+        ['Edited by (muḥaqqiq)', 'مالك بن سالم بن مطر المهذري'],
+        ['Publisher', 'دار ابن حزم'],
+        ['Place of publication', 'بيروت'],
+        ['Year published (Hijri)', '1432'],
+        ['Year published (CE)', '2011'],
+        ['Edition', '1'],
+      ]) {
+        expect(screen.getByLabelText(label)).toHaveValue(value)
+        expect(screen.getByLabelText(label)).toHaveAccessibleDescription(/Please confirm\. Read from the photo\./)
+      }
+
+      // aCatalogueScholarIsLinkedOnlyWhenChosen: offered, and nothing is added until a button is pressed
+      expect(screen.getByText(/^Author on the page:/)).toBeInTheDocument()
+      expect(api.mock.calls.map(([path]) => path)).not.toContain('/api/v1/authors')
+      fireEvent.click(await screen.findByRole('button', { name: /^Use Al-Hattab \(d\. 1547 CE\) from the catalogue/ }))
+      await waitFor(() => expect(within(screen.getByRole('list', { name: 'Authors' })).getByText('Al-Hattab')).toBeInTheDocument())
+      // The page wins: its death year, linked to the scholar
+      expect(JSON.parse(String(callTo(api, '/api/v1/authors').body))).toEqual({
+        nameAr: 'الحطاب',
+        nameEn: 'Al-Hattab',
+        death: { hijri: 954, ce: null, approximate: false },
+        wikidataId: 'Q16120965',
+      })
+    })
+
+    it('lists every line, as text, and puts one in a field when chosen (scriptInALineIsShownAsText)', async () => {
+      photoCanBeDrawn()
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [STATUS]: on(),
+          '/api/v1/page-readings': () => json(200, { ...MUTAMMIMA, fields: { ...MUTAMMIMA.fields, authors: [] } }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+      await screen.findByRole('button', { name: 'Take or choose a photo' })
+      choosePhoto()
+
+      await user.click(await screen.findByText('5 lines read from the photo'))
+      expect(screen.getByText('<img src=x onerror="window.hacked=1">')).toBeInTheDocument()
+      expect((window as { hacked?: number }).hacked).toBeUndefined()
+
+      await user.selectOptions(
+        screen.getByRole('combobox', { name: 'Put “طبعة مقابلة على نسخ خطية” in a field' }),
+        'Title on the cover',
+      )
+      expect(screen.getByLabelText('Title on the cover')).toHaveValue('طبعة مقابلة على نسخ خطية')
+    })
+
+    it('never replaces what you typed', async () => {
+      photoCanBeDrawn()
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [STATUS]: on(),
+          '/api/v1/page-readings': () => json(200, MUTAMMIMA),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+      await user.type(await screen.findByLabelText('Publisher'), 'دار المنهاج')
+      choosePhoto()
+
+      await screen.findByText(/^Read\./)
+      expect(screen.getByLabelText('Publisher')).toHaveValue('دار المنهاج')
+      expect(screen.getByLabelText('Publisher')).not.toHaveAccessibleDescription(/Read from the photo/)
+    })
+
+    it('at a limit says so, and the form still works (atALimitTheFormStillWorks)', async () => {
+      fakeApi({ [SCIENCES]: sciences, '/api/v1/library-settings': settings, [STATUS]: on(0) }, 'r@example.com')
+      renderPage('/books/new')
+
+      expect(await screen.findByRole('button', { name: 'Take or choose a photo' })).toBeDisabled()
+      expect(screen.getByText(/You've used today's readings/)).toBeInTheDocument()
+      expect(screen.getByLabelText('ISBN')).toBeEnabled()
+      expect(screen.getByLabelText('Title in Arabic')).toBeEnabled()
+    })
+
+    it('says what went wrong, in words, when the page could not be read', async () => {
+      photoCanBeDrawn()
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [STATUS]: on(),
+          '/api/v1/page-readings': () => json(502, { status: 502, code: 'timed_out' }),
+        },
+        'r@example.com',
+      )
+      renderPage('/books/new')
+      await screen.findByRole('button', { name: 'Take or choose a photo' })
+      choosePhoto()
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Reading the page took too long.')
+    })
+
+    it('is not offered when reading pages is not set up', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [STATUS]: () => json(200, { enabled: false, leftToday: 0, leftThisMonth: 0, paused: false }),
+        },
+        'r@example.com',
+      )
+      renderPage('/books/new')
+
+      await screen.findByLabelText('ISBN')
+      expect(screen.queryByRole('button', { name: 'Take or choose a photo' })).not.toBeInTheDocument()
+      expect(screen.queryByText('Photograph the cover or title page')).not.toBeInTheDocument()
     })
   })
 })

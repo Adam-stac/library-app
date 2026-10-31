@@ -618,6 +618,7 @@ function answer(url: URL): unknown {
   if (path === '/api/v1/sciences') return { items: sciences, total: sciences.length }
   if (path === '/api/v1/library-settings') return { defaultCurrency: 'SAR' }
   if (path === '/api/v1/auth/2fa') return { enabled: false, recoveryCodesLeft: 0 }
+  if (path === '/api/v1/page-readings/status') return { enabled: true, leftToday: 30, leftThisMonth: 300, paused: false }
   if (path === '/api/v1/bin') return bin
   if (path === '/api/v1/timeline') return timeline
   if (path === '/api/v1/public/scholars') return publicScholars

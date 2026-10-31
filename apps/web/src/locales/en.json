@@ -437,7 +437,7 @@
       "noCurrency": "None",
       "readingHint": "Leave both empty if you have not started it.",
       "isbnGroup": "ISBN",
-      "isbnGroupHint": "Start here if the book has one: the app checks your library and fills in what it can."
+      "isbnGroupHint": "If the book has one, the app checks your library and fills in what it can."
     },
     "isbn": {
       "scan": "Scan barcode",
@@ -863,5 +863,47 @@
     "isbnLink": "International ISBN Agency",
     "yoursTitle": "Your own books",
     "yoursBody": "The publisher, place and language suggested for a new book come from the books you have already added. Nothing you enter is shared with anyone."
+  },
+  "pageReading": {
+    "title": "Photograph the cover or title page",
+    "hint": "The quickest way: the app reads the page and fills in what it finds, for you to confirm.",
+    "take": "Take or choose a photo",
+    "reading": "Reading the page…",
+    "note_one": "The photo is read by Google; only the picture is sent, without where or when it was taken. {{number}} reading left today.",
+    "note_other": "The photo is read by Google; only the picture is sent, without where or when it was taken. {{number}} readings left today.",
+    "noneLeftToday": "You've used today's readings. Tomorrow you can read more; until then, type the details below.",
+    "paused": "Reading pages is paused until next month. You can type the details below.",
+    "done": "Read. The fields it filled say \"Please confirm\"; anything it missed is in the lines below.",
+    "nothing": "No text could be read. Try again in better light, holding the page flat, or type the details below.",
+    "notAPhoto": "That file couldn't be opened as a photo. Try a JPEG or PNG.",
+    "check": "Please confirm. Read from the photo.",
+    "author": "Author on the page: {{name}}",
+    "useScholar": "Use {{name}} from the catalogue",
+    "pageSays": "(the page says {{year}} AH)",
+    "lines_one": "{{count}} line read from the photo",
+    "lines_other": "{{count}} lines read from the photo",
+    "linesHint": "If a line belongs in a field, choose the field beside it.",
+    "putIn": "Put “{{line}}” in a field",
+    "putInChoose": "Put in…",
+    "fields": {
+      "titleAr": "Title in Arabic",
+      "titleEn": "Title in English",
+      "title": "Title on the cover",
+      "muhaqqiq": "Edited by (muḥaqqiq)",
+      "publisher": "Publisher",
+      "publicationPlace": "Place of publication"
+    },
+    "errors": {
+      "day_limit": "You've used today's readings. Type the details below, or read more tomorrow.",
+      "month_limit": "You've used this month's readings. Type the details below.",
+      "app_limit": "Reading pages is paused until next month. Type the details below.",
+      "unavailable": "The page couldn't be read just now. Try again in a moment, or type the details below.",
+      "timed_out": "Reading the page took too long. Try again, or type the details below.",
+      "too_large": "That photo is too large. Try again with a smaller one.",
+      "not_an_image": "That file isn't a photo the app can read. Try a JPEG or PNG.",
+      "too_small": "That photo is too small to read. Take it closer.",
+      "request_too_large": "That photo is too large. Try again with a smaller one.",
+      "busy": "Many pages are being read just now. Try again in a moment."
+    }
   }
 }
