@@ -354,7 +354,7 @@ describe('BookFormPage', () => {
       expect(await screen.findByDisplayValue('دار الغوثاني')).toBeInTheDocument()
       for (const label of ['Publisher', 'Place of publication', 'Language']) {
         expect(screen.getByLabelText(label)).toHaveAccessibleDescription(
-          'May be incorrect, please check. From your books by the same publisher.',
+          'Please confirm. From your books by the same publisher.',
         )
       }
       expect(screen.getByLabelText('Place of publication')).toHaveValue('دمشق')
@@ -420,7 +420,7 @@ describe('BookFormPage', () => {
 
       await waitFor(() => expect(screen.getByLabelText('Language')).toHaveValue('ar'))
       expect(screen.getByLabelText('Language')).toHaveAccessibleDescription(
-        "May be incorrect, please check. From the ISBN's country: Syria.",
+        "Please confirm. From the ISBN's country: Syria.",
       )
       expect(screen.getByLabelText('Publisher')).toHaveValue('')
     })
@@ -445,7 +445,7 @@ describe('BookFormPage', () => {
 
       await waitFor(() => expect(screen.getByLabelText('Language')).toHaveValue('ar'))
       expect(screen.getByLabelText('Language')).toHaveAccessibleDescription(
-        "May be incorrect, please check. From the ISBN's publisher, an Arabic publisher in Lebanon.",
+        "Please confirm. From the ISBN's publisher, an Arabic publisher in Lebanon.",
       )
     })
 
@@ -541,7 +541,7 @@ describe('BookFormPage', () => {
       await user.type(await screen.findByLabelText('ردمك (ISBN)'), ISBN)
 
       await waitFor(() =>
-        expect(screen.getByText(/قد يكون هذا غير صحيح، يُرجى التحقق منه\. من بلد الردمك: سوريا\./)).toBeInTheDocument(),
+        expect(screen.getByText(/يُرجى التأكد منه\. من بلد الردمك: سوريا\./)).toBeInTheDocument(),
       )
     })
   })
@@ -560,7 +560,7 @@ describe('BookFormPage', () => {
     const yours = { id: 'a9', nameAr: 'البخاري', nameEn: null }
     const searchFor = (q: string) => `/api/v1/search?q=${encodeURIComponent(q)}&limit=5`
     const noAuthors = () => json(200, { authors: { items: [], total: 0 } })
-    const CHECK = "May be incorrect, please check. From the scholars' catalogue (Wikidata)."
+    const CHECK = "Please confirm. From the scholars' catalogue (Wikidata)."
 
     it('offers classical works as you type a title, and choosing one fills the titles with a note to check', async () => {
       fakeApi(
@@ -645,6 +645,8 @@ describe('BookFormPage', () => {
         nameAr: bukhari.nameAr,
         nameEn: bukhari.nameEn,
         death: { hijri: 256, ce: 870, approximate: false },
+        // Linked to the scholar, so the general timeline shows them once (T2)
+        wikidataId: bukhari.id,
       })
     })
 
@@ -687,6 +689,79 @@ describe('BookFormPage', () => {
       await new Promise((resolve) => setTimeout(resolve, 450))
 
       expect(api.mock.calls.some(([path]) => String(path).startsWith('/api/v1/reference/works'))).toBe(false)
+    })
+  })
+
+  describe('Saying what happened (from the first case study)', () => {
+    const settings = () => json(200, { defaultCurrency: null })
+    const ISBN = '9789933685027'
+
+    it('puts the ISBN first, and says what it did: not in your library yet, what it filled in, and what next', async () => {
+      fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [`/api/v1/editions/by-isbn?isbn=${ISBN}`]: () => json(200, { items: [] }),
+          [`/api/v1/editions/suggestions?isbn=${ISBN}`]: () =>
+            json(200, {
+              publisher: null,
+              publicationPlace: null,
+              language: { value: 'ar', from: 'country', country: 'SY' },
+            }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      // The first field of the form
+      const isbn = await screen.findByLabelText('ISBN')
+      expect(screen.getAllByRole('textbox')[0]).toBe(isbn)
+      await user.type(screen.getByLabelText('ISBN'), ISBN)
+
+      expect(
+        await screen.findByText(
+          'Not in your library yet. Filled in from it: Language. Next, type the title below: classical works are offered as you type.',
+        ),
+      ).toBeInTheDocument()
+      // Once a title is typed, the last part has done its job
+      await user.type(screen.getByLabelText('Title in Arabic'), 'م')
+      expect(await screen.findByText('Not in your library yet. Filled in from it: Language.')).toBeInTheDocument()
+    })
+
+    it("says when a title isn't in the catalogue, and the author field finds its author there", async () => {
+      const TYPED = 'متممة الآجرومية'
+      const hattab = { id: 'Q16120965', nameAr: 'الحطاب', nameEn: 'Al-Hattab', deathHijri: null, deathCe: 1547 }
+      const api = fakeApi(
+        {
+          [SCIENCES]: sciences,
+          '/api/v1/library-settings': settings,
+          [`/api/v1/reference/works?q=${encodeURIComponent(TYPED)}&limit=5`]: () => json(200, { items: [] }),
+          [`/api/v1/search?q=${encodeURIComponent('الحطاب')}&limit=8`]: () =>
+            json(200, { authors: { items: [], total: 0 }, places: nothing, works: nothing, editions: nothing }),
+          [`/api/v1/reference/scholars?q=${encodeURIComponent('الحطاب')}&limit=4`]: () =>
+            json(200, { items: [hattab] }),
+          '/api/v1/authors': () => json(201, { id: 'a5', nameAr: 'الحطاب', nameEn: 'Al-Hattab' }),
+        },
+        'r@example.com',
+      )
+      const user = renderPage('/books/new')
+
+      await user.type(await screen.findByLabelText('Title in Arabic'), TYPED)
+      expect(
+        await screen.findByText("Not in the scholars' catalogue. Type the title in full; its author may still be found below."),
+      ).toBeInTheDocument()
+
+      await user.type(screen.getByRole('combobox', { name: 'Authors' }), 'الحطاب')
+      expect(await screen.findByText("From the scholars' catalogue, added with their death year")).toBeInTheDocument()
+      await user.click(await screen.findByRole('option', { name: /^Al-Hattab \(d\. 1547 CE\)/ }))
+
+      expect(within(await screen.findByRole('list', { name: 'Authors' })).getByText('Al-Hattab')).toBeInTheDocument()
+      expect(JSON.parse(String(callTo(api, '/api/v1/authors').body))).toEqual({
+        nameAr: 'الحطاب',
+        nameEn: 'Al-Hattab',
+        death: { hijri: null, ce: 1547, approximate: false },
+        wikidataId: 'Q16120965',
+      })
     })
   })
 })

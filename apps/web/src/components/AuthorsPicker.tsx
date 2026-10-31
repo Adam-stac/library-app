@@ -1,9 +1,12 @@
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { postJson } from '../api'
 import { formatNumber } from '../authors'
+import { displayName } from '../authors'
 import { errorMessage, isArabic, type Named, nameOf, otherNameOf } from '../library'
+import { scholarLine, scholarsNamed } from '../scholarWorks'
 import Icon from './Icon'
-import SearchPicker from './SearchPicker'
+import SearchPicker, { type CatalogueOption } from './SearchPicker'
 
 const MAX_AUTHORS = 20
 
@@ -17,8 +20,9 @@ type Props = {
 }
 
 /**
- * A work's authors, in the order the book names them: found as you type among the account's authors, or added from
- * what was typed (as the Arabic or English name, by its letters), then moved up or down, or taken out.
+ * A work's authors, in the order the book names them: found as you type among the account's authors, or among the
+ * scholars' catalogue (added with their death year and linked to the scholar), or added from what was typed (as the
+ * Arabic or English name, by its letters), then moved up or down, or taken out.
  */
 export default function AuthorsPicker({ id, label, value, onChange, error }: Props) {
   const { t, i18n } = useTranslation()
@@ -29,6 +33,35 @@ export default function AuthorsPicker({ id, label, value, onChange, error }: Pro
     next.splice(to, 0, author)
     onChange(next)
   }
+  // Scholars from the catalogue, after your own authors: a book whose title isn't in the catalogue often has an
+  // author who is (al-Hattab, for his Mutammima). Choosing one adds them as your author, with their death year
+  const fromCatalogue = useCallback(
+    async (typed: string): Promise<CatalogueOption<Named>[]> =>
+      (await scholarsNamed(typed)).map((scholar) => {
+        const other = language === 'ar' ? scholar.nameEn : scholar.nameAr
+        return {
+          key: scholar.id,
+          primary: scholarLine(scholar, t, language),
+          secondary: other && other !== displayName(scholar, language) ? other : null,
+          run: async () => {
+            const result = await postJson<Named>(
+              '/api/v1/authors',
+              {
+                nameAr: scholar.nameAr,
+                nameEn: scholar.nameEn,
+                death: { hijri: scholar.deathHijri, ce: scholar.deathCe, approximate: false },
+                wikidataId: scholar.id,
+              },
+              { csrf: true },
+            )
+            if (result.ok && result.data) return result.data
+            if (result.ok) return errorMessage(t, language, 'unexpected')
+            return errorMessage(t, language, Object.values(result.fieldErrors)[0] ?? result.code)
+          },
+        }
+      }),
+    [t, language],
+  )
   const iconButton =
     'grid size-8 shrink-0 place-items-center rounded-md text-muted transition-colors duration-150 hover:bg-hover hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent'
 
@@ -90,6 +123,7 @@ export default function AuthorsPicker({ id, label, value, onChange, error }: Pro
           exclude={value.map((author) => author.id)}
           describe={(author) => ({ primary: nameOf(author, language), secondary: otherNameOf(author, language) })}
           onPick={(author) => onChange([...value, author])}
+          catalogue={{ heading: t('picker.fromCatalogue'), search: fromCatalogue }}
           create={{
             label: (text) => t('picker.addAuthor', { name: text }),
             run: async (text) => {

@@ -2,36 +2,25 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { postJson } from '../api'
-import { displayName, indexYear } from '../authors'
+import { displayName } from '../authors'
 import { errorMessage, type Named } from '../library'
-import { type Scholar, type ScholarWork, useScholarWorks, yourAuthorsLike } from '../scholarWorks'
+import { type Scholar, type ScholarWork, scholarLine, useScholarWorks, yourAuthorsLike } from '../scholarWorks'
 import Icon from './Icon'
-
-/** A scholar's death year as an index shows it ("d. 256 AH", "ت ٢٥٦هـ"), or null. */
-function died(scholar: Scholar, t: ReturnType<typeof useTranslation>['t'], language: string): string | null {
-  const none = { hijri: null, ce: null, approximate: false }
-  return indexYear(
-    { birth: none, death: { hijri: scholar.deathHijri, ce: scholar.deathCe, approximate: false } },
-    t,
-    language,
-  )
-}
-
-function scholarLine(scholar: Scholar, t: ReturnType<typeof useTranslation>['t'], language: string): string {
-  const year = died(scholar, t, language)
-  const name = displayName(scholar, language)
-  return year ? `${name} (${year})` : name
-}
 
 /**
  * Classical works matching the title being typed, from the scholars' catalogue (ADR 0010, layer 2). Choosing one is
  * the reader's own act: it fills the titles, and the authors are then offered one by one ({@link ScholarAuthor}).
+ * When none match, a line says so, and points to the author field, which also searches the catalogue's scholars.
  */
 export function CatalogueOffers({ typed, onPick }: { typed: string; onPick: (work: ScholarWork) => void }) {
   const { t, i18n } = useTranslation()
   const language = i18n.language
   const works = useScholarWorks(typed)
-  if (!works || works.length === 0) return null
+  if (!works) return null
+  if (works.length === 0) {
+    // Said, so the reader knows the title was looked for and can go on: the author may still be in the catalogue
+    return <p className="text-sm text-muted">{t('books.catalogue.none')}</p>
+  }
 
   return (
     <section aria-labelledby="catalogue-title" className="rounded-panel border border-line p-4">
@@ -95,6 +84,7 @@ export function ScholarAuthor({ scholar, onChosen }: { scholar: Scholar; onChose
         nameAr: scholar.nameAr,
         nameEn: scholar.nameEn,
         death: { hijri: scholar.deathHijri, ce: scholar.deathCe, approximate: false },
+        wikidataId: scholar.id,
       },
       { csrf: true },
     )

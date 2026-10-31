@@ -128,4 +128,22 @@ describe('AccountPage', () => {
     expect(await screen.findByRole('heading', { name: 'Deleted page' })).toBeInTheDocument()
     expect(JSON.parse(callTo(api, '/api/v1/auth/delete-account').body as string)).toEqual({ currentPassword: PASSWORD })
   })
+
+  it("says so when it can't tell whether two-step verification is on, and tries again", async () => {
+    let fails = true
+    fakeApi(
+      { '/api/v1/auth/2fa': () => (fails ? json(500) : json(200, { enabled: false, recoveryCodesLeft: 0 })) },
+      'reader@example.com',
+    )
+    const user = renderPage()
+
+    // Not two empty boxes: what went wrong, and a way on
+    expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't load this. Please try again.")
+    expect(screen.queryByLabelText('New email address')).not.toBeInTheDocument()
+    fails = false
+    await user.click(screen.getAllByRole('button', { name: 'Try again' })[0])
+
+    expect(await screen.findByLabelText('New email address')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
+  })
 })

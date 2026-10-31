@@ -196,7 +196,7 @@ export default function SecurityPage() {
       <p className="mt-8 rounded-lg border-s-4 border-line-strong bg-surface px-4 py-3 text-muted">
         {t('security.notYou')}{' '}
         <Link to="/change-password" className="link">
-          {t('home.changePassword')}
+          {t('changePassword.title')}
         </Link>
       </p>
     </section>

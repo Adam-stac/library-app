@@ -49,7 +49,9 @@ const sectionLink =
       'min-h-12 flex-col items-center justify-center gap-1 rounded-2xl text-xs transition-colors duration-150',
       // On a phone only the tabs show; on a wide screen, every section, in the rail
       phone ? 'flex' : 'hidden lg:flex',
-      'lg:w-19 lg:py-2.5',
+      // Tighter on a short screen (a laptop at 125% zoom is about 650 px tall), so the account stays in view
+      'lg:w-19 lg:py-2 [@media(max-height:720px)]:lg:min-h-11 [@media(max-height:720px)]:lg:py-1.5',
+      '[@media(max-height:660px)]:lg:min-h-10 [@media(max-height:660px)]:lg:gap-0.5 [@media(max-height:660px)]:lg:py-1',
       isActive
         ? 'font-semibold text-accent lg:bg-surface lg:text-ink lg:shadow-lift'
         : 'font-medium text-muted hover:text-ink lg:hover:bg-surface/60',
@@ -117,16 +119,16 @@ export default function Layout({ children }: { children: ReactNode }) {
     <UndoProvider>
       <div className={state.status === 'loading' ? `${frame} invisible` : frame}>
         {signedIn ? (
-          <aside className="sticky top-0 z-20 lg:top-5 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:w-22 lg:shrink-0 lg:flex-col lg:items-center">
+          <aside className="sticky top-0 z-20 lg:top-5 lg:flex lg:h-[calc(100dvh-2.5rem)] lg:min-h-0 lg:w-22 lg:shrink-0 lg:flex-col lg:items-center">
             {/* The phone's top bar is frosted. The frost is a layer of its own, so the tab bar inside the aside can
               still be fixed to the bottom of the screen (a frosted parent would hold it inside the bar). */}
             <div aria-hidden="true" className="glass-bar absolute inset-0 -z-10 border-b border-line lg:hidden" />
             <div className="flex items-center justify-between gap-2 px-4 py-2.5 lg:contents">
-              <div className="lg:mt-2 lg:mb-8">
+              <div className="lg:mt-1 lg:mb-6 [@media(max-height:720px)]:lg:mb-3 [@media(max-height:660px)]:lg:mb-1">
                 <Brand compact />
               </div>
-              <div className="flex items-center gap-1 lg:order-last lg:mt-auto lg:flex-col lg:gap-2">
-                <LanguageButton className="lg:min-h-12 lg:w-19 lg:flex-col lg:gap-1 lg:px-0 lg:text-xs" />
+              <div className="flex items-center gap-1 lg:order-last lg:mt-auto lg:flex-col lg:gap-1 lg:pt-2">
+                <LanguageButton className="lg:min-h-11 lg:w-19 lg:flex-col lg:gap-1 lg:px-0 lg:text-xs" />
                 <AccountMenu email={state.account.email} />
               </div>
             </div>
@@ -135,11 +137,11 @@ export default function Layout({ children }: { children: ReactNode }) {
               <PhoneSearch />
               <nav
                 aria-label={t('nav.main')}
-                className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:flex lg:flex-col lg:items-center lg:gap-1.5 lg:p-0"
+                className="grid grid-cols-5 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:flex lg:flex-col lg:items-center lg:gap-1 lg:p-0 [@media(max-height:620px)]:lg:min-h-0 [@media(max-height:620px)]:lg:flex-1 [@media(max-height:620px)]:lg:overflow-y-auto [@media(max-height:620px)]:lg:py-1"
               >
                 {SECTIONS.map(({ to, key, icon, end }) => (
                   <NavLink key={to} to={to} end={end} className={sectionLink(TABS.includes(to))}>
-                    <Icon name={icon} className="size-5.5" />
+                    <Icon name={icon} className="size-5.5 lg:size-5" />
                     {t(`nav.${key}`)}
                   </NavLink>
                 ))}

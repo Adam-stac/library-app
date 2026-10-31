@@ -31,6 +31,7 @@
     "delete": "Delete",
     "deleteYes": "Yes, delete",
     "loadFailed": "We couldn't load this. Please try again.",
+    "tryAgain": "Try again",
     "stale": "This was changed on another device after you opened it. Load the latest version, then make your changes again.",
     "loadLatest": "Load the latest version",
     "pages": "Pages",
@@ -459,7 +460,7 @@
       "next": "Next, type the title below: classical works are offered as you type."
     },
     "suggest": {
-      "check": "May be incorrect, please check.",
+      "check": "Please confirm.",
       "fromYourBooks": "From your books by the same publisher.",
       "fromCountry": "From the ISBN's country: {{country}}.",
       "fromLanguageArea": "From the ISBN's language area.",
@@ -474,7 +475,8 @@
       "author": "Author in the catalogue: {{name}}",
       "useYours": "Use your author {{name}}",
       "addNew": "Add {{name}} as a new author",
-      "filled": "The titles were filled in from the scholars' catalogue. Please check them, then choose the authors below."
+      "filled": "The titles were filled in from the scholars' catalogue. Please check them, then choose the authors below.",
+      "none": "Not in the scholars' catalogue. Type the title in full; its author may still be found below."
     },
     "aboutCopy": "About this copy",
     "allDetails": "All details"
@@ -668,8 +670,9 @@
     "moveUp": "Move {{name}} up",
     "moveDown": "Move {{name}} down",
     "addAnotherAuthor": "Add another author",
-    "authorHint": "Type a name to search your authors.",
-    "addAuthor": "Add “{{name}}” as a new author"
+    "authorHint": "Type a name to search your authors and the scholars' catalogue.",
+    "addAuthor": "Add “{{name}}” as a new author",
+    "fromCatalogue": "From the scholars' catalogue, added with their death year"
   },
   "usedBy": {
     "authors_one": "{{number}} author",
@@ -760,7 +763,8 @@
     "work_or_work_id": "Choose a work you have, or fill in a new one, not both.",
     "edition_required": "Choose the book before giving a volume or page.",
     "unknown_edition": "That book isn't in your library any more. Choose another.",
-    "work_gone": "Its work was deleted for good, so this book can't be put back. You can delete it from the bin."
+    "work_gone": "Its work was deleted for good, so this book can't be put back. You can delete it from the bin.",
+    "already_in_library": "This scholar is already one of your authors: search for them by name."
   },
   "bin": {
     "title": "Bin",
@@ -850,7 +854,7 @@
   },
   "aboutData": {
     "title": "About the data",
-    "lede": "Where the details the app fills in for you come from. Each one is marked \"May be incorrect, please check\" until you check or change it.",
+    "lede": "Where the details the app fills in for you come from. Each one is marked \"Please confirm\", with where it came from, until you change it.",
     "scholarsTitle": "Classical scholars and their works",
     "scholarsBody": "From Wikidata, which anyone may use freely (CC0). The app keeps its own copy of the scholars Wikidata links to OpenITI or al-Maktaba al-Shāmila, and their works, so your searches never leave the app.",
     "scholarsLink": "Wikidata",
