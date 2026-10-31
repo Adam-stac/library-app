@@ -109,6 +109,46 @@ class ScholarWorksTests {
         assertThat(ApiBrowser.signedOut(port).get(WORKS + encode("صحيح البخاري")).statusCode()).isEqualTo(401);
     }
 
+    // ---- Scholars by name, for the author field -----------------------------------------------------------------
+
+    static final String SCHOLARS = "/api/v1/reference/scholars?q=";
+
+    @Test
+    void aScholarIsFoundByNameWhenTheirBookIsntInTheCatalogue() throws Exception {
+        ApiBrowser reader = newAccount();
+
+        // Al-Hattab al-Ru'ayni, who wrote al-Mutammima, a book the catalogue doesn't have
+        JsonNode first = scholars(reader, "الحطاب").get(0);
+        assertThat(first.get("nameAr").asString()).isEqualTo("الحطاب");
+        assertThat(first.get("deathCe").asInt()).isEqualTo(1547);
+        assertThat(first.get("id").asString()).matches("Q[0-9]+");
+        // In English letters, and with a typo
+        assertThat(scholars(reader, "hattab").get(0).get("nameAr").asString()).isEqualTo("الحطاب");
+        assertThat(scholars(reader, "البخارى").get(0).get("nameAr").asString()).contains("البخاري");
+    }
+
+    @Test
+    void theScholarSearchIsCheckedLikeTheWorksSearch() throws Exception {
+        ApiBrowser reader = newAccount();
+
+        assertThat(reader.get("/api/v1/reference/scholars").statusCode()).isEqualTo(400);
+        assertThat(reader.get(SCHOLARS + "a").statusCode()).isEqualTo(400);
+        assertThat(reader.get(SCHOLARS + "a".repeat(101)).statusCode()).isEqualTo(400);
+        assertThat(reader.get(SCHOLARS + encode("%%%%")).statusCode()).isEqualTo(400);
+        assertThat(reader.get(SCHOLARS + encode("ح%ب")).body()).isEqualTo("{\"items\":[]}"); // % taken literally
+        assertThat(json.readTree(reader.get(SCHOLARS + encode("محمد") + "&limit=1000").body()).get("items").size())
+                .isEqualTo(10);
+        assertThat(ApiBrowser.signedOut(port).get(SCHOLARS + "hattab").statusCode()).isEqualTo(401);
+    }
+
+    private JsonNode scholars(ApiBrowser reader, String text) throws Exception {
+        HttpResponse<String> answer = reader.get(SCHOLARS + encode(text));
+        assertThat(answer.statusCode()).as(answer.body()).isEqualTo(200);
+        JsonNode items = json.readTree(answer.body()).get("items");
+        assertThat(items.isEmpty()).as(text + " found nothing").isFalse();
+        return items;
+    }
+
     // ---- Helpers -------------------------------------------------------------------------------------------------
 
     private ApiBrowser newAccount() throws Exception {

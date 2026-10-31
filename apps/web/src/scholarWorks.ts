@@ -1,5 +1,7 @@
+import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 import { getJson } from './api'
+import { displayName, indexYear } from './authors'
 import type { Named } from './library'
 
 /**
@@ -90,6 +92,22 @@ export function useScholarWorks(typed: string): ScholarWork[] | undefined {
   return query !== null && answer?.query === query ? answer.works : undefined
 }
 
+/** The most scholars offered in the author field */
+const SCHOLARS_OFFERED = 4
+
+/**
+ * Scholars whose names match what was typed in the author field, for a book whose title isn't in the catalogue. Empty
+ * when there's nothing to ask, or the request fails: a help, not a gate.
+ */
+export async function scholarsNamed(typed: string): Promise<Scholar[]> {
+  if (!searchable(typed)) return []
+  const result = await getJson<{ items?: unknown }>(
+    `/api/v1/reference/scholars?q=${encodeURIComponent(typed.trim())}&limit=${SCHOLARS_OFFERED}`,
+  )
+  const items = result.ok && Array.isArray(result.data?.items) ? result.data.items : []
+  return items.map(scholar).filter((s): s is Scholar => s !== null)
+}
+
 /** The last word of an Arabic name, which is usually the name scholars are known by (البخاري, النووي). */
 function knownBy(name: string): string | null {
   const words = name.trim().split(/\s+/)
@@ -114,4 +132,20 @@ export async function yourAuthorsLike(scholarFound: Scholar): Promise<Named[]> {
     }
   }
   return [...found.values()].slice(0, 3)
+}
+
+/** A scholar's death year as an index shows it ("d. 256 AH", "ت ٢٥٦هـ"), or null. */
+function died(scholar: Scholar, t: TFunction, language: string): string | null {
+  const none = { hijri: null, ce: null, approximate: false }
+  return indexYear(
+    { birth: none, death: { hijri: scholar.deathHijri, ce: scholar.deathCe, approximate: false } },
+    t,
+    language,
+  )
+}
+
+export function scholarLine(scholar: Scholar, t: TFunction, language: string): string {
+  const year = died(scholar, t, language)
+  const name = displayName(scholar, language)
+  return year ? `${name} (${year})` : name
 }

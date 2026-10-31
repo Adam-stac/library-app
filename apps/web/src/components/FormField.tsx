@@ -18,7 +18,7 @@ type Props = {
   dir?: 'ltr' | 'auto'
   /** Words for the library, such as names: typed in the font they will be shown in */
   book?: boolean
-  /** A filled-in value's "may be incorrect, please check" note, shown with ⓘ until the value is edited (ADR 0010) */
+  /** A filled-in value's "please confirm" note, shown with ⓘ until the value is edited (ADR 0010) */
   note?: string
 }
 

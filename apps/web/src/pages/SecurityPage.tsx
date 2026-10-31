@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate } from 'react-router'
 import { postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import { type ActiveSession, deviceName, eventText, fetchActivity, type SecurityEvent } from '../security'
 
 const secondary = 'btn'
@@ -70,6 +71,7 @@ export default function SecurityPage() {
 
   return (
     <section className="max-w-2xl">
+      <BackToSettings />
       <h1 className="page-title">{t('security.title')}</h1>
       <p className="lede">{t('security.intro')}</p>
 
@@ -194,7 +196,7 @@ export default function SecurityPage() {
       <p className="mt-8 rounded-lg border-s-4 border-line-strong bg-surface px-4 py-3 text-muted">
         {t('security.notYou')}{' '}
         <Link to="/change-password" className="link">
-          {t('home.changePassword')}
+          {t('changePassword.title')}
         </Link>
       </p>
     </section>

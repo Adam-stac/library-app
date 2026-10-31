@@ -63,6 +63,8 @@ describe('PasskeysPage', () => {
     )
     browser.startRegistration.mockResolvedValue({ id: 'cred', response: {} })
     const user = renderPage()
+    // A way back to Settings, which lists this page
+    expect(await screen.findByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings')
 
     expect(await screen.findByText("You haven't added a passkey yet.")).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Add a passkey' }))

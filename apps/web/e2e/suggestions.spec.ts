@@ -24,7 +24,7 @@ async function signedInAccount(page: Page, request: APIRequestContext) {
   await expect(page.getByRole('button', { name: /^Your account/ })).toBeVisible()
 }
 
-const CHECK = 'May be incorrect, please check.'
+const CHECK = 'Please confirm.'
 
 test.describe('Filling in a book from its ISBN', () => {
   test('your other books by the same publisher fill in its name and place; the country gives the language', async ({

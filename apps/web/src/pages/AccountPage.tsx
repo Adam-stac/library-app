@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate } from 'react-router'
 import { type ApiResult, getJson, postJson } from '../api'
 import { useAuth } from '../auth/context'
+import { BackToSettings } from '../components/BackLink'
 import FormField from '../components/FormField'
 import { type Language, saveLanguage } from '../language'
 
@@ -16,6 +17,10 @@ export default function AccountPage() {
   const { state, refresh } = useAuth()
   const navigate = useNavigate()
   const [twoStepOn, setTwoStepOn] = useState<boolean | null>(null)
+  // The forms below need to know whether to ask for a two-step code; if that can't be found out, say so and offer
+  // to try again, rather than leave their boxes empty
+  const [twoStepFailed, setTwoStepFailed] = useState(false)
+  const [round, setRound] = useState(0)
   const [languageNotice, setLanguageNotice] = useState<string | null>(null)
   const [emailSentTo, setEmailSentTo] = useState<string | null>(null)
 
@@ -26,14 +31,33 @@ export default function AccountPage() {
       if (!current) return
       if (result.ok && result.data) setTwoStepOn(result.data.enabled)
       else if (result.status === 401) void refresh()
+      else setTwoStepFailed(true)
     })
     return () => {
       current = false
     }
-  }, [state.status, refresh])
+  }, [state.status, refresh, round])
 
   if (state.status === 'loading') return null
   if (state.status === 'signedOut') return <Navigate to="/sign-in" replace />
+
+  const loadFailed = (announce: boolean) =>
+    twoStepOn === null &&
+    twoStepFailed && (
+      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <p role={announce ? 'alert' : undefined}>{t('common.loadFailed')}</p>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            setTwoStepFailed(false)
+            setRound((n) => n + 1)
+          }}
+        >
+          {t('common.tryAgain')}
+        </button>
+      </div>
+    )
 
   async function chooseLanguage(language: Language) {
     setLanguageNotice(null)
@@ -43,6 +67,7 @@ export default function AccountPage() {
 
   return (
     <section className="max-w-xl">
+      <BackToSettings />
       <h1 className="page-title">{t('account.title')}</h1>
 
       <h2 className="section-title mt-12">{t('account.languageTitle')}</h2>
@@ -80,6 +105,7 @@ export default function AccountPage() {
             {state.account.email}
           </bdi>
         </p>
+        {!emailSentTo && loadFailed(true)}
         {emailSentTo ? (
           <p role="status" className="mt-4 rounded-lg border border-line bg-paper px-4 py-3">
             {t('account.emailSent', { email: emailSentTo })}
@@ -109,6 +135,7 @@ export default function AccountPage() {
 
       <h2 className="section-title mt-12 text-danger">{t('account.deleteTitle')}</h2>
       <div className="mt-4 rounded-lg border border-danger-line bg-surface p-6">
+        {loadFailed(false)}
         {twoStepOn !== null && (
           <ConfirmForm
             intro={t('account.deleteIntro')}

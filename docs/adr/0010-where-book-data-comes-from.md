@@ -49,7 +49,7 @@ themselves, and anything that leaves the server comes after everything that does
 different order (the roadmap's), because the shared catalogue needs the most care.
 
 **2. Suggestions, never records.** Nothing is saved until the reader has looked at it and pressed Save (as in
-ADR 0003). Every field filled from outside the reader's own typing shows the ⓘ note, "may be incorrect, please check",
+ADR 0003). Every field filled from outside the reader's own typing shows the ⓘ note, "please confirm",
 until the reader edits it. The note names where the value came from. The source is not stored: once saved, the entry
 is the reader's own. An ISBN is matched exactly (after its check digit passes); a near match fills nothing.
 

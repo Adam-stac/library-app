@@ -41,7 +41,7 @@ test.describe("Adding a classical work from the scholars' catalogue", () => {
     await expect(page.getByLabel('Title in Arabic')).toHaveValue('صحيح البخاري')
     await expect(page.getByLabel('Title in English')).toHaveValue('Sahih al-Bukhari')
     await expect(page.getByLabel('Title in Arabic')).toHaveAccessibleDescription(
-      "May be incorrect, please check. From the scholars' catalogue (Wikidata).",
+      "Please confirm. From the scholars' catalogue (Wikidata).",
     )
 
     // A new account has no authors of its own, so the scholar is added as a new one, with their death year

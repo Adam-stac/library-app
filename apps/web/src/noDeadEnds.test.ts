@@ -99,6 +99,31 @@ describe('no dead ends', () => {
     }
   })
 
+  it('every text the code asks for by name exists (a missing one would show its key, as "home.changePassword" did)', () => {
+    const flat = new Set<string>()
+    const walk = (texts: object, prefix: string) => {
+      for (const [key, value] of Object.entries(texts)) {
+        const name = prefix ? `${prefix}.${key}` : key
+        if (typeof value === 'object' && value !== null) walk(value, name)
+        else flat.add(name)
+      }
+    }
+    walk(en, '')
+    // A plural is stored as key_one, key_other and so on; a list or a group as an object under the key
+    const exists = (key: string) =>
+      flat.has(key) || [...flat].some((name) => name.startsWith(`${key}_`) || name.startsWith(`${key}.`))
+    const missing: string[] = []
+    let asked = 0
+    for (const [file, source] of Object.entries(sources)) {
+      for (const match of source.matchAll(/\bt\('([a-zA-Z][\w]*(?:\.[\w]+)+)'/g)) {
+        asked++
+        if (!exists(match[1])) missing.push(`${file}: ${match[1]}`)
+      }
+    }
+    expect(asked).toBeGreaterThan(300) // the check itself is finding the texts
+    expect(missing).toEqual([])
+  })
+
   it('every text exists in both Arabic and English', () => {
     // Arabic has more plural forms than English (_zero, _two, _few, _many), so those are compared without them
     const keysOf = (texts: object) =>

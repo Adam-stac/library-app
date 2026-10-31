@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import Icon from './Icon'
+import BackLink from './BackLink'
 
 type Props = {
   title: ReactNode
@@ -25,10 +24,7 @@ type Props = {
 export default function PageHeader({ title, lede, actions, back, book = false, above }: Props) {
   const actionsOnTop = book && back !== undefined && actions !== undefined
   const backLink = back && (
-    <Link to={back.to} className={actionsOnTop ? 'back-link' : 'back-link mb-6'}>
-      <Icon name="back" className="size-4" />
-      <bdi>{back.label}</bdi>
-    </Link>
+    <BackLink to={back.to} label={back.label} className={actionsOnTop ? 'back-link' : 'back-link mb-6'} />
   )
   const actionList = actions && <div className="flex flex-wrap gap-2 has-[>div]:basis-full">{actions}</div>
 

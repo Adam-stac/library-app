@@ -23,6 +23,12 @@ public interface ScholarWorks {
      */
     List<Work> search(String text, int limit);
 
+    /**
+     * Scholars whose names contain the text, matched the same way as {@link #search} (Arabic-aware, forgiving of a typo,
+     * whole matches first), for a book whose title isn't in the catalogue but whose author may be.
+     */
+    List<Scholar> searchScholars(String text, int limit);
+
     /** A scholar on the general timeline: when they died, and how many of their works are in the catalogue. */
     record DatedScholar(String id, String nameAr, String nameEn, Integer deathHijri, Integer deathCe, int works) {}
 
