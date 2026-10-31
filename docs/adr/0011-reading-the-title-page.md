@@ -1,6 +1,6 @@
 # 0011. Reading a book's title page from a photo
 
-- **Status:** Proposed
+- **Status:** Accepted (approved by Adam on 31 October 2026)
 - **Date:** 2026-10-31
 
 ## Context
