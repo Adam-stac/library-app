@@ -102,6 +102,24 @@ public class ApiBrowser {
     public HttpResponse<String> send(
             String method, String path, String body, String contentType, String ifMatch, boolean withCsrf)
             throws Exception {
+        HttpRequest.BodyPublisher text = body == null ? null : HttpRequest.BodyPublishers.ofString(body);
+        return sendBody(method, path, text, contentType, ifMatch, withCsrf);
+    }
+
+    /** POSTs raw bytes, such as a photo, with the given content type. */
+    public HttpResponse<String> postBytes(String path, byte[] body, String contentType, boolean withCsrf)
+            throws Exception {
+        return sendBody("POST", path, HttpRequest.BodyPublishers.ofByteArray(body), contentType, null, withCsrf);
+    }
+
+    private HttpResponse<String> sendBody(
+            String method,
+            String path,
+            HttpRequest.BodyPublisher body,
+            String contentType,
+            String ifMatch,
+            boolean withCsrf)
+            throws Exception {
         if (withCsrf && !cookies.containsKey("XSRF-TOKEN")) {
             send("GET", "/api/v1/auth/csrf", null, null, false);
         }
@@ -118,7 +136,7 @@ public class ApiBrowser {
             request.header("If-Match", ifMatch);
         }
         if (body != null) {
-            request.header("Content-Type", contentType).method(method, HttpRequest.BodyPublishers.ofString(body));
+            request.header("Content-Type", contentType).method(method, body);
         } else {
             request.method(method, HttpRequest.BodyPublishers.noBody());
         }

@@ -67,6 +67,13 @@ app:
       changes-per-minute: 120 # per signed-in account: adding, editing and deleting library records
     public:
       requests-per-minute: 30 # per client IP, across /api/v1/public (the landing page's timeline)
+  page-reading: # reading a book's cover or title page from a photo (ADR 0011)
+    api-key: ${VISION_API_KEY:} # Google Cloud Vision; none set means the feature is off
+    endpoint: ${VISION_ENDPOINT:https://vision.googleapis.com}
+    timeout-ms: 10000
+    per-account-day: 30
+    per-account-month: 300
+    app-month: ${PAGE_READING_APP_MONTH:1000} # Google's free amount a month; raise only on purpose
   session:
     max-age: 7d # a sign-in ends after 7 days however active it is (idle limit: server.servlet.session.timeout)
   two-factor:

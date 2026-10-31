@@ -47,6 +47,7 @@ class SecurityBaselineTests {
         assertThat(get("/api/v1/editions/suggestions?isbn=9780306406157").statusCode()).isEqualTo(401); // ditto
         assertThat(get("/api/v1/reference/works?q=bukhari").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/reference/scholars?q=hattab").statusCode()).isEqualTo(401); // signed-in accounts only
+        assertThat(get("/api/v1/page-readings/status").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/timeline/scholars").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/library-settings").statusCode()).isEqualTo(401); // signed-in accounts only
         assertThat(get("/api/v1/bookmarks").statusCode()).isEqualTo(401); // signed-in accounts only

@@ -57,7 +57,8 @@ class SecurityConfig {
         "/api/v1/editions", "/api/v1/editions/**", "/api/v1/library-settings", "/api/v1/bookmarks",
         "/api/v1/benefits", "/api/v1/benefits/**", "/api/v1/search",
         "/api/v1/home", "/api/v1/bin", "/api/v1/bin/**", "/api/v1/timeline", "/api/v1/timeline/scholars",
-        "/api/v1/reference/works", "/api/v1/reference/scholars"
+        "/api/v1/reference/works", "/api/v1/reference/scholars", "/api/v1/page-readings",
+        "/api/v1/page-readings/status"
     };
 
     /** Happen before any session exists, so there is no session for CSRF to ride on. */
